@@ -47,7 +47,6 @@ void cached(Obj d)
 void cachesci(Obj sci)
 {
   long i, done, pos, co, k, bnd;
-long count=1;
   if (csci[0] == sci) return;
   for(i=1; i<=LEN_PLIST(sci); i++) {
     csci[i] = ELM_PLIST(sci, i);
@@ -243,7 +242,81 @@ Obj FuncUTScalarProductInternal( Obj self, Obj sci, Obj c, Obj d)
   return res;
 }
 
-                                
+/* the main loop for PermutedFractionFreeIntegerGaussPositiveDefinite */
+/* A and perm are changed inplace */
+Obj FuncPFFIG( Obj self, Obj A, Obj perm, Obj verbose)
+{
+  long n, verb, k, kk, i, j;
+  Obj *ptr;
+  Obj d, x, max, piv, a, ai, q;
+  Obj null = INTOBJ_INT(0);
+
+  if (! (IS_PLIST(A)))
+    ErrorQuit("first argument must be integer matrix.",0L,0L);
+  if (! (IS_PLIST(perm)))
+    ErrorQuit("second argument must be list of integers.",0L,0L);
+
+  verb = INT_INTOBJ(verbose);
+  n = LEN_PLIST(A);
+  d = INTOBJ_INT(1);
+  for (k = 1; k <= n; k++) {
+    if (verb > 3) {
+      printf("k=%ld ", k);
+      fflush(stdout);
+    }
+    /* find smallest next diagonal element */
+    for (kk = k, max = ELM_PLIST(ELM_PLIST(A, k), k), i = k+1; i <= n; i++) {
+      x = ELM_PLIST(ELM_PLIST(A, i), i);
+      if (LtInt(x, max)) {
+        kk = i;
+        max = x;
+      }
+    }
+    /* maybe swap rows and columns k and kk */
+    if (kk > k) {
+      ptr = ADDR_OBJ(perm);
+      x = ptr[k];
+      ptr[k] = ptr[kk];
+      ptr[kk] = x;
+      ptr = ADDR_OBJ(A);
+      x = ptr[k];
+      ptr[k] = ptr[kk];
+      ptr[kk] = x;
+      for (i = 1; i <= n; i++) {
+        ptr = ADDR_OBJ(ELM_PLIST(A, i));
+        x = ptr[k];
+        ptr[k] = ptr[kk];
+        ptr[kk] = x;
+      }
+    }
+    /* clean entries below A[k,k] */
+    a = ELM_PLIST(A, k);
+    piv = ELM_PLIST(ELM_PLIST(A, k), k);
+    for (i = k+1; i <= n; i++) {
+      ai = ELM_PLIST(A, i);
+      q = AInvInt(ELM_PLIST(ai, k));
+      if (q == null) {
+        for (j = k+1; j <= n; j++) {
+          x = QuoInt(ProdInt(piv, ELM_PLIST(ai, j)), d);
+          SET_ELM_PLIST(ai, j, x);
+          CHANGED_BAG(ai);
+        }
+      } else {
+        for (j = k+1; j <= n; j++) {
+          x = ProdInt(piv, ELM_PLIST(ai, j));
+          x = SumInt(x, ProdInt(q, ELM_PLIST(a, j)));
+          x = QuoInt(x, d);
+          SET_ELM_PLIST(ai, j, x);
+          CHANGED_BAG(ai);
+        }
+      }
+      SET_ELM_PLIST(ai, k, null);
+      CHANGED_BAG(ai);
+    }
+    d = piv;
+  }
+  return NULL;
+}
 
 /*F * * * * * * * * * * * * * initialize package * * * * * * * * * * * * * */
 
@@ -259,6 +332,10 @@ static StructGVarFunc GVarFuncs [] = {
   { "UTScalarProductInternal2", 3, "sci, char1, char2", 
     FuncUTScalarProductInternal2, 
     "scalar.c:UTScalarProductInternal2" },
+
+  { "PFFIG", 3, "A, perm, verbose", 
+    FuncPFFIG, 
+    "scalar.c:PFFIG" },
 
   { 0 }
 
