@@ -83,17 +83,17 @@ end);
 ##       this number is larger than max
 ##  
 ##  characters are returned as list of values in Ordering of ConjugacyClasses(G)
-BindGlobal("InducedFromElementary", function(GorUT, i, p, opts...)
+BindGlobal("InducedFromElementary", function(GorCCT, i, p, opts...)
   local G, ut, max, scen, cls, ncl, cl, x, o, cen, s, ss, t, scl, sscl, 
         fus, pms, lt, res, c, m, efus, e, j, l, k, ch, a;
-  if IsGroup(GorUT) then
-    G := GorUT;
-    ut := UTable(G);
-  elif IsUTable(GorUT) then
-    ut := GorUT;
+  if IsGroup(GorCCT) then
+    G := GorCCT;
+    ut := CCTable(G);
+  elif IsCCTable(GorCCT) then
+    ut := GorCCT;
     G := UnderlyingGroup(ut);
   else
-    Error("InducedFromElementary: First argument must be group or UTable");
+    Error("InducedFromElementary: First argument must be group or CCTable");
     return;
   fi;
   k := Filtered(opts, IsInt);
@@ -107,7 +107,7 @@ BindGlobal("InducedFromElementary", function(GorUT, i, p, opts...)
   cls := ConjugacyClasses(ut);
   ncl := Length(cls);
 
-  # if arg is UTable we store only values on reps of rational classes
+  # if arg is CCTable we store only values on reps of rational classes
   cl := cls[i];
   # generator of cyclic part
   x := Representative(cl);
@@ -181,15 +181,15 @@ end);
 # Only classes j which represent rational classes of G are considered.
 # And the second entry 'needed' contains the numbers of classes of S
 # occuring in fus.
-BindGlobal("FusionElementaryUTable", function(UT, i, p)
+BindGlobal("FusionElementaryCCTable", function(CCT, i, p)
   local G, cls, ncl, ords, cen, s, ssz, x, o, pms, rci, todo, scl, sclr, scll, 
         oscl, e, k, excl, ko, kk, max, n, ncls, els, ngen, gens, perm, orbs, 
         orb, same, fus1, z, fus, m, efus, img, poss, needed, pp, 
         a, b, y, g, r, j;
-  G := UnderlyingGroup(UT);
-  cls := ConjugacyClasses(UT);
-  ncl := NrConjugacyClasses(UT);
-  ords := OrdersClassRepresentatives(UT);
+  G := UnderlyingGroup(CCT);
+  cls := ConjugacyClasses(CCT);
+  ncl := NrConjugacyClasses(CCT);
+  ords := OrdersClassRepresentatives(CCT);
   # p-group (it is not needed later, we remove the stored attribute)
   cen := StabilizerOfExternalSet(cls[i]);
   s := SylowSubgroup(cen, p);
@@ -197,8 +197,8 @@ BindGlobal("FusionElementaryUTable", function(UT, i, p)
   # generator of cyclic group
   x := Representative(cls[i]);
   o := ords[i];
-  pms := PowerMapsOfAllClasses(UT);
-  rci := RationalClassesInfo(UT);
+  pms := PowerMapsOfAllClasses(CCT);
+  rci := RationalClassesInfo(CCT);
   # restrict information to representatives of rational classes
   todo := BlistList([1..ncl], List(rci, a-> a.classes[1]));
   # classes of s
@@ -228,8 +228,8 @@ BindGlobal("FusionElementaryUTable", function(UT, i, p)
   
   # compute orbit of normalizer in cen on classes of s to reduce
   # conjugacy tests
-  if IsBound(UT!.maxelmlist) then
-    max := UT!.maxelmlist;
+  if IsBound(CCT!.maxelmlist) then
+    max := CCT!.maxelmlist;
   else
     max := 1000000;
   fi;
@@ -322,22 +322,22 @@ end);
 # This way we can handle elementary subgroups with a huge number of classes.
 # The disadvantage is that we sometimes have some extra work because we do not
 # detect if several induced characters are the same.
-BindGlobal("InductionDataFromElementaryUTable", function(UT, i, p)
+BindGlobal("InductionDataFromElementaryCCTable", function(CCT, i, p)
   local fus, needed, G, sz, cls, ncl, szcen, ords, o, st, s, ssz, scls, szscls, 
         lg, bc, pcgs, exp, q, gcdq, exps, cr, eL, eE, j, next;
 
   # first get the fusion data
-  fus := FusionElementaryUTable(UT, i, p);
+  fus := FusionElementaryCCTable(CCT, i, p);
   needed := fus[2];
   fus := fus[1];
   
   # we need class lengths of G and Sylow P
-  G := UnderlyingGroup(UT);
-  sz := Size(UT);
-  cls := ConjugacyClasses(UT);
-  ncl := NrConjugacyClasses(UT);
-  szcen := SizesCentralizers(UT);
-  ords := OrdersClassRepresentatives(UT);
+  G := UnderlyingGroup(CCT);
+  sz := Size(CCT);
+  cls := ConjugacyClasses(CCT);
+  ncl := NrConjugacyClasses(CCT);
+  szcen := SizesCentralizers(CCT);
+  ords := OrdersClassRepresentatives(CCT);
   o := ords[i];
   # p-group
   st := StabilizerOfExternalSet(cls[i]);
@@ -479,17 +479,17 @@ BindGlobal("InductionDataFromElementaryUTable", function(UT, i, p)
         res[j+1][k] := f*(List([2..Length(a)], l-> eL[a[l][1]*j mod o + 1])*sums);
       od;
     od;
-    return EncodeForUTable(UT, res);
+    return EncodeForCCTable(CCT, res);
   end;
   bc.next := next;
   return bc;
 end);
 
 # temporary test function, should behave like 
-#     EncodeForUTable(UT, InducedFromElementary(UT, i, p))
-fu:=function(UT,i,p)
+#     EncodeForCCTable(CCT, InducedFromElementary(CCT, i, p))
+fu:=function(CCT,i,p)
   local bc, next, res, a;
-  bc := InductionDataFromElementaryUTable(UT,i,p);
+  bc := InductionDataFromElementaryCCTable(CCT,i,p);
   next := bc.next;
   res := [];
   a := next();

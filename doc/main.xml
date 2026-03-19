@@ -1,0 +1,74 @@
+<!-- 
+
+  main.xml                CCTab package documentation          Frank Lübeck
+
+  Copyright (C) 2026-, Lehrstuhl für Algebra und Zahlentheorie, RWTH-Aachen
+
+This is the main body of the documentation.
+
+-->
+
+<Chapter Label="Chap-Intro">
+<Heading>The <Package>CCTab</Package>-Package</Heading>
+<Index><Package>CCTab</Package></Index>
+
+<Emph>(Constructing (ordinary) character tables of finite groups,  by Frank
+Lübeck)</Emph><P/>
+
+<Section Label="Sect-Install">
+<Heading>Installation of the <Package>CCTab</Package> package</Heading>
+
+To install this package first unpack it inside some GAP root directory
+in the subdirectory <F>pkg</F> (see 
+<Ref Sect="Installing a GAP Package" BookName="Reference"/>). Then
+the <Package>CCTab</Package> package can already be loaded and used.
+But we strongly recommend to compile a kernel function and some standalone
+programs as well during installation. This will speed up some computations.
+
+The standalone programs assume that the library files and header files of the
+<Package>FLINT</Package> library are installed. If not there install them
+first via your operating systems package manager (package <C>libflint-dev</C> 
+or similar), or directly from <URL>https://flintlib.org/</URL>.
+
+To install the extra functions  go to  the  directory  <F>pkg/CCTab-...</F> 
+or <F>pkg/cctab/</F> to
+which the package was extracted and call<P/>
+
+<C>/bin/sh ./configure [path]</C><P/>
+
+where <C>path</C>  is a path  to  the main <Package>GAP</Package> root
+directory (if not given, the default <F>../..</F> is assumed). 
+
+Afterwards call <C>make</C>  to  compile the code. <P/>
+
+You  can   run  a test of    the installation  by  typing <C>make test</C>.
+
+<ManSection> 
+
+<InfoClass Name="InfoCCTab"/> 
+
+<Description>    
+This is  an <K>Info</K> class for the <Package>CCTab</Package>-package.
+By <C>SetInfoLevel(InfoCCTab, level);</C> with <C>level</C> between <C>1</C>
+and <C>3</C> you can switch on the printing of
+some information     during      the    computations     of    certain
+<Package>CCTab</Package>-functions.  
+</Description>
+</ManSection>
+
+</Section>
+
+<!-- ############################################################ -->
+<Section Label="Sect-FindClass">
+<Heading>Identifying conjugacy classes of elements</Heading>
+
+
+<Subsection Label="Ssect-bla">
+<Heading>Blabla subsection</Heading>
+
+</Subsection>
+
+</Section>
+
+</Chapter>
+

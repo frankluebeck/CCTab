@@ -1,8 +1,10 @@
 
 
 
-DeclareOperation("SplitByCentre", [IsUTable]);
-DeclareOperation("SplitByCentre", [IsUTable, IsList]);
-DeclareAttribute("SplittingCentre", IsUTable);
-DeclareOperation("SplitCharactersByCentre", 
-                        [IsUTable and HasSplittingCentre, IsList]);
+DeclareOperation("SplitByCentre", [IsCCTable]);
+DeclareOperation("SplitByCentre", [IsCCTable, IsList]);
+DeclareAttribute("SplittingCentre", IsCCTable);
+DeclareOperation("SplitCharacterByCentre", 
+                        [IsCCTable and HasSplittingCentre, IsList]);
+DeclareOperation("SplitEncodedCharacterByCentre", 
+                        [IsCCTable and HasSplittingCentre, IsList]);

@@ -1,6 +1,6 @@
 ####  (C) 2025 Frank Lübeck (Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen)
 
-# The GAP 4 package `UTable'
+# The GAP 4 package `CCTab'
 
 This package provides programs to compute ordinary character tables of
 finite groups, either interactively or automatically.
@@ -35,18 +35,18 @@ Just download the archive from
 and unpack it in one of the 'pkg' directories of your GAP installation,
 or clone the git repository
 
-       git clone https://github.com/frankluebeck/UTable.git
+       git clone https://github.com/frankluebeck/CCTab.git
 
 Then load the package with
 
-       gap> LoadPackage("UTable");
+       gap> LoadPackage("CCTab");
 
 
 ## Feedback
 
 Use the issue tracker
 
-       https://github.com/frankluebeck/UTable/issues
+       https://github.com/frankluebeck/CCTab/issues
 
 
 ## License

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE Book SYSTEM "gapdoc.dtd">
+
+<!--
+
+  cctab.xml          CCTab package documentation               Frank Lübeck
+
+  Copyright (C) 2026-, Lehrstuhl für Algebra und Zahlentheorie, RWTH-Aachen
+
+-->
+
+<Book Name="CCTab">
+
+<TitlePage>
+    <Title><Package>CCTab</Package></Title>
+    <Subtitle>Constructing Character Tables</Subtitle>
+    <Version>
+      Version <#Include SYSTEM "../VERSION">
+    </Version>
+    <Author>Frank Lübeck
+<Address>
+Lehrstuhl für Algebra und Zahlentheorie
+RWTH Aachen
+Pontdriesch 14/16
+52062 Aachen
+Germany
+</Address>
+    <Email>Frank.Luebeck@Math.RWTH-Aachen.De</Email>
+    <Homepage>http://www.math.rwth-aachen.de/&tilde;Frank.Luebeck</Homepage>
+    </Author>
+    <Date>February 2026</Date>
+    <Copyright> <Index>License</Index>
+              &copyright; 2026- by Frank Lübeck <P/>
+              <Package>CCTab</Package>  
+              is free software; you can redistribute it
+              and/or modify it under the terms of the 
+              <URL Text="GNU General Public License">
+              https://www.fsf.org/licenses/gpl.html</URL>
+              as published by the Free Software Foundation;
+              either version 2 of the License, or (at your option) any
+              later version.
+    </Copyright>
+
+</TitlePage>
+
+<!--  TableOfContents  . . . . . .  generate a table of contents   -->
+<TableOfContents/>
+
+<!--  The only chapter of the book  --> 
+<Body>
+<#Include SYSTEM "main.xml">
+</Body>
+
+<!--  We want a bibliography  -->
+<Bibliography Databases="cctab"/>
+
+<!--  And finally an index as well   -->
+<TheIndex/>
+
+</Book>
+

@@ -5,7 +5,7 @@
 **  
 *Y  Copyright (C) 2025  Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen
 **  
-**  `UTScalarProductInternal' as kernel function.
+**  `CCTScalarProductInternal' as kernel function.
 **  
 */
 
@@ -72,12 +72,12 @@ void cachesci(Obj sci)
 }
 
 /* The following two functions are C-versions of the GAP-function 
-   UTScalarProduct. The variant FuncUTScalarProductInternal2 caches
+   CCTScalarProduct. The variant FuncCCTScalarProductInternal2 caches
    its arguments in a buffer (it is often called for the same table
    or even the same first or second character in a row).
 */
 
-Obj FuncUTScalarProductInternal2( Obj self, Obj sci, Obj c, Obj d)
+Obj FuncCCTScalarProductInternal2( Obj self, Obj sci, Obj c, Obj d)
 {
   Obj res, x, y, z, ci, di;
   long max, pos, done, co, i, j, k, m, n, bnd, dim;
@@ -166,7 +166,7 @@ Obj FuncUTScalarProductInternal2( Obj self, Obj sci, Obj c, Obj d)
 }
 
 
-Obj FuncUTScalarProductInternal( Obj self, Obj sci, Obj c, Obj d)
+Obj FuncCCTScalarProductInternal( Obj self, Obj sci, Obj c, Obj d)
 {
   Obj res, x, y, z, ci, di;
   long pos, done, co, i, j, k, m, n, bnd, dim;
@@ -325,13 +325,13 @@ Obj FuncPFFIG( Obj self, Obj A, Obj perm, Obj verbose)
 */
 static StructGVarFunc GVarFuncs [] = {
 
-  { "UTScalarProductInternal", 3, "sci, char1, char2", 
-    FuncUTScalarProductInternal, 
-    "scalar.c:UTScalarProductInternal" },
+  { "CCTScalarProductInternal", 3, "sci, char1, char2", 
+    FuncCCTScalarProductInternal, 
+    "scalar.c:CCTScalarProductInternal" },
 
-  { "UTScalarProductInternal2", 3, "sci, char1, char2", 
-    FuncUTScalarProductInternal2, 
-    "scalar.c:UTScalarProductInternal2" },
+  { "CCTScalarProductInternal2", 3, "sci, char1, char2", 
+    FuncCCTScalarProductInternal2, 
+    "scalar.c:CCTScalarProductInternal2" },
 
   { "PFFIG", 3, "A, perm, verbose", 
     FuncPFFIG, 

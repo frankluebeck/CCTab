@@ -9,5 +9,5 @@
 DeclareAttribute("MaximalNonCyclicElementarySubgroups", IsGroup);
 
 DeclareGlobalName("InducedFromElementary");
-DeclareGlobalName("FusionElementaryUTable");
-DeclareGlobalName("InductionDataFromElementaryUTable");
+DeclareGlobalName("FusionElementaryCCTable");
+DeclareGlobalName("InductionDataFromElementaryCCTable");

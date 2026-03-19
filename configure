@@ -1,6 +1,6 @@
 #!/bin/sh
 # (C) Frank Lübeck     2025
-# configure script for UTable with GAP > 4.14 (different build system for GAP)
+# configure script for CCTab with GAP > 4.14 (different build system for GAP)
 
 # some tools on OS X made locale related problems, so:
 export LANG=C

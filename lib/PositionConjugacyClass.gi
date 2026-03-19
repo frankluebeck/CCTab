@@ -28,7 +28,7 @@
 ##  and matrix groups.
 ##  
 ##  Note that a similar scheme could also be used for identifying other
-##  equivalence classes.
+##  types of equivalence classes.
 ##  
 
 # refine the tree with function fu
@@ -74,6 +74,9 @@ CCInvFuncs.NoticeReps := function(r, tree)
     tree[2] := fu;
     tree[3] := [1..len];
     tree[4] := [1..len];
+    # of course, we can be lucky above to identify the class, but fu
+    # does not yield a class invariant, in case of 'fail' we can still
+    # have any class:
     Add(tree[3], fail);
     Add(tree[4], [[1..len]]);
   fi;
@@ -147,6 +150,13 @@ CCInvFuncs.CycStruct := function(r, tree)
   CCInvFuncs.refine(r, tree, fu);
 end;
 
+# In result we always bind the group as r.G, classes as r.classes and
+# class reps as r.reps in addition to the recursive r.tree
+# (these can be used by the functions computing invariants).
+# Furthermore there is always a component .exclude, a list of class
+# positions, when PositionConjugacyClass is called, the functions that
+# compute invariants can use this as a hint, that the given element
+# is not contained in a class in r.exclude.
 BindGlobal("ConjugacyClassInvariants", function(G, args...)
   local r, funcs, tree, find;
   if IsBound(G!.ConjugacyClassInvariants) then
@@ -172,10 +182,12 @@ BindGlobal("ConjugacyClassInvariants", function(G, args...)
     funcs[1](r, tree);
     f2 := funcs{[2..Length(funcs)]};
     if Length(tree) = 1 then
+      # funcs[1] did not distinguish any of the classes in tree[1]
       find(tree, f2);
     else
       for a in tree[4] do
         if IsList(a) then
+          # recurse if still several classes possible
           find(a, f2);
         fi;
       od;

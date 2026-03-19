@@ -1,4 +1,4 @@
-# makefile prototype for the UTable package (assuming GAP >= 4.12) Frank Lübeck
+# makefile prototype for the CCTab package (assuming GAP >= 4.12) Frank Lübeck
 
 # GAPPATH is found in `configure`, GAParch, GAP and GAC are set in sysinfo.gap
 GAPPATH=@GAPPATH@
@@ -6,7 +6,7 @@ include $(GAPPATH)/sysinfo.gap
 
 .PHONY: doc clean cleanlast distclean docclean test all
 
-all: bin/$(GAParch)/scalar.so bin/$(GAParch)/lll.so
+all: bin/$(GAParch)/scalar.so bin/$(GAParch)/pffgintmat_threads bin/$(GAParch)/lll_modular_threads bin/$(GAParch)/invuni_threads
 
 
 bin/$(GAParch)/scalar.so: src/scalar.c Makefile
@@ -18,12 +18,24 @@ bin/$(GAParch)/scalar.so: src/scalar.c Makefile
 #	@mkdir -p bin/$(GAParch)
 #	$(GAC) -d -p "$(CPPFLAGS)" -p "$(CFLAGS)" -P "$(LDFLAGS)" -o bin/$(GAParch)/lll.so src/lll.c
 
+bin/$(GAParch)/pffgintmat_threads: flint/pffgintmat_threads.c flint/do_parallel_dyn.c
+	@mkdir -p bin/$(GAParch)
+	gcc -O3  -march=native -o bin/$(GAParch)/pffgintmat_threads flint/do_parallel_dyn.c flint/pffgintmat_threads.c -lflint -lgmp
+
+bin/$(GAParch)/lll_modular_threads: flint/lll_modular_threads.c flint/do_parallel_dyn.c
+	@mkdir -p bin/$(GAParch)
+	gcc -O3  -march=native -o bin/$(GAParch)/lll_modular_threads flint/do_parallel_dyn.c flint/lll_modular_threads.c -lflint -lgmp
+
+bin/$(GAParch)/invuni_threads: flint/invuni_threads.c flint/do_parallel_dyn.c
+	@mkdir -p bin/$(GAParch)
+	gcc -O3  -march=native -o bin/$(GAParch)/invuni_threads flint/do_parallel_dyn.c flint/invuni_threads.c -lflint -lgmp
+
 doc:
 	$(GAP)  makedocrel.g
 
 # for compatibility with other packages
 clean:
-	rm -rf bin/$(GAParch) *~
+	rm -rf bin/$(GAParch) *~ */*~
 # clean last build
 cleanlast:
 	rm -rf bin/$(GAParch) Makefile *~
@@ -35,7 +47,7 @@ docclean:
 	(cd  doc; ./clean)
 
 test:
-	$(GAP) -b -q -r < tst/test.g
+	$(GAP) -b -q -r < tst/testall.g
 
 # regenerate Makefile if any of its inputs changed
 Makefile: configure Makefile.in $(GAPPATH)/sysinfo.gap

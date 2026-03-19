@@ -1,12 +1,13 @@
 ##  (C) 2025 Frank Lübeck (Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen)
 ##  
-##  Read implementation files of the 'UTable' package
+##  Read implementation files of the 'CCTab' package
 ##  
-ReadPackage( "UTable", "lib/SplitByCentre.gi");
-ReadPackage( "UTable", "lib/LLL.gi");
-ReadPackage( "UTable", "lib/PositionConjugacyClass.gi");
-ReadPackage( "UTable", "lib/PowerMaps.gi");
-ReadPackage( "UTable", "lib/SomeCharacters.gi");
-ReadPackage( "UTable", "lib/Elementary.gi");
-ReadPackage( "UTable", "lib/ScalarProducts.gi");
-ReadPackage( "UTable", "lib/UTable.gi");
+ReadPackage( "CCTab", "lib/SplitByCentre.gi");
+ReadPackage( "CCTab", "lib/LLL.gi");
+ReadPackage( "CCTab", "lib/PositionConjugacyClass.gi");
+ReadPackage( "CCTab", "lib/PowerMaps.gi");
+ReadPackage( "CCTab", "lib/SomeCharacters.gi");
+ReadPackage( "CCTab", "lib/Elementary.gi");
+ReadPackage( "CCTab", "lib/ScalarProducts.gi");
+ReadPackage( "CCTab", "lib/CCTable.gi");
+ReadPackage( "CCTab", "lib/Interface.gi");
