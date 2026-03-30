@@ -23,7 +23,7 @@
 
 
 static long n, nthr;
-static uint p;
+static unsigned int p;
 static fmpz_t pf;
 static fmpz_mat_t A, Ai, res;
 
