@@ -25,7 +25,7 @@ static fmpz_t d, M;
 static fmpz_t *qlist, *dd, *ddM, *lovasz;
 static long *klist;
 static long n, nthr;
-static uint p;
+static unsigned int p;
 static fmpz_t pf;
 
 // the content of the inner loop for fraction free Gauss

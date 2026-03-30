@@ -20,15 +20,15 @@ bin/$(GAParch)/scalar.so: src/scalar.c Makefile
 
 bin/$(GAParch)/pffgintmat_threads: flint/pffgintmat_threads.c flint/do_parallel_dyn.c
 	@mkdir -p bin/$(GAParch)
-	gcc -O3  -march=native -o bin/$(GAParch)/pffgintmat_threads flint/do_parallel_dyn.c flint/pffgintmat_threads.c -lflint -lgmp
+	gcc -O3  -march=native $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o bin/$(GAParch)/pffgintmat_threads flint/do_parallel_dyn.c flint/pffgintmat_threads.c -lflint -lgmp
 
 bin/$(GAParch)/lll_modular_threads: flint/lll_modular_threads.c flint/do_parallel_dyn.c
 	@mkdir -p bin/$(GAParch)
-	gcc -O3  -march=native -o bin/$(GAParch)/lll_modular_threads flint/do_parallel_dyn.c flint/lll_modular_threads.c -lflint -lgmp
+	gcc -O3  -march=native $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o bin/$(GAParch)/lll_modular_threads flint/do_parallel_dyn.c flint/lll_modular_threads.c -lflint -lgmp
 
 bin/$(GAParch)/invuni_threads: flint/invuni_threads.c flint/do_parallel_dyn.c
 	@mkdir -p bin/$(GAParch)
-	gcc -O3  -march=native -o bin/$(GAParch)/invuni_threads flint/do_parallel_dyn.c flint/invuni_threads.c -lflint -lgmp
+	gcc -O3  -march=native $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o bin/$(GAParch)/invuni_threads flint/do_parallel_dyn.c flint/invuni_threads.c -lflint -lgmp
 
 doc:
 	$(GAP)  makedocrel.g
