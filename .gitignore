@@ -21,5 +21,5 @@ doc/*.toc
 doc/manual.pdf
 *~
 tttttmppre
-UTable-*.*
+CCTab-*.*
 Makefile
