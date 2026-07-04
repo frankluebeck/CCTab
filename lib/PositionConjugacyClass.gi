@@ -30,8 +30,17 @@
 ##  Note that a similar scheme could also be used for identifying other
 ##  types of equivalence classes.
 ##  
+##  In the result of ConjugacyClassInvariants we also bind the group 
+##  as r.G, classes as r.classes and  class reps as r.reps in 
+##  addition to the recursive r.tree
+##  (these can be used by the functions computing invariants).
+##  Furthermore there is always a component .exclude, a list of class
+##  positions, when PositionConjugacyClass is called, the functions that
+##  compute invariants can use this as a hint, that the given element
+##  is not contained in a class in r.exclude.
+##  
 
-# refine the tree with function fu
+# utility: refine the tree with function fu
 CCInvFuncs.refine := function(r, tree, fu)
   local invs, s, ts, pos, a;
   invs := List(r.reps{tree[1]}, x-> fu(r, x));
@@ -132,6 +141,44 @@ CCInvFuncs.MinPol := function(r, tree)
   CCInvFuncs.refine(r, tree, fu);
 end;
 
+# if "nofoma" package loaded use Frobenius normal form for matrix groups
+CCInvFuncs.Frob := function(r, tree)
+  local F, n, inSL, d, fu;
+  F := FieldOfMatrixGroup(r.G);
+  n := DimensionOfMatrixGroup(r.G);
+  inSL := ForAll(GeneratorsOfGroup(r.G), x-> IsOne(DeterminantMat(x)));
+  d := 1;
+  if IsFinite(F) then
+    d := Gcd(n, Size(F)-1);
+  fi;
+  if not IsBound(GAPInfo.PackagesLoaded.nofoma) then
+    fu := ReturnTrue;
+  elif not IsFinite(F) or not inSL or d = 1 then
+    fu := function(r, x)
+      return FrobeniusNormalForm(x)[1];
+    end;
+  else
+    fu := function(r, x)
+      local fr, g, e, pl;
+      fr := FrobeniusNormalForm(x);
+      g := d;
+      for pl in fr[1] do
+        if g = 1 then
+          break;
+        fi;
+        e := List(Collected(Factors(pl)), a-> a[2]);
+        g := Gcd(g, Gcd(e));
+      od;
+      if g = 1 then
+        return fr[1];
+      else
+ Print("nontriv g ",g,"\n");       
+        return [fr[1], LogFFE(DeterminantMat(fr[2]), Z(Size(F))) mod g];
+      fi;
+    end;
+  fi;
+  CCInvFuncs.refine(r, tree, fu);
+end;
 
 # for permutation groups: cycle structures on orbits of points
 CCInvFuncs.CycStruct := function(r, tree)
@@ -150,13 +197,6 @@ CCInvFuncs.CycStruct := function(r, tree)
   CCInvFuncs.refine(r, tree, fu);
 end;
 
-# In result we always bind the group as r.G, classes as r.classes and
-# class reps as r.reps in addition to the recursive r.tree
-# (these can be used by the functions computing invariants).
-# Furthermore there is always a component .exclude, a list of class
-# positions, when PositionConjugacyClass is called, the functions that
-# compute invariants can use this as a hint, that the given element
-# is not contained in a class in r.exclude.
 BindGlobal("ConjugacyClassInvariants", function(G, args...)
   local r, funcs, tree, find;
   if IsBound(G!.ConjugacyClassInvariants) then
