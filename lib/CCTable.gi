@@ -303,7 +303,7 @@ BindGlobal("UpdateHNFCCTable", function(CCT)
     tind := 0;
     for r in CCT!.hnfs do
       if Length(r.new) > 0 then
-        r.hnf := HermiteNormalFormIntegerMat(Concatenation(r.hnf, r.new));
+        r.hnf := HermiteIntMat(Concatenation(r.hnf, r.new));
         while IsZero(r.hnf[Length(r.hnf)]) do
           Remove(r.hnf);
         od;

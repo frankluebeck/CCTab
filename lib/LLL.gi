@@ -37,6 +37,38 @@ PrintIntegerMatToFlint := function(fname, mat)
   PrintTo1(fname, fu);
 end;
 
+# Interface to Hermite normal form functions in FLINT
+TMPRES9676895304721 := fail;
+HNFThreaded := function(mat)
+  local prg, str, out, inp, res;
+  prg := Filename(DirectoriesPackagePrograms("CCTab"), "hnfintmat");
+  if prg = fail then
+    return fail;
+  fi;
+  str := "";
+  out := OutputTextString(str, false);
+  PrintIntegerMatToFlint(out, mat);
+  CloseStream(out);
+  inp := InputTextString(str);
+  res := "";
+  out := OutputTextString(res, false);
+  Process(DirectoryCurrent(), prg, inp, out, [String(NRFlintThreads), 
+                          String(Length(mat)), String(Length(mat[1])) ]);
+  CloseStream(inp);
+  CloseStream(out);
+  inp := InputTextString(res);
+  Read(inp);
+  CloseStream(inp);
+  res := TMPRES9676895304721.hnf;
+  Unbind(TMPRES9676895304721);
+  return res;
+end;
+if Filename(DirectoriesPackagePrograms("CCTab"), "hnfintmat") <> fail then
+  HermiteIntMat := HNFThreaded;
+else
+  HermiteIntMat := HermiteNormalFormIntegerMat;
+fi;
+
 # A: square symmetric positive definite matrix
 # computes a fraction free Gauss elimination, together with
 # a permutation of the rows and and columns of the input matrix
@@ -59,52 +91,48 @@ PermutedFractionFreeIntegerGaussPositiveDefinite_GAP := function(A)
     od;
   fi;
   perm := [1..n]+0;
-  if IsBound(PFFIGx) then
-    PFFIG(A, perm, InfoLevel(InfoCCTable));
-  else
-    d := 1; 
-    for k in [1..n] do
-      # permute such that smallest diagonal entry is in position k
-      kk := k;
-      for i in [k+1..n] do
-        if A[i,i]<A[kk,kk] then
-          kk := i;
-        fi;
-      od;
-      if kk > k then
-        q := perm[k];
-        perm[k] := perm[kk];
-        perm[kk] := q;
-        q := A[k];
-        A[k] := A[kk];
-        A[kk] := q;
-        for i in [1..n] do
-          a := A[i];
-          q := a[k];
-          a[k] := a[kk];
-          a[kk] := q;
-        od;
+  d := 1; 
+  for k in [1..n] do
+    # permute such that smallest diagonal entry is in position k
+    kk := k;
+    for i in [k+1..n] do
+      if A[i,i]<A[kk,kk] then
+        kk := i;
       fi;
-      #for i in [k+1..n] do
-      #  q := -A[i,k];
-      #  MultVector(A[i], A[k,k]);
-      #  AddRowVector(A[i], A[k], q, k+1, n);
-      #  QuoVector(A[i], d, k, n);
-      #  A[i,k] := z;
-      #od;
-      a := A[k];
-      piv := A[k,k];
-      for i in [k+1..n] do
-        ai := A[i];
-        q := -ai[k];
-        for j in [k+1..n] do
-          ai[j] := QuoInt(piv*ai[j]+q*a[j], d);
-        od;
-        ai[k] := z;
-      od;
-      d := A[k,k];
     od;
-  fi;
+    if kk > k then
+      q := perm[k];
+      perm[k] := perm[kk];
+      perm[kk] := q;
+      q := A[k];
+      A[k] := A[kk];
+      A[kk] := q;
+      for i in [1..n] do
+        a := A[i];
+        q := a[k];
+        a[k] := a[kk];
+        a[kk] := q;
+      od;
+    fi;
+    #for i in [k+1..n] do
+    #  q := -A[i,k];
+    #  MultVector(A[i], A[k,k]);
+    #  AddRowVector(A[i], A[k], q, k+1, n);
+    #  QuoVector(A[i], d, k, n);
+    #  A[i,k] := z;
+    #od;
+    a := A[k];
+    piv := A[k,k];
+    for i in [k+1..n] do
+      ai := A[i];
+      q := -ai[k];
+      for j in [k+1..n] do
+        ai[j] := QuoInt(piv*ai[j]+q*a[j], d);
+      od;
+      ai[k] := z;
+    od;
+    d := A[k,k];
+  od;
   return [A, PermList(perm)^-1];
 end;
 
