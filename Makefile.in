@@ -51,7 +51,7 @@ docclean:
 	(cd  doc; ./clean)
 
 test:
-	$(GAP) -b -q -r < tst/testall.g
+	$(GAP) -b -q -r --quitonbreak tst/testall.g
 
 # regenerate Makefile if any of its inputs changed
 Makefile: configure Makefile.in $(GAPPATH)/sysinfo.gap
