@@ -6,16 +6,70 @@
 export LANG=C
 export LC_ALL=C
 
+usage () {
+  cat <<EOF
+Usage: ./configure [OPTION]... [VAR=VALUE]...
+
+Configuration options:
+  -h, --help            display this help and exit
+  --with-gaproot=PATH   path to the GAP root directory (default: ../..)
+  --with-flint=PREFIX   prefix of the FLINT installation, i.e., FLINT headers
+                        are expected in PREFIX/include and libraries in
+                        PREFIX/lib; if not given, 'pkg-config' resp. the
+                        compiler defaults are used
+  --without-flint       do not build the FLINT based standalone programs
+
+Some influential variables:
+  CC          C compiler command (default: cc)
+  CFLAGS      C compiler flags (default: -O3 -march=native, if supported)
+  CPPFLAGS    C preprocessor flags, e.g. -I<dir>
+  LDFLAGS     linker flags, e.g. -L<dir>
+  FLINT_LIBS  libraries needed for FLINT (default: -lflint -lgmp)
+
+These can be set either in the environment or as arguments, e.g.
+
+  ./configure --with-gaproot=/opt/gap CC=clang CFLAGS="-O2 -g"
+EOF
+}
+
 # GAP path
 GAPPATH=../..
+FLINTPATH=
+WITH_FLINT=auto
+
+# remember the arguments, so that the Makefile can re-run us if needed;
+# each argument is wrapped into single quotes, embedded single quotes are
+# escaped as '\''
+CONFIGURE_ARGS=
+for arg in "$@" ; do
+  CONFIGURE_ARGS="$CONFIGURE_ARGS '$(printf '%s' "$arg" | sed "s/'/'\\\\''/g")'"
+done
+
 while test "$#" -ge 1 ; do
   option="$1" ; shift
   case "$option" in
     --with-gaproot=*) GAPPATH=${option#--with-gaproot=}; ;;
-    -*)               echo "ERROR: unsupported argument $option" ; exit 1;;
+    --with-flint=*)   FLINTPATH=${option#--with-flint=}; WITH_FLINT=yes; ;;
+    --without-flint)  FLINTPATH=; WITH_FLINT=no; ;;
+    --with-flint)     WITH_FLINT=yes; ;;
+    -h|--help)        usage; exit 0;;
+    CC=*)             CC=${option#CC=}; ;;
+    CFLAGS=*)         CFLAGS=${option#CFLAGS=}; ;;
+    CPPFLAGS=*)       CPPFLAGS=${option#CPPFLAGS=}; ;;
+    LDFLAGS=*)        LDFLAGS=${option#LDFLAGS=}; ;;
+    FLINT_LIBS=*)     FLINT_LIBS=${option#FLINT_LIBS=}; ;;
+    -*)               echo "ERROR: unsupported argument $option" ; \
+                      echo "Try './configure --help' for more information." ; \
+                      exit 1;;
     *)                GAPPATH="$option" ;;
   esac
 done
+
+if ! test -f "$GAPPATH/sysinfo.gap" ; then
+  echo "ERROR: no sysinfo.gap found in '$GAPPATH'."
+  echo "Use './configure --with-gaproot=PATH' to point to a GAP root directory."
+  exit 1
+fi
 echo "Using $GAPPATH as GAP build directory."
 
 # Reading variables from GAP build directory
@@ -23,6 +77,102 @@ echo "Using $GAPPATH as GAP build directory."
 
 echo "Using bin path: $GAParch"
 
-# Creating Makefile
-sed -e "s|@GAPPATH@|$GAPPATH|g" < Makefile.in > Makefile
+# Compiler and flags; everything can be overridden by the user, either via
+# the environment or via arguments of the form VAR=VALUE.
+CC=${CC:-cc}
 
+# helper: does the compiler accept the given flags?
+cc_check () {
+  echo 'int main(void) { return 0; }' > conftest.c
+  $CC "$@" conftest.c -o conftest > /dev/null 2>&1
+  res=$?
+  rm -rf conftest.c conftest conftest.o conftest.dSYM
+  return $res
+}
+
+if ! cc_check ; then
+  echo "ERROR: the C compiler '$CC' cannot compile a trivial program."
+  echo "Use './configure CC=...' to select a working compiler."
+  exit 1
+fi
+
+if test -z "${CFLAGS+set}" ; then
+  # '-march=native' is not understood by all compilers (and not on all targets)
+  if cc_check -O3 -march=native ; then
+    CFLAGS="-O3 -march=native"
+  else
+    CFLAGS="-O3"
+  fi
+  echo "Using CFLAGS: $CFLAGS"
+fi
+
+# Locating FLINT: an explicit --with-flint=PREFIX wins, otherwise we try
+# pkg-config, otherwise we hope that the compiler finds FLINT on its own.
+FLINT_CPPFLAGS=
+FLINT_LDFLAGS=
+FLINT_LIBS=${FLINT_LIBS:-"-lflint -lgmp"}
+if test "$WITH_FLINT" != no ; then
+  if test -n "$FLINTPATH" ; then
+    FLINT_CPPFLAGS="-I$FLINTPATH/include"
+    FLINT_LDFLAGS="-L$FLINTPATH/lib"
+  elif pkg-config --exists flint > /dev/null 2>&1 ; then
+    FLINT_CPPFLAGS=$(pkg-config --cflags flint)
+    FLINT_LDFLAGS=$(pkg-config --libs-only-L flint)
+    FLINT_LIBS=$(pkg-config --libs-only-l flint)
+    echo "Found FLINT via pkg-config."
+  fi
+
+  # verify that we can actually compile and link against FLINT
+  cat > conftest.c <<EOF
+#include <flint/flint.h>
+#include <flint/fmpz_mat.h>
+int main(void) {
+  fmpz_mat_t m;
+  fmpz_mat_init(m, 1, 1);
+  fmpz_mat_clear(m);
+  return 0;
+}
+EOF
+  if $CC $CPPFLAGS $FLINT_CPPFLAGS $CFLAGS $LDFLAGS $FLINT_LDFLAGS \
+         conftest.c -o conftest $FLINT_LIBS > /dev/null 2>&1 ; then
+    echo "Using FLINT: $FLINT_CPPFLAGS $FLINT_LDFLAGS $FLINT_LIBS"
+  else
+    WITH_FLINT=no
+    echo "WARNING: cannot compile and link a program using FLINT."
+    echo "WARNING: the standalone programs will NOT be built; CCTab will work,"
+    echo "WARNING: but some computations will be much slower."
+    echo "WARNING: Install FLINT (https://flintlib.org/) and use"
+    echo "WARNING: './configure --with-flint=PREFIX' to point to it."
+  fi
+  rm -rf conftest.c conftest conftest.o conftest.dSYM
+fi
+
+# this one is substituted verbatim (and not via `escape` below), because it is
+# meant to be a make variable reference resp. empty
+if test "$WITH_FLINT" = no ; then
+  FLINT_PROGS=
+else
+  FLINT_PROGS='$(FLINT_PROGRAMS)'
+fi
+
+# escape a value for use as replacement text in `sed s|...|...|` below, and
+# protect '$' from being interpreted by make
+escape () {
+  printf '%s' "$1" | sed -e 's/[\\&|]/\\&/g' -e 's/\$/$$/g'
+}
+
+# Creating Makefile
+sed \
+    -e "s|@GAPPATH@|$(escape "$GAPPATH")|g" \
+    -e "s|@CC@|$(escape "$CC")|g" \
+    -e "s|@CFLAGS@|$(escape "$CFLAGS")|g" \
+    -e "s|@CPPFLAGS@|$(escape "$CPPFLAGS")|g" \
+    -e "s|@LDFLAGS@|$(escape "$LDFLAGS")|g" \
+    -e "s|@FLINT_CPPFLAGS@|$(escape "$FLINT_CPPFLAGS")|g" \
+    -e "s|@FLINT_LDFLAGS@|$(escape "$FLINT_LDFLAGS")|g" \
+    -e "s|@FLINT_LIBS@|$(escape "$FLINT_LIBS")|g" \
+    -e "s|@FLINT_PROGS@|$FLINT_PROGS|g" \
+    -e "s|@CONFIGURE_ARGS@|$(escape "$CONFIGURE_ARGS")|g" \
+    < Makefile.in > Makefile
+
+echo "Created Makefile; now type 'make' to build CCTab."

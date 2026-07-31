@@ -30,16 +30,34 @@ The standalone programs assume that the library files and header files of the
 first via your operating systems package manager (package <C>libflint-dev</C> 
 or similar), or directly from <URL>https://flintlib.org/</URL>.
 
-To install the extra functions  go to  the  directory  <F>pkg/CCTab-...</F> 
+To install the extra functions  go to  the  directory  <F>pkg/CCTab-...</F>
 or <F>pkg/cctab/</F> to
 which the package was extracted and call<P/>
 
-<C>/bin/sh ./configure [path]</C><P/>
+<C>/bin/sh ./configure [--with-gaproot=path]</C><P/>
 
 where <C>path</C>  is a path  to  the main <Package>GAP</Package> root
-directory (if not given, the default <F>../..</F> is assumed). 
+directory (if not given, the default <F>../..</F> is assumed).
 
-Afterwards call <C>make</C>  to  compile the code. <P/>
+If the <Package>FLINT</Package> library is not installed in a place where
+the compiler finds it by itself, and it is not known to <C>pkg-config</C>
+either, you can specify its location with<P/>
+
+<C>/bin/sh ./configure --with-gaproot=path --with-flint=prefix</C><P/>
+
+where the header files are expected in <F>prefix/include</F> and the
+libraries in <F>prefix/lib</F>. Use <C>--without-flint</C> to skip the
+standalone programs altogether; the package then still works, but some
+computations are slower. Call <C>./configure --help</C> for the complete
+list of options. <P/>
+
+The compiler and the compiler flags can be overridden, either in the
+environment or as arguments of <C>configure</C>, for example<P/>
+
+<C>/bin/sh ./configure CC=clang CFLAGS="-O2 -g"</C><P/>
+
+Afterwards call <C>make</C>  to  compile the code. Individual flags can also
+be overridden at this point, e.g. by <C>make CFLAGS="-O2"</C>. <P/>
 
 You  can   run  a test of    the installation  by  typing <C>make test</C>.
 
