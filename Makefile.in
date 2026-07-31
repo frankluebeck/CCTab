@@ -4,48 +4,75 @@
 GAPPATH=@GAPPATH@
 include $(GAPPATH)/sysinfo.gap
 
+# compiler and flags, all determined by `configure` and all overridable, e.g.
+# by `make CFLAGS="-O2 -g"`
+CC=@CC@
+CFLAGS=@CFLAGS@
+CPPFLAGS=@CPPFLAGS@
+LDFLAGS=@LDFLAGS@
+
+# how to find the FLINT library, determined by `configure`
+FLINT_CPPFLAGS=@FLINT_CPPFLAGS@
+FLINT_LDFLAGS=@FLINT_LDFLAGS@
+FLINT_LIBS=@FLINT_LIBS@
+
+BINDIR = bin/$(GAParch)
+
+FLINT_PROGRAMS = $(BINDIR)/pffgintmat_threads $(BINDIR)/lll_modular_threads \
+                 $(BINDIR)/invuni_threads $(BINDIR)/hnfintmat
+
+# empty if `configure` did not find FLINT
+FLINT_TARGETS = @FLINT_PROGS@
+
 .PHONY: doc clean cleanlast distclean docclean test all
 
-all: bin/$(GAParch)/scalar.so bin/$(GAParch)/pffgintmat_threads bin/$(GAParch)/lll_modular_threads bin/$(GAParch)/invuni_threads bin/$(GAParch)/hnfintmat
+all: $(BINDIR)/scalar.so $(FLINT_TARGETS)
 
-
-bin/$(GAParch)/scalar.so: src/scalar.c Makefile
-	@mkdir -p bin/$(GAParch)
-	$(GAC) -d -p "$(CPPFLAGS)" -p "$(CFLAGS)" -P "$(LDFLAGS)" -o bin/$(GAParch)/scalar.so src/scalar.c
+$(BINDIR)/scalar.so: src/scalar.c Makefile
+	@mkdir -p $(BINDIR)
+	$(GAC) -d -p "$(CPPFLAGS)" -p "$(CFLAGS)" -P "$(LDFLAGS)" -o $@ src/scalar.c
 
 #   disabled (temporarily) since there is some memory error
-#bin/$(GAParch)/lll.so: src/lll.c Makefile
-#	@mkdir -p bin/$(GAParch)
-#	$(GAC) -d -p "$(CPPFLAGS)" -p "$(CFLAGS)" -P "$(LDFLAGS)" -o bin/$(GAParch)/lll.so src/lll.c
+#$(BINDIR)/lll.so: src/lll.c Makefile
+#	@mkdir -p $(BINDIR)
+#	$(GAC) -d -p "$(CPPFLAGS)" -p "$(CFLAGS)" -P "$(LDFLAGS)" -o $@ src/lll.c
 
-bin/$(GAParch)/pffgintmat_threads: flint/pffgintmat_threads.c flint/do_parallel_dyn.c
-	@mkdir -p bin/$(GAParch)
-	gcc -O3  -march=native $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o bin/$(GAParch)/pffgintmat_threads flint/do_parallel_dyn.c flint/pffgintmat_threads.c -lflint -lgmp
+# all standalone programs are built the same way: the program's own source
+# plus the shared helper do_parallel_dyn.c
+FLINT_SOURCES = flint/do_parallel_dyn.c flint/do_parallel_dyn.h
 
-bin/$(GAParch)/lll_modular_threads: flint/lll_modular_threads.c flint/do_parallel_dyn.c
-	@mkdir -p bin/$(GAParch)
-	gcc -O3  -march=native $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o bin/$(GAParch)/lll_modular_threads flint/do_parallel_dyn.c flint/lll_modular_threads.c -lflint -lgmp
+$(BINDIR)/pffgintmat_threads: flint/pffgintmat_threads.c $(FLINT_SOURCES) Makefile
+	@mkdir -p $(BINDIR)
+	$(CC) $(CPPFLAGS) $(FLINT_CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(FLINT_LDFLAGS) \
+	  -o $@ flint/pffgintmat_threads.c flint/do_parallel_dyn.c $(FLINT_LIBS)
 
-bin/$(GAParch)/invuni_threads: flint/invuni_threads.c flint/do_parallel_dyn.c
-	@mkdir -p bin/$(GAParch)
-	gcc -O3  -march=native $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o bin/$(GAParch)/invuni_threads flint/do_parallel_dyn.c flint/invuni_threads.c -lflint -lgmp
+$(BINDIR)/lll_modular_threads: flint/lll_modular_threads.c $(FLINT_SOURCES) Makefile
+	@mkdir -p $(BINDIR)
+	$(CC) $(CPPFLAGS) $(FLINT_CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(FLINT_LDFLAGS) \
+	  -o $@ flint/lll_modular_threads.c flint/do_parallel_dyn.c $(FLINT_LIBS)
 
-bin/$(GAParch)/hnfintmat: flint/hnfintmat.c flint/do_parallel_dyn.c
-	@mkdir -p bin/$(GAParch)
-	gcc -O3  -march=native $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o bin/$(GAParch)/hnfintmat flint/do_parallel_dyn.c flint/hnfintmat.c -lflint -lgmp
+$(BINDIR)/invuni_threads: flint/invuni_threads.c $(FLINT_SOURCES) Makefile
+	@mkdir -p $(BINDIR)
+	$(CC) $(CPPFLAGS) $(FLINT_CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(FLINT_LDFLAGS) \
+	  -o $@ flint/invuni_threads.c flint/do_parallel_dyn.c $(FLINT_LIBS)
+
+$(BINDIR)/hnfintmat: flint/hnfintmat.c $(FLINT_SOURCES) Makefile
+	@mkdir -p $(BINDIR)
+	$(CC) $(CPPFLAGS) $(FLINT_CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(FLINT_LDFLAGS) \
+	  -o $@ flint/hnfintmat.c flint/do_parallel_dyn.c $(FLINT_LIBS)
 
 doc:
 	$(GAP)  makedocrel.g
 
 # for compatibility with other packages
 clean:
-	rm -rf bin/$(GAParch) *~ */*~
+	rm -rf $(BINDIR) *~ */*~
 # clean last build
 cleanlast:
-	rm -rf bin/$(GAParch) Makefile *~
+	rm -rf $(BINDIR) Makefile *~
 # clean all builds
 distclean:
-	rm -rf bin/* Makefile Makefile-*
+	rm -rf bin Makefile Makefile-*
 
 docclean:
 	(cd  doc; ./clean)
@@ -55,4 +82,4 @@ test:
 
 # regenerate Makefile if any of its inputs changed
 Makefile: configure Makefile.in $(GAPPATH)/sysinfo.gap
-	./configure $(GAPPATH)
+	./configure @CONFIGURE_ARGS@

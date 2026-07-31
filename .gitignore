@@ -23,3 +23,5 @@ doc/manual.pdf
 tttttmppre
 CCTab-*.*
 Makefile
+bin/
+conftest*
