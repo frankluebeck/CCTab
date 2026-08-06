@@ -8,8 +8,6 @@
 ##  of a finite group (also works for Q-linear combinations).
 ##  
 
-BindGlobal("RATPARTVEC", []);
-
 DeclareAttribute("ScalarInfo", IsGroup);    
 DeclareAttribute("ScalarInfo", IsCCTable);    
 

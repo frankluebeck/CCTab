@@ -9,7 +9,7 @@ else
   relpath:="../../..";
 fi;
 LoadPackage("GAPDoc");
-MakeGAPDocDoc("doc", "cctab", [], "CCTab", relpath, "MathJax");
+MakeGAPDocDoc("doc", "cctab", ["../lib/PowerMaps.gi"], "CCTab", relpath, "MathJax");
 GAPDocManualLab("CCTab");
 CopyHTMLStyleFiles("doc");
 QUIT;

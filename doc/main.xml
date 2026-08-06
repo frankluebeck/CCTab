@@ -12,8 +12,7 @@ This is the main body of the documentation.
 <Heading>The <Package>CCTab</Package>-Package</Heading>
 <Index><Package>CCTab</Package></Index>
 
-<Emph>(Constructing (ordinary) character tables of finite groups,  by Frank
-Lübeck)</Emph><P/>
+<Emph>(Constructing (ordinary) character tables of finite groups)</Emph><P/>
 
 <Section Label="Sect-Install">
 <Heading>Installation of the <Package>CCTab</Package> package</Heading>
@@ -26,7 +25,8 @@ But we strongly recommend to compile a kernel function and some standalone
 programs as well during installation. This will speed up some computations.
 
 The standalone programs assume that the library files and header files of the
-<Package>FLINT</Package> library are installed. If not there install them
+<Package>FLINT</Package> library are installed. If this is not yet the case,
+install them
 first via your operating systems package manager (package <C>libflint-dev</C> 
 or similar), or directly from <URL>https://flintlib.org/</URL>.
 
@@ -36,15 +36,20 @@ which the package was extracted and call<P/>
 
 <C>/bin/sh ./configure [path]</C><P/>
 
-where <C>path</C>  is a path  to  the main <Package>GAP</Package> root
+where <C>[path]</C>  is a path  to  the main <Package>GAP</Package> root
 directory (if not given, the default <F>../..</F> is assumed). 
 
 Afterwards call <C>make</C>  to  compile the code. <P/>
 
-You  can   run  a test of    the installation  by  typing <C>make test</C>.
+You  can   run  a test of    the installation  by  typing <C>make test</C>.<P/>
+
+After installation the package can be used with
+<C>LoadPackage("CCTab");</C>. <P/>
+
+To see some progress information during longer computations the following
+info class can be set to a non-zero level:
 
 <ManSection> 
-
 <InfoClass Name="InfoCCTab"/> 
 
 <Description>    
@@ -52,13 +57,37 @@ This is  an <K>Info</K> class for the <Package>CCTab</Package>-package.
 By <C>SetInfoLevel(InfoCCTab, level);</C> with <C>level</C> between <C>1</C>
 and <C>3</C> you can switch on the printing of
 some information     during      the    computations     of    certain
-<Package>CCTab</Package>-functions.  
+<Package>CCTab</Package>-functions.  <P/>
+The default level is <C>0</C>.
 </Description>
 </ManSection>
 
 </Section>
+</Chapter>
 
 <!-- ############################################################ -->
+<Chapter Label="Chap-main">
+<Heading>The main functions of <Package>CCTab</Package></Heading>
+
+This package can be useful for users who want to compute ordinary 
+character tables of given finite groups, even if they do not know
+any function from this package. By loading this package the default 
+method for <Ref Oper="Irr" BookName="Reference"/> is overwritten
+for those groups for which the &GAP; library would use 
+<Ref BookName="Reference" Func="IrrDixonSchneider" />.
+
+</Chapter>
+
+<Chapter Label="Chap-util">
+<Heading>Utility functions from the <Package>CCTab</Package> package</Heading>
+
+This package implements various utility functions which may also be of 
+independent interest. For example, there are functions for identifying
+the conjugacy class of a given element, or for computing all power maps
+of a finite group, or for computing information about rational conjugacy 
+classes. 
+
+
 <Section Label="Sect-FindClass">
 <Heading>Identifying conjugacy classes of elements</Heading>
 
@@ -67,6 +96,37 @@ some information     during      the    computations     of    certain
 <Heading>Blabla subsection</Heading>
 
 </Subsection>
+
+</Section>
+
+<!-- ############################################################ -->
+<Section Label="Sect-PowerMaps">
+<Heading>Power maps and rational classes</Heading>
+
+Let <M>x_1, \ldots, x_k</M> be conjugacy class representatives of a finite 
+group <M>G</M>. The <E><M>n</M>-th power map of <M>G</M></E> is the list of 
+<M>k</M> integers such that the <M>i</M>-th entry is <M>j</M> when 
+<M>x_i^n</M> is conjugate to <M>x_j</M>. If <M>x_i</M> has order <M>m</M> 
+then the <E>power map of class <M>i</M></E> is a list of length <M>m</M> 
+such that the <M>n</M>-th entry is <M>j</M> if <M>x_i^{{n-1}}</M> is 
+conjugate to <M>x_j</M>.
+<P/>
+
+Let <M>x</M> be an element of order <M>m</M> in a group <M>G</M>.
+The <E>rational class</E> of <M>x</M> is the union of the conjugacy classes
+of all elements which generate the same cyclic subgroup of <M>G</M>
+as <M>x</M> (that is, of all <M>x^i</M> with <M>\gcd(i, m) = 1)</M>.
+
+<#Include Label="PowerMapsOfAllClasses">
+<#Include Label="RationalClassSets">
+<#Include Label="NrRationalClasses">
+<#Include Label="RationalClassesInfo">
+<#Include Label="MaximalCyclics">
+<#Include Label="InduceAllFromCyclicSubgroup">
+<#Include Label="InducedFromAllMaximalCyclicSubgroups">
+<#Include Label="PowerMapCharacters">
+<#Include Label="SmallPowerMapCharacters">
+<#Include Label="ActionAutomorphismsOnConjugacyClasses">
 
 </Section>
 
