@@ -1,5 +1,5 @@
 ###########################################################################
-##  Elementary.gd
+##  Elementary.gi
 ##  
 ##  (C) 2025 Frank Lübeck, Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen
 ##  
@@ -11,6 +11,34 @@
 ##     InducedFromElementary(G, i, p[, "linear"/"nonlinear")
 ##  
 
+##  <#GAPDoc Label="MaximalNonCyclicElementarySubgroups">
+##  <ManSection>
+##  <Attr Name="MaximalNonCyclicElementarySubgroups" Arg="G"/>
+##  <Returns>a list of pairs of positive integers</Returns>
+##  <Description>
+##  This function returns a list
+##  of pairs <C>[ i, p ]</C>, where <C>i</C> is the number of a conjugacy
+##  class in <A>G</A> and <C>p</C> is a prime. To each such pair we consider 
+##  a subgroup <M>\langle{x}\rangle \times P</M>, where <M>x</M> is a 
+##  representative of class <A>i</A> and <M>P</M> is a Sylow-<M>p</M>-subgroup
+##  of the centralizer of <M>x</M>. These subgroups form, up to conjugacy in 
+##  <A>G</A>, the non-cyclic maximal elementary subgroups of <A>G</A>.
+##  <P/>
+##  Brauer's theorem on the characterization of characters of <A>G</A> says
+##  that the full lattice of generalized characters of <A>G</A> (that is
+##  all integer linear combinations of irreducible characters) is spanned by
+##  the characters induced from the maximal elementary subgroups of
+##  <A>G</A>, that is the maximal cyclic subgroups (see <Ref
+##  Attr="MaximalCyclics"/>) and the subgroups descibed by this function. See
+##  <Cite Key="Isaacs" Where="Chapter 8"/> for more details.
+##  <Example>
+##  gap> G := SL(4,2);;
+##  gap> MaximalNonCyclicElementarySubgroups(G);
+##  [ [ 1, 3 ], [ 1, 2 ], [ 6, 2 ] ]
+##  </Example>
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
 ##  returns list of pairs [i, p] encoding the elementary subgroups
 ##  <x> x P where x is an element from class i and P is a Sylow-p-subgroup
 ##  of the centralizer of x in G (up to conjugacy in G)
@@ -74,6 +102,46 @@ InstallMethod(MaximalNonCyclicElementarySubgroups, ["IsGroup"], function(G)
   return List(Reversed(res), a-> [ratcl[a[1]][1], a[2]]);
 end);
 
+##  <#GAPDoc Label="InducedFromElementary">
+##  <ManSection>
+##  <Func Name="InducedFromElementary" Arg="G, i, p[, opts...]"/>
+##  <Func Name="InducedFromElementary" Arg="CCT, i, p[, opts...]"/>
+##  <Returns>a list of row vectors of cyclotomic numbers, or an integer</Returns>
+##  <Description>
+##  In the first form <A>G</A> is a group, in the second form
+##  <A>CCT</A> is an <Ref Filt="IsCCTable"/> object of a group <A>G</A>. Let
+##  <A>i</A> be an integer and <A>p</A> be a prime, such that <M>x</M> 
+##  contained the <A>i</A>-th conjugacy class of <M>G</M> has order
+##  not divisible by <A>p</A>. We consider the <A>p</A>-elementary subgroup
+##  <M>E = \langle{x}\rangle \times S</M> where <M>S</M> is a 
+##  Sylow-<A>p</A>-subgroup of the centralizer of <M>x</M>.
+##  <P/>
+##  This function returns the pairwise distinct characters of <M>G</M>
+##  induced from the irreducible characters of <M>E</M> (as lists of 
+##  values, in the order of <C>ConjugacyClasses(<A>G</A>)</C>).
+##  <P/>
+##  The following further optional arguments may be given, in any order:
+##  <List>
+##  <Mark><C>"linear"</C></Mark>
+##  <Item>only the characters induced from the linear characters of
+##  <M>E</M> are computed</Item>
+##  <Mark><C>"nonlinear"</C></Mark>
+##  <Item>only the characters induced from the non-linear irreducible
+##  characters of <M>E</M> are computed</Item>
+##  <Mark>a positive integer <A>max</A></Mark>
+##  <Item>if the number of conjugacy classes of <M>E</M> 
+##  is larger than <A>max</A>, no characters are computed and this
+##  number is returned instead (this can be used to skip elementary
+##  subgroups that would be too expensive to handle)</Item>
+##  </List>
+##  <Example>
+##  gap> G := AlternatingGroup(5);;
+##  gap> InducedFromElementary(G, 1, 2);
+##  [ [ 15, -1, 0, 0, 0 ], [ 15, 3, 0, 0, 0 ] ]
+##  </Example>
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
 ##  computes the induced irreducible characters from an elementary subgroup
 ##  (given by [i, p] as above) to G
 ##  with optional argument "linear" only the linear characters are induced
@@ -81,7 +149,7 @@ end);
 ##  with an integer max in optional arguments the function returns only the
 ##       number of conjugacy classes of the elementary subgroup if
 ##       this number is larger than max
-##  
+##
 ##  characters are returned as list of values in Ordering of ConjugacyClasses(G)
 BindGlobal("InducedFromElementary", function(GorCCT, i, p, opts...)
   local G, ut, max, scen, cls, ncl, cl, x, o, cen, s, ss, t, scl, sscl, 
@@ -171,8 +239,39 @@ BindGlobal("InducedFromElementary", function(GorCCT, i, p, opts...)
   return res;
 end);
 
+##  <#GAPDoc Label="FusionElementaryCCTable">
+##  <ManSection>
+##  <Func Name="FusionElementaryCCTable" Arg="CCT, i, p"/>
+##  <Returns>a list of length 2</Returns>
+##  <Description>
+##  Let <A>CCT</A> be an <Ref Filt="IsCCTable"/> object of a group
+##  <M>G</M>. The arguments <A>i</A> and <A>p</A> decribe an elementary
+##  subgroup <M>E = \langle{x}\rangle \times S</M>, as explained in <Ref
+##  Func="InducedFromElementary"/>. 
+##  <P/>
+##  This function computes the fusion of the conjugacy classes of <M>E</M>
+##  into the classes of <M>G</M>. The implementation tries to avoid
+##  class identifications and uses the power maps. The result is a list
+##  <C>[ fus, needed ]</C>. Here <C>fus</C> is a list with one entry of
+##  form <P/><C>[ j, [ e1, k1, k2, ... ], [ e2, ... ], ... ]</C><P/> 
+##  for every class <A>j</A> of <M>G</M> representing a rational class (see
+##  <Ref Attr="RationalClassSets"/>) that occurs in the image of the fusion.
+##  Here <C>e1, e2, ...</C> are exponents and they are followed by numbers
+##  <C>k</C> such that the classes of x^ei y with y in class k of
+##  S fuse into class j of G.
+##  <P/>
+##  The second entry <C>needed</C> is the set of numbers of classes of
+##  <M>S</M> occurring in <C>fus</C>.
+##  <Example>
+##  gap> G := AlternatingGroup(5);;
+##  gap> FusionElementaryCCTable(CCTable(G), 1,2);
+##  [ [ [ 1, [ 0, 1 ] ], [ 2, [ 0, 2, 3, 4 ] ] ], [ 1, 2, 3, 4 ] ]
+##  </Example>
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
 # Fusion of elementary subgroup <x> x S (x in class i, S p-Sylow in
-# centralizer of x): returns pair of lists [fus, needed] where fus is list of 
+# centralizer of x): returns pair of lists [fus, needed] where fus is list of
 # lists of form
 #     [j, [e1, ...], [e2, ...] ...]
 # where j is number of class in G in the image, e1, e2,... exponents,
@@ -316,12 +415,58 @@ BindGlobal("FusionElementaryCCTable", function(CCT, i, p)
   return [poss, needed];
 end);
 
-# Here we produce a sort data with an iteration function which produces
+##  <#GAPDoc Label="InductionDataFromElementaryCCTable">
+##  <ManSection>
+##  <Func Name="InductionDataFromElementaryCCTable" Arg="CCT, i, p"/>
+##  <Returns>a record</Returns>
+##  <Description>
+##  Let <A>CCT</A>, <A>i</A> and <A>p</A> be as for
+##  <Ref Func="FusionElementaryCCTable"/>, describing a <M>p</M>-elementary
+##  subgroup <M>E = \langle{x}\rangle \times S</M> of the group <M>G</M>
+##  underlying <A>CCT</A>. This function provides an alternative, more
+##  memory efficient way to compute the characters of <M>G</M> induced
+##  from the irreducible characters of <M>E</M>
+##  than <Ref Func="InducedFromElementary"/>. This is useful in particular
+##  when <M>S</M> has a large number of conjugacy classes.
+##  <P/>
+##  The irreducible characters of the <A>p</A>-group
+##  <M>S</M> are described via <C>BaumClausenInfo</C> (see
+##  <Ref BookName="Reference" Attr="IrrBaumClausen"/>), and the record
+##  returned by this function
+##  contains a component <C>next</C>, a function without arguments. 
+##  Each call of <C>.next()</C> returns <M>|x|</M> induced characters from
+##  <M>E</M>; or <K>fail</K> when there are no more such characters.
+##  <P/>
+##  In contrast to <Ref Func="InducedFromElementary"/>, this function does
+##  not detect and remove induced characters occurring several times.
+##  <Example>
+##  gap> G := SymmetricGroup(5);;
+##  gap> ind := InductionDataFromElementaryCCTable(CCTable(G),1,2);;
+##  gap> ind.next();
+##  [ [ 15, 3, 3, 0, 1, 0, 0 ] ]
+##  gap> ind.next();
+##  [ [ 15, 3, -1, 0, -1, 0, 0 ] ]
+##  gap> ind.next();
+##  [ [ 15, -3, 3, 0, -1, 0, 0 ] ]
+##  gap> ind.next();
+##  [ [ 15, -3, -1, 0, 1, 0, 0 ] ]
+##  gap> ind.next();
+##  [ [ 30, 0, -2, 0, 0, 0, 0 ] ]
+##  gap> ind.next();
+##  fail
+##  </Example>
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
+# Here we produce data with an iteration function which produces
 # |x| induced irreducible characters at a time. We use 'BaumClausenInfo' and
 # then compute character values as in 'IrrBaumClausen' later on the fly.
 # This way we can handle elementary subgroups with a huge number of classes.
 # The disadvantage is that we sometimes have some extra work because we do not
 # detect if several induced characters are the same.
+# On the other hand, for the last needed p-elementary subgroup in the
+# induce-reduce process the missing p-part of the lattice index is
+# often found after only a few induced characters.
 BindGlobal("InductionDataFromElementaryCCTable", function(CCT, i, p)
   local fus, needed, G, sz, cls, ncl, szcen, ords, o, st, s, ssz, scls, szscls, 
         lg, bc, pcgs, exp, q, gcdq, exps, cr, eL, eE, j, next;
@@ -485,18 +630,18 @@ BindGlobal("InductionDataFromElementaryCCTable", function(CCT, i, p)
   return bc;
 end);
 
-# temporary test function, should behave like 
-#     EncodeForCCTable(CCT, InducedFromElementary(CCT, i, p))
-fu:=function(CCT,i,p)
-  local bc, next, res, a;
-  bc := InductionDataFromElementaryCCTable(CCT,i,p);
-  next := bc.next;
-  res := [];
-  a := next();
-  while a <> fail do
-    Append(res,a);
-    a := next();
-  od;
-  return res;
-end;
+##  # temporary test function, should behave like 
+##  #     EncodeForCCTable(CCT, InducedFromElementary(CCT, i, p))
+##  fu:=function(CCT,i,p)
+##    local bc, next, res, a;
+##    bc := InductionDataFromElementaryCCTable(CCT,i,p);
+##    next := bc.next;
+##    res := [];
+##    a := next();
+##    while a <> fail do
+##      Append(res,a);
+##      a := next();
+##    od;
+##    return res;
+##  end;
 
