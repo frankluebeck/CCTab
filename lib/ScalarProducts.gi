@@ -44,9 +44,43 @@ function(CCT)
   return ScalarInfo(UnderlyingGroup(CCT));
 end);
 
+##  <#GAPDoc Label="CCTScalarProduct">
+##  <ManSection>
+##  <Func Name="CCTScalarProduct" Arg="CCT, c, d"/>
+##  <Returns>a rational number</Returns>
+##  <Description>
+##  Let <A>CCT</A> be an <Ref Filt="IsCCTable"/> object, and let <A>c</A>
+##  and <A>d</A> be two generalized characters of <A>CCT</A>, encoded as
+##  integer vectors as produced by <Ref Func="EncodeForCCTable"/>.
+##  This function returns the scalar product of <A>c</A> and <A>d</A>.
+##  <P/>
+##  This is used as the method for <Ref BookName="Reference"
+##  Oper="ScalarProduct"/> for characters of an <Ref Filt="IsCCTable"/>
+##  object. The <Package>CCTab</Package> also provides faster
+##  implementations of this function as kernel extension. (It can be checked
+##  if this is installed with 
+##  <C>IsBound(CCTScalarProductInternal2);</C>.
+##  <P/>
+##  Note that this function cannot be used for arbitrary class functions,
+##  only for class functions which are rational linear combinations of
+##  irreducible characters.
+##  <Example>
+##  gap> G := AlternatingGroup(5);;
+##  gap> CCT := CCTable(G);;
+##  gap> irr := Irr(CCT);
+##  [ [ 1, 1, 1, 1, 0, 0, 0 ], [ 3, -1, 0, 0, 0, -1, -1 ],
+##    [ 3, -1, 0, 1, 0, 1, 1 ], [ 4, 0, 1, -1, 0, 0, 0 ],
+##    [ 5, 1, -1, 0, 0, 0, 0 ] ]
+##  gap> List(irr, c-> List(irr, d-> ScalarProduct(CCT, c, d)));
+##  [ [ 1, 0, 0, 0, 0 ], [ 0, 1, 0, 0, 0 ], [ 0, 0, 1, 0, 0 ],
+##    [ 0, 0, 0, 1, 0 ], [ 0, 0, 0, 0, 1 ] ]
+##  </Example>
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
 ##  Compute scalar product of generalized characters, only given the values
 ##  x on the classes i which start an entry of RatClassExps(G). The other
-##  values on classes of the same rational class are GaloisCyc(x,kj), kj as 
+##  values on classes of the same rational class are GaloisCyc(x,kj), kj as
 ##  in RatClassExps.
 ##
 BindGlobal("CCTScalarProduct",  function(CCT, c, d)
