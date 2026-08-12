@@ -67,14 +67,27 @@ The default level is <C>0</C>.
 
 <!-- ############################################################ -->
 <Chapter Label="Chap-main">
-<Heading>The main functions of <Package>CCTab</Package></Heading>
+<Heading>The main functionality of <Package>CCTab</Package></Heading>
 
 This package can be useful for users who want to compute ordinary 
-character tables of given finite groups, even if they do not know
-any function from this package. By loading this package the default 
+character tables of given finite groups.
+<P/>
+By loading this package the default 
 method for <Ref Oper="Irr" BookName="Reference"/> is overwritten
 for those groups for which the &GAP; library would use 
 <Ref BookName="Reference" Func="IrrDixonSchneider" />.
+<P/> 
+If this is all you want, you do not need to know any further details 
+about the functions in <Package>CCTab</Package>.
+<P/>
+But the functions in <Package>CCTab</Package> can also be used 
+interactively to construct character tables of groups which are
+not handled easily by the generic algorithm. In this case you may be
+interested in more details about how this package works.
+<P/>
+There are also some functions, e.g., <Ref Func="PositionConjugacyClass"/>,
+<Ref Attr="PowerMapsOfAllClasses"/> or <Ref Attr="RationalClassesInfo"/>
+which may be of independent interest for other applications.
 
 </Chapter>
 
@@ -85,17 +98,15 @@ This package implements various utility functions which may also be of
 independent interest. For example, there are functions for identifying
 the conjugacy class of a given element, or for computing all power maps
 of a finite group, or for computing information about rational conjugacy 
-classes. 
+classes. Furthermore there are utilities for certain integer matrices.
 
 
 <Section Label="Sect-FindClass">
 <Heading>Identifying conjugacy classes of elements</Heading>
 
+<#Include Label="PositionConjugacyClass">
+<#Include Label="ConjugacyClassInvariants">
 
-<Subsection Label="Ssect-bla">
-<Heading>Blabla subsection</Heading>
-
-</Subsection>
 
 </Section>
 
@@ -129,6 +140,116 @@ as <M>x</M> (that is, of all <M>x^i</M> with <M>\gcd(i, m) = 1)</M>.
 <#Include Label="ActionAutomorphismsOnConjugacyClasses">
 
 </Section>
+
+<!-- ############################################################ -->
+<Section Label="Sect-Elementary">
+<Heading>Induction from elementary subgroups</Heading>
+
+To compute the irreducible characters of a
+finite group <M>G</M> we are interested in the characters of <M>G</M>
+induced from <M>p</M>-elementary subgroups <M>\langle{x}\rangle
+\times P</M>, where <M>p</M> is a prime, 
+<M>x \in G</M> is of order not divisible by <M>p</M>, and <M>P</M> is a 
+<M>p</M>-subgroup of the centralizer of <M>x</M> in <M>G</M>.
+An elementary subgroup of <M>G</M> is a <M>p</M>-elementary subgroup for 
+some prime <M>p</M>.
+We are mainly interested in maximal elementary subgroups (those not contained 
+in larger elementary subgroups).
+
+<#Include Label="MaximalNonCyclicElementarySubgroups">
+<#Include Label="InducedFromElementary">
+
+The following two functions try to find the fusion with fewer class
+identifications,  respectively provide an iterator for the irreducible
+characters of an elementary subgroup.  This can be useful in cases where
+elementary subgroups have a huge number of conjugacy classes.
+
+<#Include Label="FusionElementaryCCTable">
+<#Include Label="InductionDataFromElementaryCCTable">
+
+</Section>
+
+<!-- ############################################################ -->
+<Section Label="Sect-LLL">
+<Heading>Some utilities for integer matrices</Heading>
+
+This package uses a variant of the LLL algorithm to find the irreducible
+characters from another integral basis of the lattice of generalized 
+characters. And there are functions to compute Hermite normal forms and 
+inverses of unimodular matrices.
+<P/>
+There are variants of these functions written in &GAP;. But we also 
+provide variants which use standalone programs which need to be compiled
+during installation. These depend on the FLINT library, see
+<Cite Key="FLINT"/>. These standalone programs use several threads. The
+number of these threads is configured in the variable <C>NRFlintThreads</C>,
+it defaults to <C>8</C> (but you can change it, depending on the number
+of cores of your machine).
+<P/>
+
+<#Include Label="HermiteIntMat">
+<#Include Label="PermutedFractionFreeIntegerGaussPositiveDefinite">
+<#Include Label="InverseUnimodularMat">
+<#Include Label="LLLTransformUnimodularGram">
+
+</Section>
+
+</Chapter>
+
+<!-- ############################################################ -->
+<Chapter Label="Chap-CCTable">
+<Heading>Computing character tables with <Package>CCTab</Package></Heading>
+
+An <Ref Filt="IsCCTable"/> object is the central data structure used by this
+package to incrementally collect information about the generalized and
+irreducible characters of a finite group, using an induce-reduce algorithm.
+
+<Section Label="Sect-CCTable-Basic">
+<Heading>The <Ref Filt="IsCCTable"/> object</Heading>
+
+<#Include Label="CCTable">
+<#Include Label="EncodeForCCTable">
+<#Include Label="ImportToCCTable">
+<#Include Label="UpdateHNFCCTable">
+<#Include Label="HasFullRankCCTable">
+<#Include Label="FindIndexCCTable">
+<#Include Label="ImportInducedFromAllMaximalCyclicToCCTable">
+<#Include Label="FindIrreduciblesInFullLattices">
+<#Include Label="IrrCCTableHNF">
+
+Finally, we document a utility function for adjusting the 
+Hermite normal form of an integer by adding a further vector
+to the lattices spanned by its rows.
+
+<#Include Label="AddVectorToHNF">
+
+</Section>
+
+<!-- ############################################################ -->
+<Section Label="Sect-ScalarProducts">
+<Heading>Scalar products</Heading>
+
+<#Include Label="CCTScalarProduct">
+
+</Section>
+
+<!-- ############################################################ -->
+<Section Label="Sect-SplitByCentre">
+<Heading>Splitting by the centre</Heading>
+
+<#Include Label="SplitByCentre">
+<#Include Label="SplitCharacterByCentre">
+
+</Section>
+
+<!-- ############################################################ -->
+<Section Label="Sect-NaturalCharacters">
+<Heading>Natural characters</Heading>
+
+<#Include Label="NaturalCharacters">
+
+</Section>
+
 
 </Chapter>
 

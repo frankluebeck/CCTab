@@ -1,6 +1,13 @@
+###########################################################################
+##  LLL.gi
+##  
+##  (C) 2026 Frank Lübeck, Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen
+##  
+##  Utilities for LLL reduction of integer lattices.
+##  
 
 # utilities:utilities:  symmetric mod for integer a and positive integer b
-SMod := function(a, b)
+BindGlobal("SMod", function(a, b)
   local res;
   res := a mod b;
   if 2*res > b then
@@ -8,21 +15,17 @@ SMod := function(a, b)
   else
     return res;
   fi;
-end;
-SModList := function(l, b)
+end);
+BindGlobal("SModList", function(l, b)
   if IsList(l) then
     return List(l, a-> SModList(a, b));
   fi;
   return SMod(l, b);
-end;
-
-# Configure number of threads for various standalone programs below which 
-# use the FLINT library and several threads.
-NRFlintThreads := 8;
+end);
 
 # Print integer matrix in format read by the FLINT function
 # read_fmpz_mat()
-PrintIntegerMatToFlint := function(fname, mat)
+BindGlobal("PrintIntegerMatToFlint", function(fname, mat)
   local fu;
   fu := function()
     local r, x;
@@ -35,11 +38,11 @@ PrintIntegerMatToFlint := function(fname, mat)
     Print( "\n\n" );
   end;
   PrintTo1(fname, fu);
-end;
+end);
 
 # Interface to Hermite normal form functions in FLINT
 TMPRES9676895304721 := fail;
-HNFThreaded := function(mat)
+BindGlobal("HNFThreaded", function(mat)
   local prg, str, out, inp, res;
   prg := Filename(DirectoriesPackagePrograms("CCTab"), "hnfintmat");
   if prg = fail then
@@ -62,11 +65,27 @@ HNFThreaded := function(mat)
   res := TMPRES9676895304721.hnf;
   Unbind(TMPRES9676895304721);
   return res;
-end;
+end);
+##  <#GAPDoc Label="HermiteIntMat">
+##  <ManSection>
+##  <Func Name="HermiteIntMat" Arg="mat"/>
+##  <Returns>an integer matrix</Returns>
+##  <Description>
+##  Returns the Hermite normal form of the integer matrix <A>mat</A>.
+##  The &GAP; variant is just <Ref BookName="Reference" 
+##  Func="HermiteNormalFormIntegerMat"/>,
+##  the standalone variant essentially uses <C>fmpz_mat_hnf</C> from FLINT.
+##  <Example>
+##  gap> HermiteIntMat(RandomUnimodularMat(4));
+##  [ [ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 1, 0 ], [ 0, 0, 0, 1 ] ]
+##  </Example>
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
 if Filename(DirectoriesPackagePrograms("CCTab"), "hnfintmat") <> fail then
-  HermiteIntMat := HNFThreaded;
+  BindGlobal("HermiteIntMat", HNFThreaded);
 else
-  HermiteIntMat := HermiteNormalFormIntegerMat;
+  BindGlobal("HermiteIntMat", HermiteNormalFormIntegerMat);
 fi;
 
 # A: square symmetric positive definite matrix
@@ -77,7 +96,7 @@ fi;
 # left ixi submatrix, that is the i-th principal minor).
 # This is the transpose of the mu-matrix in classical LLL,
 # i-th row multiplied by principal i x i-minor d_i.
-PermutedFractionFreeIntegerGaussPositiveDefinite_GAP := function(A)
+BindGlobal("PermutedFractionFreeIntegerGaussPositiveDefinite_GAP", function(A)
   local n, z, perm, d, kk, q, a, piv, ai, i, j, k, res;
   A := List(A, ShallowCopy);
   n := Length(A);
@@ -134,11 +153,11 @@ PermutedFractionFreeIntegerGaussPositiveDefinite_GAP := function(A)
     d := A[k,k];
   od;
   return [A, PermList(perm)^-1];
-end;
+end);
 
 # multithreaded standalone version of the previous function 
 TMPRES774684629486 := fail;
-PFFIGThreaded := function(gr)
+BindGlobal("PFFIGThreaded", function(gr)
   local prg, str, inp, res, out;
   prg := Filename(DirectoriesPackagePrograms("CCTab"), "pffgintmat_threads");
   if prg = fail then
@@ -160,18 +179,45 @@ PFFIGThreaded := function(gr)
   res := [TMPRES774684629486.A, PermList(TMPRES774684629486.perm)^-1];
   Unbind(TMPRES774684629486);
   return res;
-end;
+end);
+##  <#GAPDoc Label="PermutedFractionFreeIntegerGaussPositiveDefinite">
+##  <ManSection>
+##  <Func Name="PermutedFractionFreeIntegerGaussPositiveDefinite" Arg="A"/>
+##  <Returns>a list <C>[ B, perm ]</C></Returns>
+##  <Description>
+##  Here <A>A</A> must be a square, symmetric, positive definite integer
+##  matrix. This function computes a fraction free Gauss elimination of
+##  <A>A</A>, together with a permutation <C>perm</C> of the rows and
+##  columns of <A>A</A>, such that the diagonal entries of the resulting
+##  matrix <C>B</C> are minimal (the <M>i</M>-th diagonal entry of
+##  <C>B</C> is the determinant of the upper left <M>i \times i</M>
+##  submatrix of the permuted <A>A</A>, that is, its <M>i</M>-th principal
+##  minor).
+##  <P/>
+##  Remark: The matrix <C>B</C> is the transpose of the <M>\mu</M>-matrix in
+##  classical LLL, with its <M>i</M>-th row multiplied by the <M>i</M>-th
+##  principal minor <M>d_i</M>.
+##  <Example>
+##  gap> A := [ [ 9, -3, 1, -2 ], [ -3, 3, 1, 1 ], [ 1, 1, 13, -2 ],
+##  >   [ -2, 1, -2, 5 ] ];;
+##  gap> PermutedFractionFreeIntegerGaussPositiveDefinite(A);
+##  [ [ [ 3, 1, -3, 1 ], [ 0, 14, -3, -7 ], [ 0, 0, 81, 21 ],
+##        [ 0, 0, 0, 900 ] ], (1,3,4,2) ]
+##  </Example>
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
 if Filename(DirectoriesPackagePrograms("CCTab"), "pffgintmat_threads") <>
                                       fail then
-  PermutedFractionFreeIntegerGaussPositiveDefinite := PFFIGThreaded;
+  BindGlobal("PermutedFractionFreeIntegerGaussPositiveDefinite", PFFIGThreaded);
 else
-  PermutedFractionFreeIntegerGaussPositiveDefinite := 
-            PermutedFractionFreeIntegerGaussPositiveDefinite_GAP;
+  BindGlobal("PermutedFractionFreeIntegerGaussPositiveDefinite",
+            PermutedFractionFreeIntegerGaussPositiveDefinite_GAP);
 fi;
 
 
 # a simplified version of InverseRatMat
-InverseUnimodularMat_GAP := function(m)
+BindGlobal("InverseUnimodularMat_GAP", function(m)
   local p, mi, n, null, res, v, pi, r, x, i;
   p := 251;
   mi := Z(p)^0*m;
@@ -194,10 +240,10 @@ InverseUnimodularMat_GAP := function(m)
     Add(res, r);
   od;
   return res;
-end;
+end);
 # standalone version of function above using FLINT and multiple threads
 TMPRES897966487097 := fail;
-InvUniThreaded := function(mat)
+BindGlobal("InvUniThreaded", function(mat)
   local prg, str, inp, res, out;
   prg := Filename(DirectoriesPackagePrograms("CCTab"), "invuni_threads");
   if prg = fail then
@@ -220,11 +266,31 @@ InvUniThreaded := function(mat)
   res := TMPRES897966487097.invmat;
   Unbind(TMPRES897966487097);
   return res;
-end;
+end);
+##  <#GAPDoc Label="InverseUnimodularMat">
+##  <ManSection>
+##  <Func Name="InverseUnimodularMat" Arg="A"/>
+##  <Returns>an integer matrix</Returns>
+##  <Description>
+##  Here <A>A</A> must be a unimodular integer matrix (that is, a square
+##  integer matrix with determinant <M>\pm 1</M>). This function returns
+##  the inverse of <A>A</A>, which again is an integer matrix.
+##  <P/>
+##  This is a simplified variant of <Ref BookName="EDIM"
+##  Func="InverseRatMat"/>, based on a <M>p</M>-adic lifting approach.
+##  <Example>
+##  gap> A := RandomUnimodularMat(5);;
+##  gap> A * InverseUnimodularMat(A);
+##  [ [ 1, 0, 0, 0, 0 ], [ 0, 1, 0, 0, 0 ], [ 0, 0, 1, 0, 0 ],
+##    [ 0, 0, 0, 1, 0 ], [ 0, 0, 0, 0, 1 ] ]
+##  </Example>
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
 if Filename(DirectoriesPackagePrograms("CCTab"), "invuni_threads") <> fail then
-  InverseUnimodularMat := InvUniThreaded;
+  BindGlobal("InverseUnimodularMat", InvUniThreaded);
 else
-  InverseUnimodularMat := InverseUnimodularMat_GAP;
+  BindGlobal("InverseUnimodularMat", InverseUnimodularMat_GAP);
 fi;
 
 
@@ -241,7 +307,7 @@ fi;
 # swaps in parallel; this is implemented in the standalone program for
 # this algorithm
 # 
-LLLTransformUnimodularGram_GAP := function(gr)
+BindGlobal("LLLTransformUnimodularGram_GAP", function(gr)
   local n, a, max, M, T, HH, ModSubtractRow, ModSwitchRow, 
         dd, ddM, lovasz, k, klist, qlist, x, d, mat, v, H, i, j;
   n := Length(gr);
@@ -420,12 +486,11 @@ LLLTransformUnimodularGram_GAP := function(gr)
     v[i] := 0;
   od;
   return H;
-end;
+end);
 
 # a multithreaded variant of the previous GAP function
-NRFlintThreads := 8;
 TMPRES03695464 := fail;
-LLLTUGIT := function(gr)
+BindGlobal("LLLTUGIT", function(gr)
   local n, prg, str, out, inp, res, HH, mat, v, H, i;
   n := Length(gr);
   prg := Filename(DirectoriesPackagePrograms("CCTab"), "lll_modular_threads");
@@ -448,11 +513,34 @@ LLLTUGIT := function(gr)
   H := TMPRES03695464.H;
   Unbind(TMPRES03695464);
   return H;
-end;
+end);
 
+##  <#GAPDoc Label="LLLTransformUnimodularGram">
+##  <ManSection>
+##  <Func Name="LLLTransformUnimodularGram" Arg="gr"/>
+##  <Returns>a unimodular integer matrix</Returns>
+##  <Description>
+##  Here <A>gr</A> must be a symmetric, positive definite integer matrix
+##  (a Gram matrix). This function returns a unimodular integer matrix
+##  <C>H</C> such that <C>H * gr * TransposedMat(H)</C> is the identity
+##  matrix.
+##  <P/>
+##  The algorithm is similar to the modular variant of the LLL-algorithm
+##  described in <Cite Key="Sto96"/>, but here the main loop is parallelized.
+##  <Example>
+##  gap> A := RandomUnimodularMat(5);;
+##  gap> gr := A * TransposedMat(A);;
+##  gap> h := LLLTransformUnimodularGram(gr);;
+##  gap> h * gr * TransposedMat(h);
+##  [ [ 1, 0, 0, 0, 0 ], [ 0, 1, 0, 0, 0 ], [ 0, 0, 1, 0, 0 ],
+##    [ 0, 0, 0, 1, 0 ], [ 0, 0, 0, 0, 1 ] ]
+##  </Example>
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
 if Filename(DirectoriesPackagePrograms("CCTab"), "lll_modular_threads") <>
                                               fail then
-  LLLTransformUnimodularGram := LLLTUGIT;
+  BindGlobal("LLLTransformUnimodularGram", LLLTUGIT);
 else
-  LLLTransformUnimodularGram := LLLTransformUnimodularGram_GAP;
+  BindGlobal("LLLTransformUnimodularGram", LLLTransformUnimodularGram_GAP);
 fi;

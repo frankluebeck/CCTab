@@ -211,7 +211,7 @@ end);
 ##  <#GAPDoc Label="InduceAllFromCyclicSubgroup">
 ##  <ManSection>
 ##  <Func Name="InduceAllFromCyclicSubgroup" Arg="G, i"/>
-##  <Func Name="InduceAllFromCyclicSubgroup" Arg="CCT, i"/>
+##  <Func Name="InduceAllFromCyclicSubgroup" Label="forCCTable" Arg="CCT, i"/>
 ##  <Returns>a list of row vectors of cyclotomic numbers</Returns>
 ##  <Description>
 ##  In the first form <A>G</A> is a group. In the second form <A>CCT</A>
@@ -335,7 +335,7 @@ end);
 ##  <#GAPDoc Label="InducedFromAllMaximalCyclicSubgroups">
 ##  <ManSection>
 ##  <Func Name="InducedFromAllMaximalCyclicSubgroups" Arg="G"/>
-##  <Returns>a list of row vectors of cyclotomic numbers</Returns>
+##  <Returns>a list of lists of cyclotomic numbers</Returns>
 ##  <Description>
 ##  Returns the set of all characters of <A>G</A> induced from irreducible
 ##  characters of the maximal cyclic subgroups of <A>G</A>, computed via
@@ -490,7 +490,7 @@ end);
 ##  <Returns>a list of records</Returns>
 ##  <Description>
 ##  Returns a list of records, one for each rational class of <A>G</A>
-##  (see <Ref Attr="RationalClassSets"/>), in the same order. This
+##  (in the same order as <Ref Attr="RationalClassSets"/>(<A>G</A>)). This
 ##  collects detailed information about the classes, used, for example,
 ##  to encode character values in an <Ref Filt="IsCCTable"/> object via
 ##  <Ref Func="EncodeForCCTable"/>.
@@ -684,7 +684,7 @@ end);
 ##  <#GAPDoc Label="PowerMapCharacters">
 ##  <ManSection>
 ##  <Func Name="PowerMapCharacters" Arg="G, n"/>
-##  <Returns>a list of row lists of integers</Returns>
+##  <Returns>a list of lists of integers</Returns>
 ##  <Description>
 ##  This function returns a list of class functions on the finite group <A>G</A>
 ##  (as lists of values in the order of the conjugacy classes in <A>G</A>), 
@@ -748,7 +748,7 @@ end);
 ##  <#GAPDoc Label="SmallPowerMapCharacters">
 ##  <ManSection>
 ##  <Func Name="SmallPowerMapCharacters" Arg="G"/>
-##  <Returns>a list of row vectors of integers</Returns>
+##  <Returns>a list of lists of integers</Returns>
 ##  <Description>
 ##  Applies <Ref Func="PowerMapCharacters"/> for a selection of divisors
 ##  <M>n</M> of <M>|<A>G</A>|</M> that are large (so that the value

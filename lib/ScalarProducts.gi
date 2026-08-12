@@ -47,7 +47,7 @@ end);
 ##  <#GAPDoc Label="CCTScalarProduct">
 ##  <ManSection>
 ##  <Func Name="CCTScalarProduct" Arg="CCT, c, d"/>
-##  <Returns>a rational number</Returns>
+##  <Returns>an integer</Returns>
 ##  <Description>
 ##  Let <A>CCT</A> be an <Ref Filt="IsCCTable"/> object, and let <A>c</A>
 ##  and <A>d</A> be two generalized characters of <A>CCT</A>, encoded as
@@ -62,7 +62,7 @@ end);
 ##  <C>IsBound(CCTScalarProductInternal2);</C>.
 ##  <P/>
 ##  Note that this function cannot be used for arbitrary class functions,
-##  only for class functions which are rational linear combinations of
+##  it only works for class functions which are rational linear combinations of
 ##  irreducible characters.
 ##  <Example>
 ##  gap> G := AlternatingGroup(5);;

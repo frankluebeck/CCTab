@@ -1,4 +1,58 @@
+###########################################################################
+##  SplitByCentre.gi
+##  
+##  (C) 2026 Frank Lübeck, Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen
+##  
+##  Orthogonal decomposition of the lattice of generalized characters
+##  according to the characters of (a subgroup of) the center.
+##  
 
+##  <#GAPDoc Label="SplitByCentre">
+##  <ManSection>
+##  <Oper Name="SplitByCentre" Arg="CCT"/>
+##  <Meth Name="SplitByCentre" Label="withZ" Arg="CCT, zind"/>
+##  <Filt Name="HasSplittingCentre" Arg="CCT"/>
+##  <Attr Name="SplittingCentre" Arg="CCT"/>
+##  <Description>
+##  Let <A>CCT</A> be an <Ref Filt="IsCCTable"/> object of a group
+##  <M>G</M>. In the second form, <A>zind</A> must be a list of numbers of
+##  conjugacy classes of <A>G</A> forming a subgroup <M>Z</M> of the
+##  center of <M>G</M> (with the class of the
+##  identity first). In the first form, <A>zind</A> is computed as the set
+##  of classes of length <M>1</M>, that is the full centre of <M>G</M>.
+##  <P/>
+##  Each irreducible character of <A>G</A> restricted to <M>Z</M> is 
+##  a multiple of an irreducible character of <M>Z</M> (Schur's Lemma).
+##  We get an orthogonal decomposition of the lattice of generalized
+##  characters into sublattices spanned by irreducible characters whose 
+##  restrictions to <M>Z</M> are multiples of the same irreducible
+##  character. <Ref Oper="SplitByCentre"/>  computes a data structure 
+##  which allows to
+##  split any generalized character according to this decomposition.
+##  We only need to store class functions for one character of <M>Z</M>
+##  per Galois orbit (the others can be computed by 
+##  <Ref BookName="Reference" Oper="GaloisCyc"/>).
+##  <P/>
+##  This splitting is applied to all generalized characters already
+##  stored in <A>CCT</A> and to all generalized characters which are
+##  imported afterwards.
+##  <P/>
+##  After a successful call with non-trivial <M>Z</M> 
+##  the filter <Ref Filt="HasSplittingCentre"/>
+##  is set in <A>CCT</A> and the attribute
+##  <Ref Attr="SplittingCentre"/> of <A>CCT</A> is set to <A>zind</A>.
+##  <Example>
+##  gap> G := SL(4,5);;
+##  gap> CCT := CCTable(G);;
+##  gap> SplitByCentre(CCT);
+##  gap> HasSplittingCentre(CCT);
+##  true
+##  gap> SplittingCentre(CCT);
+##  [ 1, 10, 19, 28 ]
+##  </Example>
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
 
 # do nothing if splitting centre is already installed
 InstallMethod(SplitByCentre, ["IsCCTable and HasSplittingCentre"],
@@ -102,11 +156,44 @@ function(CCT, zind)
   ImportToCCTable(CCT, known);
 end);
 
+##  <#GAPDoc Label="SplitCharacterByCentre">
+##  <ManSection>
+##  <Oper Name="SplitCharacterByCentre" Arg="CCT, ch"/>
+##  <Oper Name="SplitEncodedCharacterByCentre" Arg="CCT, ech"/>
+##  <Returns>a list of (encoded) characters</Returns>
+##  <Description>
+##  Let <A>CCT</A> be an <Ref Filt="IsCCTable"/> object with
+##  <C>HasSplittingCentre(CCT) = </C><K>true</K>.
+##  In the first form let
+##  <A>ch</A> be a generalized character of the underlying group, given
+##  by a list of values on <E>all</E> conjugacy classes (not encoded as by
+##  <Ref Func="EncodeForCCTable"/>). In the second form <A>ech</A> is a
+##  character endoded for <A>CCT</A>. This function decomposes the character
+##  according to the splitting centre (see <Ref Oper="SplitByCentre"/>).
+##  <Example>
+##  gap> G := SmallGroup(96, 14);;
+##  gap> CCT := CCTable(G);;
+##  gap> SplitByCentre(CCT);
+##  gap> U := TrivialSubgroup(G);;
+##  gap> reg := InducedClassFunction(TrivialCharacter(U), G);;
+##  gap> SplitCharacterByCentre(CCT, reg);
+##  [ [ 24, 0, 0, 24, 0, 24, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0,
+##        0, 0, 0, 0 ],
+##    [ 24, 0, 0, -24, 0, 24, 0, 0, 0, 0, 0, 0, 0, -24, 0, 0, 0, 0, 0, 0,
+##        0, 0, 0, 0 ],
+##    [ 24, 0, 0, 24, 0, -24, 0, 0, 0, 0, 0, 0, 0, -24, 0, 0, 0, 0, 0, 0,
+##        0, 0, 0, 0 ],
+##    [ 24, 0, 0, -24, 0, -24, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0,
+##        0, 0, 0, 0 ] ]
+##  </Example>
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
 # in general characters of centre involve cyclotomics
 # we do the splitting with the expanded character
-# 
+#
 
-InstallMethod(SplitCharacterByCentre, 
+InstallMethod(SplitCharacterByCentre,
               [IsCCTable and HasSplittingCentre, IsList], 
 function(CCT, ech)
   local zchars, nch, inv, zmaps, zind, reps, zgal, res, pos, coeffs, i, a;

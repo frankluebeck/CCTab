@@ -9,7 +9,10 @@ else
   relpath:="../../..";
 fi;
 LoadPackage("GAPDoc");
-MakeGAPDocDoc("doc", "cctab", ["../lib/PowerMaps.gi"], "CCTab", relpath, "MathJax");
+MakeGAPDocDoc("doc", "cctab", ["../lib/PowerMaps.gi", "../lib/Elementary.gi",
+    "../lib/PositionConjugacyClass.gi", "../lib/ScalarProducts.gi",
+    "../lib/SomeCharacters.gi", "../lib/SplitByCentre.gi",
+    "../lib/CCTable.gi", "../lib/LLL.gi"], "CCTab", relpath, "MathJax");
 GAPDocManualLab("CCTab");
 CopyHTMLStyleFiles("doc");
 QUIT;

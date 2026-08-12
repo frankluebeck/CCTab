@@ -105,8 +105,8 @@ end);
 ##  <#GAPDoc Label="InducedFromElementary">
 ##  <ManSection>
 ##  <Func Name="InducedFromElementary" Arg="G, i, p[, opts...]"/>
-##  <Func Name="InducedFromElementary" Arg="CCT, i, p[, opts...]"/>
-##  <Returns>a list of row vectors of cyclotomic numbers, or an integer</Returns>
+##  <Func Name="InducedFromElementary" Label="forCCTable" Arg="CCT, i, p[, opts...]"/>
+##  <Returns>a list of lists of cyclotomic numbers, or an integer</Returns>
 ##  <Description>
 ##  In the first form <A>G</A> is a group, in the second form
 ##  <A>CCT</A> is an <Ref Filt="IsCCTable"/> object of a group <A>G</A>. Let
@@ -129,9 +129,9 @@ end);
 ##  <Item>only the characters induced from the non-linear irreducible
 ##  characters of <M>E</M> are computed</Item>
 ##  <Mark>a positive integer <A>max</A></Mark>
-##  <Item>if the number of conjugacy classes of <M>E</M> 
-##  is larger than <A>max</A>, no characters are computed and this
-##  number is returned instead (this can be used to skip elementary
+##  <Item>if the number of conjugacy classes of <M>E</M>, say <M>k</M>, 
+##  is larger than <A>max</A>, no characters are computed and <M>k</M>
+##  is returned instead (this can be used to skip elementary
 ##  subgroups that would be too expensive to handle)</Item>
 ##  </List>
 ##  <Example>

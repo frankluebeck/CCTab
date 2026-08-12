@@ -21,6 +21,49 @@
 ##                               |G|_p chi(x) for x p-regular
 ##  
 
+##  <#GAPDoc Label="NaturalCharacters">
+##  <ManSection>
+##  <Attr Name="NaturalCharacters" Arg="G"/>
+##  <Returns>a list of characters</Returns>
+##  <Description>
+##  Returns a list of characters of the finite group <A>G</A> derived from
+##  the way <A>G</A> is represented, these are ususally cheap to
+##  compute. The following cases are handled:
+##  <List>
+##  <Mark>permutation groups</Mark>
+##  <Item>the permutation characters on the orbits of moved points, minus
+##  the trivial character</Item>
+##  <Mark>matrix groups in characteristic zero</Mark>
+##  <Item>the character of traces of the elements</Item>
+##  <Mark>matrix groups over finite fields</Mark>
+##  <Item>the permutation characters on the non-zero vectors of the
+##  natural module (over the field of definition and over its quadratic
+##  extension), and on the one-dimensional subspaces of the natural
+##  module</Item>
+##  <Mark>otherwise</Mark>
+##  <Item>the regular character of <A>G</A></Item>
+##  </List>
+##  <Example><![CDATA[
+##  gap> NaturalCharacters(AlternatingGroup(5));
+##  [ Character( CharacterTable( Alt( [ 1 .. 5 ] ) ),
+##    [ 4, 0, 1, -1, -1 ] ) ]
+##  gap> NaturalCharacters(SL(3,5));
+##  [ Character( CharacterTable( SL(3,5) ),
+##    [ 124, 4, 4, 0, 0, 4, 24, 4, 4, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+##        0, 0, 0, 0, 0, 0, 0, 0, 0 ] ),
+##    Character( CharacterTable( SL(3,5) ),
+##    [ 15624, 24, 24, 0, 0, 24, 624, 24, 24, 0, 0, 24, 0, 0, 0, 0, 0, 0,
+##        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ),
+##    Character( CharacterTable( SL(3,5) ),
+##    [ 30, 6, 0, 6, 6, 2, 5, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, -1,
+##        -1, -1, -1, -1, -1, -1, -1, -1, -1 ] ) ]
+##  gap> NaturalCharacters(SmallGroup(24,4));
+##  [ Character( CharacterTable( <pc group of size 24 with
+##      4 generators> ), [ 24, 0, 0, 0, 0, 0, 0, 0, 0 ] ) ]
+##  ]]></Example>
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
 # fallback
 InstallMethod(NaturalCharacters, ["IsGroup"], function(G)
   local t, ch;
