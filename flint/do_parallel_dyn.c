@@ -11,8 +11,13 @@
 
 /*  ====================================================================== */
 // dynamic variant of flint_parallel_do
-slong next_i;
-pthread_mutex_t mutex;
+//
+// Note that 'mutex' must be initialized explicitly: with glibc a zero filled
+// pthread_mutex_t happens to be the same as PTHREAD_MUTEX_INITIALIZER, but
+// on other systems (e.g. macOS) it is not, and there pthread_mutex_lock()
+// then fails with EINVAL and does not lock anything at all.
+static slong next_i;
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 typedef struct
 {
