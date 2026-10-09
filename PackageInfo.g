@@ -9,8 +9,8 @@ SetPackageInfo( rec(
 
 PackageName := "CCTab",
 Subtitle := "Constructing character tables",
-Version := "0.4",
-Date := "08/10/2026",
+Version := "0.4.dev",
+Date := "09/10/2026",
 License := "GPL-3.0-or-later",
 
 Persons := [
@@ -35,7 +35,7 @@ PackageWWWHome :="https://www.math.rwth-aachen.de/~Frank.Luebeck/gap/CCTab/",
 
 PackageInfoURL := Concatenation( ~.PackageWWWHome, "PackageInfo.g" ),
 README_URL     := Concatenation( ~.PackageWWWHome, "README.md" ),
-ArchiveURL     := Concatenation( ~.PackageWWWHome, "CCTab-0.4"),
+ArchiveURL     := Concatenation( ~.PackageWWWHome, "CCTab-0.4.dev"),
 
 ArchiveFormats := ".tar.gz",
 
