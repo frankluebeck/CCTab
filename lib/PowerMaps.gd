@@ -3,7 +3,7 @@
 ##  
 ##  (C) 2025 Frank Lübeck, Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen
 ##  
-##  These files contains functions to find all power maps of the conjugacy
+##  These files contain functions to find all power maps of the conjugacy
 ##  classes of a finite group.
 ##  
 

@@ -3,7 +3,7 @@
 ##  
 ##  (C) 2025 Frank Lübeck, Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen
 ##  
-##  These files contains functions to compute the scalar products of
+##  These files contain functions to compute the scalar products of
 ##  generalized characters (Z-linear combinations of irreducible characters) 
 ##  of a finite group (also works for Q-linear combinations).
 ##  
@@ -56,10 +56,10 @@ end);
 ##  <P/>
 ##  This is used as the method for <Ref BookName="Reference"
 ##  Oper="ScalarProduct"/> for characters of an <Ref Filt="IsCCTable"/>
-##  object. The <Package>CCTab</Package> also provides faster
+##  object. The <Package>CCTab</Package> package also provides faster
 ##  implementations of this function as kernel extension. (It can be checked
 ##  if this is installed with 
-##  <C>IsBound(CCTScalarProductInternal2);</C>.
+##  <C>IsBound(CCTScalarProductInternal2);</C>.)
 ##  <P/>
 ##  Note that this function cannot be used for arbitrary class functions,
 ##  it only works for class functions which are rational linear combinations of

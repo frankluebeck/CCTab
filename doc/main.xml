@@ -21,13 +21,13 @@ To install this package first unpack it inside some GAP root directory
 in the subdirectory <F>pkg</F> (see 
 <Ref Sect="Installing a GAP Package" BookName="Reference"/>). Then
 the <Package>CCTab</Package> package can already be loaded and used.
-But we strongly recommend to compile a kernel function and some standalone
+But we strongly recommend compiling a kernel function and some standalone
 programs as well during installation. This will speed up some computations.
 
 The standalone programs assume that the library files and header files of the
 <Package>FLINT</Package> library are installed. If this is not yet the case,
 install them
-first via your operating systems package manager (package <C>libflint-dev</C> 
+first via your operating system's package manager (package <C>libflint-dev</C> 
 or similar), or directly from <URL>https://flintlib.org/</URL>.
 
 To install the extra functions  go to  the  directory  <F>pkg/CCTab-...</F>
@@ -144,7 +144,7 @@ conjugate to <M>x_j</M>.
 Let <M>x</M> be an element of order <M>m</M> in a group <M>G</M>.
 The <E>rational class</E> of <M>x</M> is the union of the conjugacy classes
 of all elements which generate the same cyclic subgroup of <M>G</M>
-as <M>x</M> (that is, of all <M>x^i</M> with <M>\gcd(i, m) = 1)</M>.
+as <M>x</M> (that is, of all <M>x^i</M> with <M>\gcd(i, m) = 1</M>).
 
 <#Include Label="PowerMapsOfAllClasses">
 <#Include Label="RationalClassSets">
@@ -236,8 +236,8 @@ irreducible characters of a finite group, using an induce-reduce algorithm.
 <#Include Label="IrrCCTableHNF">
 
 Finally, we document a utility function for adjusting the 
-Hermite normal form of an integer by adding a further vector
-to the lattices spanned by its rows.
+Hermite normal form of an integer matrix by adding a further vector
+to the lattice spanned by its rows.
 
 <#Include Label="AddVectorToHNF">
 

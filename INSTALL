@@ -3,13 +3,13 @@
 The CCTab package can be used by just unpacking the archive in some
 GAP /pkg directory.
 
-But we strongly recommend to compile a kernel function and some standalone
+But we strongly recommend compiling a kernel function and some standalone
 programs as well during installation. This will speed up some computations.
 
 The standalone programs assume that the library files and header files of the
 FLINT library are installed. If this is not yet the case, install them
-first via your operating systems package manager (package <C>libflint-dev</C> 
-or similar), or directly from <URL>https://flintlib.org/</URL>.
+first via your operating system's package manager (package 'libflint-dev'
+or similar), or directly from https://flintlib.org/.
 
 To install the extra functions  go to  the  directory pkg/CCTab-...
 or pkg/cctab/ to which the package was extracted and call:
@@ -23,7 +23,7 @@ If the FLINT library is not installed in a place where
 the compiler finds it by itself, and it is not known to 'pkg-config'
 either, you can specify its location with:
 
-    bin/sh ./configure --with-gaproot=path --with-flint=prefix
+    /bin/sh ./configure --with-gaproot=path --with-flint=prefix
 
 where the header files are expected in 'prefix/include' and the
 libraries in 'prefix/lib'. Use '--without-flint' to skip the
@@ -31,7 +31,7 @@ standalone programs altogether; the package then still works, but some
 computations are slower. Call ./configure --help for the complete
 list of options.
 
-The compiler and the compiler flags can be overwritten, either in the
+The compiler and the compiler flags can be overridden, either in the
 environment or as arguments of 'configure', for example:
 
     /bin/sh ./configure CC=clang CFLAGS="-O2 -g"

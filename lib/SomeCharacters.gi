@@ -1,15 +1,15 @@
 ###########################################################################
-##  SomeCharacters.gd
+##  SomeCharacters.gi
 ##  
 ##  (C) 2025 Frank Lübeck, Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen
 ##  
-##  These files contains functions to compute some (generalized) characters
+##  These files contain functions to compute some (generalized) characters
 ##  of finite groups (some derived from already known ones).
 ##  
 ##  NaturalCharacters(G) depending on the representation of the group:
 ##      permutation groups: permutation characters on orbits of points minus
 ##              trivial
-##      matrix groups in charactistic zero: traces of elements
+##      matrix groups in characteristic zero: traces of elements
 ##      matrix groups over finite fields: permutation characters 
 ##              on non-zero vectors over field and quadratic extension and
 ##              on one dimensional subspaces
@@ -27,7 +27,7 @@
 ##  <Returns>a list of characters</Returns>
 ##  <Description>
 ##  Returns a list of characters of the finite group <A>G</A> derived from
-##  the way <A>G</A> is represented, these are ususally cheap to
+##  the way <A>G</A> is represented, these are usually cheap to
 ##  compute. The following cases are handled:
 ##  <List>
 ##  <Mark>permutation groups</Mark>
@@ -214,7 +214,7 @@ function(chi, p)
       Add(ch, q*chi[i]);
     fi;
   od;
-  # return original character if is was 0 on p-regular classes
+  # return original character if it was 0 on p-regular classes
   if q*chi = ch then
     ch := chi;
   fi;

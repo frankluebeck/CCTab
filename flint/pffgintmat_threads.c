@@ -70,7 +70,7 @@ long * fractionfreegausswithpermutation()
   perm = (long*) malloc(n*sizeof(long));
   for (k=0; k<n; k++) perm[k] = k;
 
-  // zero-th determinnat is 1
+  // zero-th determinant is 1
   fmpz_init_set_si(d, 1);
   
   for(k=0; k<n; k++) {
@@ -82,11 +82,11 @@ long * fractionfreegausswithpermutation()
       }
     }
     if (k != kk) {
-      // swap rows and colums k and kk
+      // swap rows and columns k and kk
       fmpz_mat_swap_rows(A, NULL, k, kk);
       fmpz_mat_swap_cols(A, perm, k, kk);
     }
-    //  we parallelize the folling loop
+    //  we parallelize the following loop
     //   for(r=0; r<n-1-k; r++) {
     //     worker(r, (void*)(&k));
     //   }
