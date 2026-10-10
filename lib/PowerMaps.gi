@@ -272,7 +272,6 @@ end);
 ##  <Ref Attr="RationalClassSets"/> (i.e., conjugacy classes belonging to
 ##  the same rational class share one entry).
 ##  <Example>gap> G := AlternatingGroup(5);;
-##  gap> G := AlternatingGroup(5);;
 ##  gap> T := CCTable(G);;
 ##  gap> InduceAllFromCyclicSubgroup(G, 4);
 ##  [ [ 12, 0, 0, 2, 2 ], [ 12, 0, 0, E(5)+E(5)^4, E(5)^2+E(5)^3 ], 
@@ -384,7 +383,6 @@ end);
 ##  <Ref Func="InduceAllFromCyclicSubgroup"/>. These characters always span
 ##  the vector space of class functions on <A>G</A>.
 ##  <Example>gap> G := AlternatingGroup(5);;
-##  gap> G := AlternatingGroup(5);;
 ##  gap> indcyc := InducedFromAllMaximalCyclicSubgroups(G);
 ##  [ [ 12, 0, 0, 2, 2 ], [ 12, 0, 0, E(5)^2+E(5)^3, E(5)+E(5)^4 ], 
 ##    [ 12, 0, 0, E(5)+E(5)^4, E(5)^2+E(5)^3 ], [ 20, 0, -1, 0, 0 ], 
@@ -601,7 +599,6 @@ end);
 ##  are left out. (This data structure is used by a fast function for
 ##  computing scalar products of generalized characters.)
 ##  <Example>gap> G := AlternatingGroup(5);;
-##  gap> G := AlternatingGroup(5);;
 ##  gap> rci := RationalClassesInfo(G);;
 ##  gap> rci[2];
 ##  rec( classes := [ 2 ], classlen := 15, conductor := 1, 
@@ -796,7 +793,6 @@ end);
 ##  pattern of zero entries are reduced to the one with (componentwise)
 ##  minimal non-zero values.
 ##  <Example>gap> G := AlternatingGroup(5);;
-##  gap> G := AlternatingGroup(5);;
 ##  gap> SmallPowerMapCharacters(G);
 ##  [ [ 0, 0, 0, 5, 5 ], [ 0, 0, 3, 0, 0 ], [ 0, 4, 0, 0, 0 ], 
 ##    [ 4, 0, 4, 4, 4 ], [ 3, 3, 0, 3, 3 ], [ 5, 5, 5, 0, 0 ] ]
