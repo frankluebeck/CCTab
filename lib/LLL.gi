@@ -317,7 +317,6 @@ end);
 ##  This is a simplified variant of <Ref BookName="EDIM"
 ##  Func="InverseRatMat"/>, based on a <M>p</M>-adic lifting approach.
 ##  <Example>gap> A := RandomUnimodularMat(5);;
-##  gap> A := RandomUnimodularMat(5);;
 ##  gap> A * InverseUnimodularMat(A);
 ##  [ [ 1, 0, 0, 0, 0 ], [ 0, 1, 0, 0, 0 ], [ 0, 0, 1, 0, 0 ], 
 ##    [ 0, 0, 0, 1, 0 ], [ 0, 0, 0, 0, 1 ] ]
@@ -566,7 +565,6 @@ end);
 ##  The algorithm is similar to the modular variant of the LLL-algorithm
 ##  described in <Cite Key="Sto96"/>, but here the main loop is parallelized.
 ##  <Example>gap> A := RandomUnimodularMat(5);;
-##  gap> A := RandomUnimodularMat(5);;
 ##  gap> gr := A * TransposedMat(A);;
 ##  gap> h := LLLTransformUnimodularGram(gr);;
 ##  gap> h * gr * TransposedMat(h);

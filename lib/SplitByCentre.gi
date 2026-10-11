@@ -170,7 +170,6 @@ end);
 ##  character endoded for <A>CCT</A>. This function decomposes the character
 ##  according to the splitting centre (see <Ref Oper="SplitByCentre"/>).
 ##  <Example>gap> G := SmallGroup(96, 14);;
-##  gap> G := SmallGroup(96, 14);;
 ##  gap> CCT := CCTable(G);;
 ##  gap> SplitByCentre(CCT);
 ##  gap> U := TrivialSubgroup(G);;

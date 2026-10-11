@@ -80,7 +80,6 @@ end);
 ##  will also have an attribute <Ref Attr="CCTable"/> and delegate the
 ##  computation of the irreducible characters to this <Ref Attr="CCTable"/>.
 ##  <Example>gap> G := AlternatingGroup(5);;
-##  gap> G := AlternatingGroup(5);;
 ##  gap> CCT := CCTable(G);
 ##  CCTable( Alt( [ 1 .. 5 ] ) )
 ##  gap> IsCCTable(CCT);
@@ -190,7 +189,6 @@ InstallOtherMethod(SizesConjugacyClasses, ["IsCCTable"],
 ##  of <A>CCT</A> found so far are expanded.
 ##
 ##  <Example>gap> G := AlternatingGroup(5);;
-##  gap> G := AlternatingGroup(5);;
 ##  gap> CCT := CCTable(G);;
 ##  gap> ind := InducedFromAllMaximalCyclicSubgroups(G);;
 ##  gap> enc := EncodeForCCTable(CCT, ind);
@@ -666,7 +664,6 @@ end);
 ##  lattice spanned by the irreducible characters of the 
 ##  underlying group. Otherwise, <K>fail</K> is returned.
 ##  <Example>gap> G := AlternatingGroup(5);;
-##  gap> G := AlternatingGroup(5);;
 ##  gap> CCT := CCTable(G);;
 ##  gap> ImportInducedFromAllMaximalCyclicToCCTable(CCT);
 ##  gap> FindIndexCCTable(CCT);
@@ -732,7 +729,6 @@ end);
 ##  <Ref Func="FindIrreduciblesInFullLattices"/> to extract the
 ##  irreducible characters from the completed lattice. 
 ##  <Example>gap> G := AlternatingGroup(5);;
-##  gap> G := AlternatingGroup(5);;
 ##  gap> CCT := CCTable(G);;
 ##  gap> IrrCCTableHNF(CCT);
 ##  [ [ 1, 1, 1, 1, 0, 0, 0 ], [ 3, -1, 0, 0, 0, -1, -1 ], 

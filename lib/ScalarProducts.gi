@@ -65,7 +65,6 @@ end);
 ##  it only works for class functions which are rational linear combinations of
 ##  irreducible characters.
 ##  <Example>gap> G := AlternatingGroup(5);;
-##  gap> G := AlternatingGroup(5);;
 ##  gap> CCT := CCTable(G);;
 ##  gap> irr := Irr(CCT);
 ##  [ [ 1, 1, 1, 1, 0, 0, 0 ], [ 3, -1, 0, 0, 0, -1, -1 ], 

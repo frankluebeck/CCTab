@@ -21,14 +21,13 @@ gap> START_TEST( "Input file: manual.tst" );
 gap> oldinterval:= BrowseData.defaults.dynamic.replayDefaults.replayInterval;;
 gap> BrowseData.defaults.dynamic.replayDefaults.replayInterval:= 1;;
 
-##  doc/../lib/PositionConjugacyClass.gi (307-311)
+##  doc/../lib/PositionConjugacyClass.gi (310-314)
 gap> G := AlternatingGroup(5);;
 gap> creps := List(ConjugacyClasses(G), Representative);;
 gap> List(creps, x-> PositionConjugacyClass(G, x^Random(G)));
 [ 1, 2, 3, 4, 5 ]
 
-##  doc/../lib/PositionConjugacyClass.gi (231-246)
-gap> G := AlternatingGroup(5);;
+##  doc/../lib/PositionConjugacyClass.gi (235-249)
 gap> G := AlternatingGroup(5);;
 gap> ConjugacyClassInvariants(G);
 rec( G := Alt( [ 1 .. 5 ] ), 
@@ -58,19 +57,18 @@ gap> PowerMapsOfAllClasses(t);
   [ 1, 8, 4, 8, 2, 7, 4, 7 ], [ 1, 9, 10, 9, 9, 9, 10, 10, 10, 9, 10 ]
     , [ 1, 10, 9, 10, 10, 10, 9, 9, 9, 10, 9 ] ]
 
-##  doc/../lib/PowerMaps.gi (422-427)
+##  doc/../lib/PowerMaps.gi (420-425)
 gap> G := AlternatingGroup(5);;
 gap> List(ConjugacyClasses(G), c-> Order(Representative(c)));
 [ 1, 2, 3, 5, 5 ]
 gap> RationalClassSets(G);
 [ [ 1 ], [ 2 ], [ 3 ], [ 4, 5 ] ]
 
-##  doc/../lib/PowerMaps.gi (464-466)
+##  doc/../lib/PowerMaps.gi (462-464)
 gap> NrRationalClasses(AlternatingGroup(5));
 4
 
-##  doc/../lib/PowerMaps.gi (603-614)
-gap> G := AlternatingGroup(5);;
+##  doc/../lib/PowerMaps.gi (601-611)
 gap> G := AlternatingGroup(5);;
 gap> rci := RationalClassesInfo(G);;
 gap> rci[2];
@@ -82,12 +80,11 @@ rec( classes := [ 4, 5 ], classlen := 12, conductor := 5,
   field := NF(5,[ 1, 4 ]), ind := [ 4 .. 7 ], order := 5, 
   ratvec := [ 0, 2, 2, -1, 4, -1 ], stabilizer := [ 1, 4 ] )
 
-##  doc/../lib/PowerMaps.gi (342-344)
+##  doc/../lib/PowerMaps.gi (341-343)
 gap> MaximalCyclics(AlternatingGroup(5));
 [ 4, 3, 2 ]
 
-##  doc/../lib/PowerMaps.gi (274-283)
-gap> G := AlternatingGroup(5);;
+##  doc/../lib/PowerMaps.gi (274-282)
 gap> G := AlternatingGroup(5);;
 gap> T := CCTable(G);;
 gap> InduceAllFromCyclicSubgroup(G, 4);
@@ -97,8 +94,7 @@ gap> InduceAllFromCyclicSubgroup(T, 4);
 [ [ 12, 0, 0, 2 ], [ 12, 0, 0, E(5)+E(5)^4 ], 
   [ 12, 0, 0, E(5)^2+E(5)^3 ] ]
 
-##  doc/../lib/PowerMaps.gi (386-394)
-gap> G := AlternatingGroup(5);;
+##  doc/../lib/PowerMaps.gi (385-392)
 gap> G := AlternatingGroup(5);;
 gap> indcyc := InducedFromAllMaximalCyclicSubgroups(G);
 [ [ 12, 0, 0, 2, 2 ], [ 12, 0, 0, E(5)^2+E(5)^3, E(5)+E(5)^4 ], 
@@ -107,21 +103,20 @@ gap> indcyc := InducedFromAllMaximalCyclicSubgroups(G);
 gap> Rank(indcyc);
 5
 
-##  doc/../lib/PowerMaps.gi (740-745)
+##  doc/../lib/PowerMaps.gi (737-742)
 gap> G := AlternatingGroup(5);;
 gap> pmchars := PowerMapCharacters(G, 2);
 [ [ 30, 30, 0, 0, 0 ], [ 0, 0, 30, 0, 0 ], [ 0, 0, 0, 30, 30 ] ]
 gap> MatScalarProducts(Irr(G), pmchars);
 [ [ 8, 2, 10, -6, -6 ], [ 10, 10, -10, 0, 0 ], [ 12, -12, 0, 6, 6 ] ]
 
-##  doc/../lib/PowerMaps.gi (798-803)
-gap> G := AlternatingGroup(5);;
+##  doc/../lib/PowerMaps.gi (795-799)
 gap> G := AlternatingGroup(5);;
 gap> SmallPowerMapCharacters(G);
 [ [ 0, 0, 0, 5, 5 ], [ 0, 0, 3, 0, 0 ], [ 0, 4, 0, 0, 0 ], 
   [ 4, 0, 4, 4, 4 ], [ 3, 3, 0, 3, 3 ], [ 5, 5, 5, 0, 0 ] ]
 
-##  doc/../lib/PowerMaps.gi (860-867)
+##  doc/../lib/PowerMaps.gi (856-863)
 gap> G := AlternatingGroup(5);;
 gap> A := AutomorphismGroup(G);
 <group of size 120 with 3 generators>
@@ -165,22 +160,20 @@ fail
 gap> HermiteIntMat(RandomUnimodularMat(4));
 [ [ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 1, 0 ], [ 0, 0, 0, 1 ] ]
 
-##  doc/../lib/LLL.gi (199-204)
+##  doc/../lib/LLL.gi (239-244)
 gap> A := [ [ 9, -3, 1, -2 ], [ -3, 3, 1, 1 ], [ 1, 1, 13, -2 ],
 >   [ -2, 1, -2, 5 ] ];;
 gap> PermutedFractionFreeIntegerGaussPositiveDefinite(A);
 [ [ [ 3, 1, -3, 1 ], [ 0, 14, -3, -7 ], [ 0, 0, 81, 21 ], 
       [ 0, 0, 0, 900 ] ], (1,3,4,2) ]
 
-##  doc/../lib/LLL.gi (279-284)
-gap> A := RandomUnimodularMat(5);;
+##  doc/../lib/LLL.gi (319-323)
 gap> A := RandomUnimodularMat(5);;
 gap> A * InverseUnimodularMat(A);
 [ [ 1, 0, 0, 0, 0 ], [ 0, 1, 0, 0, 0 ], [ 0, 0, 1, 0, 0 ], 
   [ 0, 0, 0, 1, 0 ], [ 0, 0, 0, 0, 1 ] ]
 
-##  doc/../lib/LLL.gi (528-535)
-gap> A := RandomUnimodularMat(5);;
+##  doc/../lib/LLL.gi (567-573)
 gap> A := RandomUnimodularMat(5);;
 gap> gr := A * TransposedMat(A);;
 gap> h := LLLTransformUnimodularGram(gr);;
@@ -188,8 +181,7 @@ gap> h * gr * TransposedMat(h);
 [ [ 1, 0, 0, 0, 0 ], [ 0, 1, 0, 0, 0 ], [ 0, 0, 1, 0, 0 ], 
   [ 0, 0, 0, 1, 0 ], [ 0, 0, 0, 0, 1 ] ]
 
-##  doc/../lib/CCTable.gi (82-96)
-gap> G := AlternatingGroup(5);;
+##  doc/../lib/CCTable.gi (82-95)
 gap> G := AlternatingGroup(5);;
 gap> CCT := CCTable(G);
 CCTable( Alt( [ 1 .. 5 ] ) )
@@ -204,8 +196,7 @@ gap> ExpandFromCCTable(CCT, Irr(CCT));
   [ 3, -1, 0, -E(5)-E(5)^4, -E(5)^2-E(5)^3 ], [ 4, 0, 1, -1, -1 ], 
   [ 5, 1, -1, 0, 0 ] ]
 
-##  doc/../lib/CCTable.gi (192-207)
-gap> G := AlternatingGroup(5);;
+##  doc/../lib/CCTable.gi (191-205)
 gap> G := AlternatingGroup(5);;
 gap> CCT := CCTable(G);;
 gap> ind := InducedFromAllMaximalCyclicSubgroups(G);;
@@ -221,7 +212,7 @@ gap> ExpandFromCCTable(CCT, enc);
   [ 12, 0, 0, E(5)+E(5)^4, E(5)^2+E(5)^3 ], [ 20, 0, -1, 0, 0 ], 
   [ 20, 0, 2, 0, 0 ], [ 30, -2, 0, 0, 0 ], [ 30, 2, 0, 0, 0 ] ]
 
-##  doc/../lib/CCTable.gi (353-361)
+##  doc/../lib/CCTable.gi (351-359)
 gap> G := AlternatingGroup(5);;
 gap> ind := InducedFromAllMaximalCyclicSubgroups(G);;
 gap> CCT := CCTable(G);;
@@ -231,8 +222,7 @@ gap> UpdateHNFCCTable(CCT);
 gap> HasFullRankCCTable(CCT);
 true
 
-##  doc/../lib/CCTable.gi (668-682)
-gap> G := AlternatingGroup(5);;
+##  doc/../lib/CCTable.gi (666-679)
 gap> G := AlternatingGroup(5);;
 gap> CCT := CCTable(G);;
 gap> ImportInducedFromAllMaximalCyclicToCCTable(CCT);
@@ -247,7 +237,7 @@ gap> CCT!.irr;
   [ 3, -1, 0, 1, 0, 1, 1 ], [ 4, 0, 1, -1, 0, 0, 0 ], 
   [ 5, 1, -1, 0, 0, 0, 0 ] ]
 
-##  doc/../lib/CCTable.gi (527-534)
+##  doc/../lib/CCTable.gi (525-532)
 gap> G := MathieuGroup(24);;
 gap> CCT := CCTable(G);;
 gap> ImportInducedFromAllMaximalCyclicToCCTable(CCT);
@@ -256,8 +246,7 @@ gap> FindIndexCCTable(CCT);
 gap> StringCollectedFactors(FindIndexCCTable(CCT));
 "2^19 3^2"
 
-##  doc/../lib/CCTable.gi (734-741)
-gap> G := AlternatingGroup(5);;
+##  doc/../lib/CCTable.gi (731-737)
 gap> G := AlternatingGroup(5);;
 gap> CCT := CCTable(G);;
 gap> IrrCCTableHNF(CCT);
@@ -265,7 +254,7 @@ gap> IrrCCTableHNF(CCT);
   [ 3, -1, 0, 1, 0, 1, 1 ], [ 4, 0, 1, -1, 0, 0, 0 ], 
   [ 5, 1, -1, 0, 0, 0, 0 ] ]
 
-##  doc/../lib/CCTable.gi (883-892)
+##  doc/../lib/CCTable.gi (879-888)
 gap> hnf := [ [ 1, 0, 1, 478, -2, -649 ], [ 0, 1, 1, 362, 2, -492 ],
 > [ 0, 0, 0, 546, 0, -742 ] ];;
 gap> piv := [1,2,4];;
@@ -276,8 +265,7 @@ gap> hnf;
 [ [ 1, 0, 1, 2, -1090, 779 ], [ 0, 1, 1, 12, -798, 558 ], 
   [ 0, 0, 0, 14, 32, -42 ] ]
 
-##  doc/../lib/ScalarProducts.gi (67-77)
-gap> G := AlternatingGroup(5);;
+##  doc/../lib/ScalarProducts.gi (67-76)
 gap> G := AlternatingGroup(5);;
 gap> CCT := CCTable(G);;
 gap> irr := Irr(CCT);
@@ -297,8 +285,7 @@ true
 gap> SplittingCentre(CCT);
 [ 1, 10, 19, 28 ]
 
-##  doc/../lib/SplitByCentre.gi (172-187)
-gap> G := SmallGroup(96, 14);;
+##  doc/../lib/SplitByCentre.gi (172-186)
 gap> G := SmallGroup(96, 14);;
 gap> CCT := CCTable(G);;
 gap> SplitByCentre(CCT);
