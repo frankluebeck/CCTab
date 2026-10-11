@@ -3,13 +3,13 @@
 ##  
 ##  (C) 2025 Frank Lübeck, Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen
 ##  
-##  These files contains functions to create a CCTable for a finite group.
+##  These files contain functions to create a CCTable for a finite group.
 ##  This will be used as a container for computing the irreducible characters
 ##  of the group without using 'CharacterTable'.
 ##  
 ##  Characters are stored as lists of values only on representing classes of
 ##  rational classes (the remaining values can be computed with GaloisCyc,
-##  see 'RatClassExps' or 'RationalClassesInfo'.
+##  see 'RatClassExps' or 'RationalClassesInfo').
 ##  
 ##  We install various attributes for CCTable which delegate to the group.
 ##  

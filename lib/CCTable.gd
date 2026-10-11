@@ -3,7 +3,7 @@
 ##  
 ##  (C) 2025 Frank Lübeck, Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen
 ##  
-##  These files contains functions to create a CCTable for a finite group.
+##  These files contain functions to create a CCTable for a finite group.
 ##  This will be used as a container for computing the irreducible characters
 ##  of the group without using 'CharacterTable'.
 ##  

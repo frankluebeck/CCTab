@@ -42,7 +42,7 @@ Then load the package with
        gap> LoadPackage("CCTab");
 
 The package provides some kernel functions and some external programs
-which use the FLINT (flintlib.org) library. We recommend to install them
+which use the FLINT (flintlib.org) library. We recommend installing them
 as well. See the file 'INSTALL' for details.
 
 ## Status

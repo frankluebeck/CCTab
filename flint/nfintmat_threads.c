@@ -939,7 +939,7 @@ int main(int argc, char *argv[])
   mpz_t t;
 
   if (argc < 3) {
-    fprintf(stderr, "usage: nfintmat nrthreads options < inputflintmat\n");
+    fprintf(stderr, "usage: nfintmat_threads nrthreads options < inputflintmat\n");
     return 1;
   }
   nthr = FLINT_MAX(1, atol(argv[1]));

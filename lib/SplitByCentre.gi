@@ -167,7 +167,7 @@ end);
 ##  <A>ch</A> be a generalized character of the underlying group, given
 ##  by a list of values on <E>all</E> conjugacy classes (not encoded as by
 ##  <Ref Func="EncodeForCCTable"/>). In the second form <A>ech</A> is a
-##  character endoded for <A>CCT</A>. This function decomposes the character
+##  character encoded for <A>CCT</A>. This function decomposes the character
 ##  according to the splitting centre (see <Ref Oper="SplitByCentre"/>).
 ##  <Example>gap> G := SmallGroup(96, 14);;
 ##  gap> G := SmallGroup(96, 14);;

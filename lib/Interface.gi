@@ -44,8 +44,8 @@ end );
 
 
 ##  Not needed now. Think again if later we have tables with HasCCTable but
-##  without UnderLyingGroup.
-##  When there is an UnderLyingGroup, the next method below will be called
+##  without UnderlyingGroup.
+##  When there is an UnderlyingGroup, the next method below will be called
 ##  by a generic method which delegates to the group.
 ##  
 ##  InstallOtherMethod(Irr, ["IsOrdinaryTable and HasCCTable"],

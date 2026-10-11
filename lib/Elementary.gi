@@ -8,7 +8,7 @@
 ##  
 ##  This file provides functions 
 ##     MaximalNonCyclicElementarySubgroups(G)
-##     InducedFromElementary(G, i, p[, "linear"/"nonlinear")
+##     InducedFromElementary(G, i, p[, "linear"/"nonlinear"])
 ##  
 
 ##  <#GAPDoc Label="MaximalNonCyclicElementarySubgroups">
@@ -29,7 +29,7 @@
 ##  all integer linear combinations of irreducible characters) is spanned by
 ##  the characters induced from the maximal elementary subgroups of
 ##  <A>G</A>, that is the maximal cyclic subgroups (see <Ref
-##  Attr="MaximalCyclics"/>) and the subgroups descibed by this function. See
+##  Attr="MaximalCyclics"/>) and the subgroups described by this function. See
 ##  <Cite Key="Isaacs" Where="Chapter 8"/> for more details.
 ##  <Example>gap> G := SL(4,2);;
 ##  gap> MaximalNonCyclicElementarySubgroups(G);
@@ -110,7 +110,7 @@ end);
 ##  In the first form <A>G</A> is a group, in the second form
 ##  <A>CCT</A> is an <Ref Filt="IsCCTable"/> object of a group <A>G</A>. Let
 ##  <A>i</A> be an integer and <A>p</A> be a prime, such that <M>x</M> 
-##  contained the <A>i</A>-th conjugacy class of <M>G</M> has order
+##  contained in the <A>i</A>-th conjugacy class of <M>G</M> has order
 ##  not divisible by <A>p</A>. We consider the <A>p</A>-elementary subgroup
 ##  <M>E = \langle{x}\rangle \times S</M> where <M>S</M> is a 
 ##  Sylow-<A>p</A>-subgroup of the centralizer of <M>x</M>.
@@ -243,7 +243,7 @@ end);
 ##  <Returns>a list of length 2</Returns>
 ##  <Description>
 ##  Let <A>CCT</A> be an <Ref Filt="IsCCTable"/> object of a group
-##  <M>G</M>. The arguments <A>i</A> and <A>p</A> decribe an elementary
+##  <M>G</M>. The arguments <A>i</A> and <A>p</A> describe an elementary
 ##  subgroup <M>E = \langle{x}\rangle \times S</M>, as explained in <Ref
 ##  Func="InducedFromElementary"/>. 
 ##  <P/>
@@ -276,7 +276,7 @@ end);
 # S fuse into class j of G.
 # Only classes j which represent rational classes of G are considered.
 # And the second entry 'needed' contains the numbers of classes of S
-# occuring in fus.
+# occurring in fus.
 BindGlobal("FusionElementaryCCTable", function(CCT, i, p)
   local G, cls, ncl, ords, cen, s, ssz, x, o, pms, rci, todo, scl, sclr, scll, 
         oscl, e, k, excl, ko, kk, max, n, ncls, els, ngen, gens, perm, orbs, 

@@ -6,7 +6,7 @@
 ##  Utilities for LLL reduction of integer lattices.
 ##  
 
-# utilities:utilities:  symmetric mod for integer a and positive integer b
+# utilities:  symmetric mod for integer a and positive integer b
 BindGlobal("SMod", function(a, b)
   local res;
   res := a mod b;
@@ -83,7 +83,7 @@ end);
 ##  <#/GAPDoc>
 #     we do not use FLINT's hnf_int_mat, it is often quite slow in our context
 # DoNFIMthreads(mat, options) can also give Smith- and other normal forms,
-# including transforation matrices.
+# including transformation matrices.
 TMPRES_NFIM_5830197461 := fail;
 BindGlobal("DoNFIMthreads", function(mat, options)
   local prg, str, out, inp, res, i;
@@ -129,9 +129,9 @@ end);
 
 # A: square symmetric positive definite matrix
 # computes a fraction free Gauss elimination, together with
-# a permutation of the rows and and columns of the input matrix
+# a permutation of the rows and columns of the input matrix
 # such that the diagonal entries of the result are minimal
-# (the i-th diagonal entry is the deterinant of the upper
+# (the i-th diagonal entry is the determinant of the upper
 # left ixi submatrix, that is the i-th principal minor).
 # This is the transpose of the mu-matrix in classical LLL,
 # i-th row multiplied by principal i x i-minor d_i.
@@ -337,7 +337,7 @@ fi;
 # basis reduction, ETH Reports, 1996.
 # 
 # integral and modular variant of LLL
-# greedy strategy, swaping vectors for which the gain
+# greedy strategy, swapping vectors for which the gain
 # (reduction factor of product of d_i) is maximal
 # length reductions are delayed to the end
 # 
@@ -445,7 +445,7 @@ BindGlobal("LLLTransformUnimodularGram_GAP", function(gr)
   od;
   while true do
     # find list of k with distance at least 3 such that
-    # swap of k an k-1 yields improvement
+    # swap of k and k-1 yields improvement
     k := n;
     klist := [];
     while k > 1 do
