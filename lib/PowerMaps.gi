@@ -41,7 +41,7 @@
 ##  entry of <C>PowerMapsOfAllClasses(G)</C> is a list of length <M>m</M> whose
 ##  <M>j</M>-th entry is the number of the class containing
 ##  <M>x^{{j-1}}</M>, for <M>j = 1, \ldots, m</M> (so the first entry is
-##  always <M>1</M>, corresponding to <M>x^0</M>).
+##  the number of the class of the identity, corresponding to <M>x^0</M>).
 ##  <P/>
 ##  In this way the result encodes the power maps of <E>all</E> conjugacy
 ##  classes of <A>G</A> at once. The implementation tries to minimize the
