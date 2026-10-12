@@ -13,13 +13,11 @@
 ##  
 gap> LoadPackage( "CCTab", false );
 true
+gap> LoadPackage( "ctbllib", false );
+true
 gap> save:= SizeScreen();;
 gap> SizeScreen( [ 72 ] );;
 gap> START_TEST( "Input file: manual.tst" );
-
-##
-gap> oldinterval:= BrowseData.defaults.dynamic.replayDefaults.replayInterval;;
-gap> BrowseData.defaults.dynamic.replayDefaults.replayInterval:= 1;;
 
 ##  doc/../lib/PositionConjugacyClass.gi (307-311)
 gap> G := AlternatingGroup(5);;
@@ -331,10 +329,6 @@ gap> NaturalCharacters(SL(3,5));
 gap> NaturalCharacters(SmallGroup(24,4));
 [ Character( CharacterTable( <pc group of size 24 with 
     4 generators> ), [ 24, 0, 0, 0, 0, 0, 0, 0, 0 ] ) ]
-
-##
-gap> BrowseData.defaults.dynamic.replayDefaults.replayInterval:= oldinterval;;
-gap> Exec( "rm -f nonsense nicer.bib test.xml");;
 
 ##
 gap> STOP_TEST( "manual.tst", 10000000 );

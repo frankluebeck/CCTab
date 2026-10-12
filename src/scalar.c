@@ -378,9 +378,9 @@ static Int InitLibrary (
 
 /****************************************************************************
 **
-*F  InitInfopl()  . . . . . . . . . . . . . . . . . table of init functions
+*V  module  . . . . . . . . . . . . . . . . . . . . . table of init functions
 */
-/* <name> returns the description of this module                           */
+/* Init__Dynamic and Init__scalar return this description of the module    */
 static StructInitInfo module = {
 #ifdef SCALARSTATIC
     .type = MODULE_STATIC,
