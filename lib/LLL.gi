@@ -40,32 +40,6 @@ BindGlobal("PrintIntegerMatToFlint", function(fname, mat)
   PrintTo1(fname, fu);
 end);
 
-# Interface to Hermite normal form functions in FLINT
-TMPRES9676895304721 := fail;
-BindGlobal("HNFThreaded", function(mat)
-  local prg, str, out, inp, res;
-  prg := Filename(DirectoriesPackagePrograms("CCTab"), "hnfintmat");
-  if prg = fail then
-    return fail;
-  fi;
-  str := "";
-  out := OutputTextString(str, false);
-  PrintIntegerMatToFlint(out, mat);
-  CloseStream(out);
-  inp := InputTextString(str);
-  res := "";
-  out := OutputTextString(res, false);
-  Process(DirectoryCurrent(), prg, inp, out, [String(NRFlintThreads), 
-                          String(Length(mat)), String(Length(mat[1])) ]);
-  CloseStream(inp);
-  CloseStream(out);
-  inp := InputTextString(res);
-  Read(inp);
-  CloseStream(inp);
-  res := TMPRES9676895304721.hnf;
-  Unbind(TMPRES9676895304721);
-  return res;
-end);
 ##  <#GAPDoc Label="HermiteIntMat">
 ##  <ManSection>
 ##  <Func Name="HermiteIntMat" Arg="mat"/>

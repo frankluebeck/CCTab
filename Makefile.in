@@ -19,8 +19,7 @@ FLINT_LIBS=@FLINT_LIBS@
 BINDIR = bin/$(GAParch)
 
 FLINT_PROGRAMS = $(BINDIR)/pffgintmat_threads $(BINDIR)/lll_modular_threads \
-                 $(BINDIR)/invuni_threads $(BINDIR)/hnfintmat \
-		 $(BINDIR)/nfintmat_threads
+                 $(BINDIR)/invuni_threads $(BINDIR)/nfintmat_threads
 
 # empty if `configure` did not find FLINT
 FLINT_TARGETS = @FLINT_PROGS@
@@ -32,11 +31,6 @@ all: $(BINDIR)/scalar.so $(FLINT_TARGETS)
 $(BINDIR)/scalar.so: src/scalar.c Makefile
 	@mkdir -p $(BINDIR)
 	$(GAC) -d -p "$(CPPFLAGS)" -p "$(CFLAGS)" -P "$(LDFLAGS)" -o $@ src/scalar.c
-
-#   disabled (temporarily) since there is some memory error
-#$(BINDIR)/lll.so: src/lll.c Makefile
-#	@mkdir -p $(BINDIR)
-#	$(GAC) -d -p "$(CPPFLAGS)" -p "$(CFLAGS)" -P "$(LDFLAGS)" -o $@ src/lll.c
 
 # all standalone programs are built the same way: the program's own source
 # plus the shared helper do_parallel_dyn.c
@@ -61,11 +55,6 @@ $(BINDIR)/nfintmat_threads: flint/nfintmat_threads.c $(FLINT_SOURCES) Makefile
 	@mkdir -p $(BINDIR)
 	$(CC) $(CPPFLAGS) $(FLINT_CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(FLINT_LDFLAGS) \
 	  -o $@ flint/nfintmat_threads.c flint/do_parallel_dyn.c $(FLINT_LIBS)
-
-$(BINDIR)/hnfintmat: flint/hnfintmat.c $(FLINT_SOURCES) Makefile
-	@mkdir -p $(BINDIR)
-	$(CC) $(CPPFLAGS) $(FLINT_CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(FLINT_LDFLAGS) \
-	  -o $@ flint/hnfintmat.c flint/do_parallel_dyn.c $(FLINT_LIBS)
 
 doc:
 	$(GAP)  makedocrel.g

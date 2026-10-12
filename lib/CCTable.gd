@@ -30,10 +30,6 @@ DeclareGlobalName("UpdateHNFCCTable");
 DeclareGlobalName("ImportInducedFromAllMaximalCyclicToCCTable");
 DeclareGlobalName("FindIndexCCTable");
 
-DeclareGlobalName("ExtendLLLCCTable");
-DeclareGlobalName("ReduceCCTable");
-DeclareGlobalName("DeterminantGramCCTable");
-
 # Info class
 DeclareInfoClass("InfoCCTable");
 SetInfoLevel(InfoCCTable, 0);

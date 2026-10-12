@@ -14,7 +14,6 @@ DeclareGlobalName("SMod");
 DeclareGlobalName("SModList");
 DeclareGlobalName("PrintIntegerMatToFlint");
 DeclareGlobalName("HermiteIntMat");
-DeclareGlobalName("HNFThreaded");
 DeclareGlobalName("PermutedFractionFreeIntegerGaussPositiveDefinite");
 DeclareGlobalName("PermutedFractionFreeIntegerGaussPositiveDefinite_GAP");
 DeclareGlobalName("PFFIGThreaded");

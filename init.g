@@ -11,16 +11,8 @@ ReadPackage( "CCTab", "lib/Elementary.gd");
 ReadPackage( "CCTab", "lib/ScalarProducts.gd");
 ReadPackage( "CCTab", "lib/LLL.gd");
 ReadPackage( "CCTab", "lib/SplitByCentre.gd");
-ReadPackage( "CCTab", "lib/Interface.gd");
 
 if (not IsBound(CCTScalarProductInternal)) and
         IsKernelExtensionAvailable("CCTab","scalar") then
   LoadKernelExtension("CCTab", "scalar");
-fi;
-
-if (not IsBound(ReduceLLLRecordInternal)) and
-        IsKernelExtensionAvailable("CCTab","lll") then
-  LoadKernelExtension("CCTab", "lll");
-elif not IsBound(ReduceLLLRecordInternal) then
-  ReduceLLLRecordInternal := fail;
 fi;
