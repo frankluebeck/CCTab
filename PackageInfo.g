@@ -57,7 +57,14 @@ Dependencies := rec(
   GAP := ">= 4.16",
   NeededOtherPackages := [ [ "GAPDoc", ">= 1.5" ], [ "EDIM", ">=1.3.8"] ],
   SuggestedOtherPackages := [ ["nofoma", ">= 1.0"] ],
-  ExternalConditions := [ ["libflint", ">= 3.1.3" ] ],
+  NeededSystemPackages := rec(
+    Ubuntu   := [ ["libflint-dev"] ],
+    Homebrew := [ ["flint"] ],
+  ),
+  ExternalConditions := [
+    [ "FLINT 3.1.3 or newer is needed only to build the optional standalone \
+programs; the package works without it",
+      "https://flintlib.org/" ] ],
 ),
 
 AvailabilityTest := ReturnTrue,
