@@ -49,6 +49,8 @@ ExampleFileHeader:= function( filename, pkgname, authors, copyrightyear,
     Append( str, "\ngap> LoadPackage( \"" );
     Append( str, pkgname );
     Append( str, "\", false );\ntrue" );
+    # the example for PowerMapsOfAllClasses uses a library table
+    Append( str, "\ngap> LoadPackage( \"ctbllib\", false );\ntrue" );
     Append( str, "\ngap> save:= SizeScreen();;" );
     Append( str, "\ngap> SizeScreen( [ 72 ] );;" );
     Append( str, "\ngap> START_TEST( \"Input file: " );
@@ -61,8 +63,7 @@ end;
 ExampleFileFooter:= function( filename, linelen )
     local str;
     
-    str := "gap> Exec( \"rm -f nonsense nicer.bib test.xml\");;\n";
-    Append( str, "\n##\ngap> STOP_TEST( \"");
+    str := "\n##\ngap> STOP_TEST( \"";
     Append( str, filename );
     Append( str, "\", 10000000 );\n" );
     Append( str, "gap> SizeScreen( save );;\n\n" );
@@ -83,7 +84,6 @@ CreateManualExamplesFile:= function( pkgname, authors, copyrightyear, text,
     str:= "# This file was created automatically, do not edit!\n";
     Append( str, ExampleFileHeader( tstfilename, pkgname, authors,
                                     copyrightyear, text, linelen ) );
-    Append( str, "\n##\ngap> oldinterval:= BrowseData.defaults.dynamic.replayDefaults.replayInterval;;\ngap> BrowseData.defaults.dynamic.replayDefaults.replayInterval:= 1;;\n" );
     for r in ExtractExamples( path, main, files, "Chapter", withLog ) do
       for l in r do
         Append( str, Concatenation( "\n##  ", l[2][1],
@@ -91,7 +91,6 @@ CreateManualExamplesFile:= function( pkgname, authors, copyrightyear, text,
         Append( str, l[1] );
       od;
     od;
-    Append( str, "\n##\ngap> BrowseData.defaults.dynamic.replayDefaults.replayInterval:= oldinterval;;\n" );
     Append( str, ExampleFileFooter( tstfilename, linelen ) );
 
     tstfilename:= Concatenation( tstpath, "/", tstfilename );
