@@ -84,11 +84,11 @@ Obj FuncCCTScalarProductInternal2( Obj self, Obj sci, Obj c, Obj d)
   int cnz, dnz;
   Obj null = INTOBJ_INT(0);
 
-  if (! (IS_PLIST(sci) || LEN_PLIST(sci) < 2))
+  if (!IS_PLIST(sci) || LEN_PLIST(sci) < 2)
     ErrorQuit("first argument must be plain list of length >= 2.",0L,0L);
-  if (! (IS_PLIST(c) || LEN_PLIST(c) < 1))
+  if (!IS_PLIST(c) || LEN_PLIST(c) < 1)
     ErrorQuit("second argument must be plain list of length >= 1.",0L,0L);
-  if (! (IS_PLIST(d) || LEN_PLIST(d) < 1))
+  if (!IS_PLIST(d) || LEN_PLIST(d) < 1)
     ErrorQuit("third argument must be plain list of length >= 1.",0L,0L);
   max = LEN_PLIST(sci);
   if (LEN_PLIST(c) > max) max = LEN_PLIST(c);
@@ -161,7 +161,11 @@ Obj FuncCCTScalarProductInternal2( Obj self, Obj sci, Obj c, Obj d)
     }
     pos = (long)csci[pos+2];
   }
-  res = QuoInt(res, csci[1]);
+  res = QUO(res, csci[1]);
+  /* do not cache mutable lists */
+  if (IS_MUTABLE_OBJ(c)) cc[0] = 0;
+  if (IS_MUTABLE_OBJ(d)) cd[0] = 0;
+  if (IS_MUTABLE_OBJ(sci)) csci[0] = 0;
   return res;
 }
 
@@ -173,11 +177,11 @@ Obj FuncCCTScalarProductInternal( Obj self, Obj sci, Obj c, Obj d)
   int cnz, dnz;
   Obj null = INTOBJ_INT(0);
 
-  if (! (IS_PLIST(sci) || LEN_PLIST(sci) < 2))
+  if (!IS_PLIST(sci) || LEN_PLIST(sci) < 2)
     ErrorQuit("first argument must be plain list of length >= 2.",0L,0L);
-  if (! (IS_PLIST(c) || LEN_PLIST(c) < 1))
+  if (!IS_PLIST(c) || LEN_PLIST(c) < 1)
     ErrorQuit("second argument must be plain list of length >= 1.",0L,0L);
-  if (! (IS_PLIST(d) || LEN_PLIST(d) < 1))
+  if (!IS_PLIST(d) || LEN_PLIST(d) < 1)
     ErrorQuit("third argument must be plain list of length >= 1.",0L,0L);
 
   done = INT_INTOBJ(ELM_PLIST(sci, 2));
@@ -238,7 +242,7 @@ Obj FuncCCTScalarProductInternal( Obj self, Obj sci, Obj c, Obj d)
     }
     pos = INT_INTOBJ(ELM_PLIST(sci, pos+2));
   }
-  res = QuoInt(res, ELM_PLIST(sci, 1));
+  res = QUO(res, ELM_PLIST(sci, 1));
   return res;
 }
 

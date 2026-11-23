@@ -62,8 +62,8 @@ end);
 ##  <C>IsBound(CCTScalarProductInternal2);</C>.)
 ##  <P/>
 ##  Note that this function cannot be used for arbitrary class functions,
-##  it only works for class functions which are rational linear combinations of
-##  irreducible characters.
+##  it only works for class functions which are generalized characters (that is 
+##  integer linear combinations of irreducible characters).
 ##  <Example>gap> G := AlternatingGroup(5);;
 ##  gap> CCT := CCTable(G);;
 ##  gap> irr := Irr(CCT);
@@ -133,7 +133,7 @@ end);
 ##  CCTScalarProductInternal and CCTScalarProductInternal2.
 ##  If they are compiled we use them, otherwise the function above,
 ##  as method for ScalarProduct for characters of IsCCTable.
-if IsBound(CCTScalarProductInternal) then
+if IsBound(CCTScalarProductInternal2) then
   InstallOtherMethod(ScalarProduct, ["IsCCTable", "IsList", "IsList"],
   function(CCT, c, d)
     return CCTScalarProductInternal2(ScalarInfo(CCT), c, d);
