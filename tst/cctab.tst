@@ -249,8 +249,7 @@ gap> AllGenElementary( idat, CCT42, ir42 );
 true
 
 ##  'ActionAutomorphismsOnConjugacyClasses', 'ActionAutomorphismsOnRationalClasses':
-##  'SymmetricGroup(4)' is a complete group, so its automorphisms act
-##  trivially on (rational) classes.
+##  'SymmetricGroup(6)' has non-trivial outer automorphisms.
 gap> AutS6:= AutomorphismGroup( SymmetricGroup( 6 ) );;
 gap> Size( ActionAutomorphismsOnConjugacyClasses( SymmetricGroup( 6 ), AutS6 ) );
 2
