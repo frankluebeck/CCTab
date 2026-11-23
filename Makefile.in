@@ -33,11 +33,6 @@ $(BINDIR)/scalar.so: src/scalar.c Makefile
 	@mkdir -p $(BINDIR)
 	$(GAC) -d -p "$(CPPFLAGS)" -p "$(CFLAGS)" -P "$(LDFLAGS)" -o $@ src/scalar.c
 
-#   disabled (temporarily) since there is some memory error
-#$(BINDIR)/lll.so: src/lll.c Makefile
-#	@mkdir -p $(BINDIR)
-#	$(GAC) -d -p "$(CPPFLAGS)" -p "$(CFLAGS)" -P "$(LDFLAGS)" -o $@ src/lll.c
-
 # all standalone programs are built the same way: the program's own source
 # plus the shared helper do_parallel_dyn.c
 FLINT_SOURCES = flint/do_parallel_dyn.c flint/do_parallel_dyn.h

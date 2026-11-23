@@ -18,9 +18,3 @@ if (not IsBound(CCTScalarProductInternal)) and
   LoadKernelExtension("CCTab", "scalar");
 fi;
 
-if (not IsBound(ReduceLLLRecordInternal)) and
-        IsKernelExtensionAvailable("CCTab","lll") then
-  LoadKernelExtension("CCTab", "lll");
-elif not IsBound(ReduceLLLRecordInternal) then
-  ReduceLLLRecordInternal := fail;
-fi;
