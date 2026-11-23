@@ -152,7 +152,13 @@ function(CCT, zind)
   for i in reps do
     CCT!.hnfs[i] := rec(new := [], hnf := [], pivots := [], index := 0);
   od;
-  ImportToCCTable(CCT, known);
+  ImportEncodedToCCTable(CCT, known);
+  
+  # if maxcycdone is set then we need to recompute the indices 
+  if IsBound(CCT!.maxcycdone) then
+    Unbind(CCT!.maxcycdone);
+    ImportInducedFromAllMaximalCyclicToCCTable(CCT);
+  fi;
 end);
 
 ##  <#GAPDoc Label="SplitCharacterByCentre">

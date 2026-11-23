@@ -314,6 +314,14 @@ gap> Length(RationalClassesInfo(Gmisc));
 gap> [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ] in Irr(Gmisc);
 true
 
+##  Using SplitByCentre on a non-empty CCTable
+gap> g := SL(3, 7);;
+gap> c := CCTable(g);;
+gap> ImportInducedFromAllMaximalCyclicToCCTable(c);
+gap> SplitByCentre(c);
+gap> Length(Irr(c));
+64
+
 ##
 gap> STOP_TEST( "cctab.tst", 10000000 );
 gap> SizeScreen( save );;

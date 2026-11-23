@@ -22,6 +22,7 @@ DeclareAttribute("RationalClassesInfo", IsNearlyCharacterTable);
 
 DeclareGlobalName("EncodeForCCTable");
 DeclareGlobalName("ImportToCCTable");
+DeclareGlobalName("ImportEncodedToCCTable");
 DeclareGlobalName("ExpandFromCCTable");
 DeclareGlobalName("HasFullRankCCTable");
 DeclareGlobalName("AddVectorToHNF");
