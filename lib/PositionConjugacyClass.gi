@@ -25,7 +25,7 @@
 ##  An optional second argument of ConjugacyClassInvariants can be a list 
 ##  of functions of form g(r, tree)  that extend a tree that so far 
 ##  only contains the list poss.  There are default functions for permutation
-##  and matrix groups.
+##  groups and matrix groups over fields.
 ##  
 ##  Note that a similar scheme could also be used for identifying other
 ##  types of equivalence classes.
@@ -264,7 +264,8 @@ BindGlobal("ConjugacyClassInvariants", function(G, args...)
     Add(funcs, CCInvFuncs.ConjTest);
   elif IsPermGroup(G) then
     funcs := [CCInvFuncs.NoticeReps, CCInvFuncs.CycStruct, CCInvFuncs.ConjTest];
-  elif IsMatrixGroup(G) then
+  elif IsMatrixGroup(G) and HasDefaultFieldOfMatrixGroup(G) and 
+       IsField(DefaultFieldOfMatrixGroup(G)) then
     funcs := [CCInvFuncs.NoticeReps, CCInvFuncs.CharPol, CCInvFuncs.MinPol, CCInvFuncs.Frob, CCInvFuncs.ConjTest];
   else
     funcs := [CCInvFuncs.NoticeReps, CCInvFuncs.Order, CCInvFuncs.ConjTest];

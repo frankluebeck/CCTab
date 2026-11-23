@@ -306,6 +306,14 @@ gap> h;
 [ [ 6, 14, 8, 4, -12, 0 ], [ 0, 34, 14, 12, 6, 6 ], 
   [ 0, 0, 0, 0, 14, 0 ] ]
 
+##  Matrix group over non-field
+gap> Length(List(Gmisc, x-> PositionConjugacyClass(Gmisc, x)));
+48
+gap> Length(RationalClassesInfo(Gmisc));
+8
+gap> [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ] in Irr(Gmisc);
+true
+
 ##
 gap> STOP_TEST( "cctab.tst", 10000000 );
 gap> SizeScreen( save );;

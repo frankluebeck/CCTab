@@ -88,8 +88,12 @@ InstallMethod(NaturalCharacters, ["IsPermGroup"], function(G)
   od;
   return res;
 end);
-InstallMethod(NaturalCharacters, ["IsMatrixGroup"], function(G)
+InstallMethod(NaturalCharacters, ["IsMatrixGroup and HasDefaultFieldOfMatrixGroup"], function(G)
   local t, cls, reps, res, F, q, n, rk, ch, x;
+  # this should not be needed!
+  if not IsField(DefaultFieldOfMatrixGroup(G)) then
+    TryNextMethod();
+  fi;
   t := CharacterTable(G);
   cls := ConjugacyClasses(G){IdentificationOfConjugacyClasses(t)};
   reps := List(cls, Representative);
