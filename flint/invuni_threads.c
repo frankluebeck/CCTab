@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
   parallel_do_dyn((do_func_t)invworker, NULL, n, 
                        nthr-1, FLINT_PARALLEL_DYNAMIC);
 
-  printf("TMPRES897966487097:=rec();\nTMPRES897966487097.invmat := \n");
+  printf("return  \n");
   printtogapfmpzmat(res, n, n);
   printf(";\n\n");
 

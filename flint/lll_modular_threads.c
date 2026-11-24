@@ -408,7 +408,7 @@ int main(int argc, char* argv[])
   fmpz_mat_clear(HH);
 
   // GAP readable print of result
-  printf("TMPRES03695464:=rec();\nTMPRES03695464.H:= \n");
+  printf("return \n");
   printtogaptransposefmpzmat(A, n, n);
 
   fmpz_clear(d);

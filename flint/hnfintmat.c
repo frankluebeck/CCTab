@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
   /* do the work */
   fmpz_mat_hnf(A, A);
 
-  printf("TMPRES9676895304721:=rec();\nTMPRES9676895304721.hnf := \n");
+  printf("return \n");
   printtogapfmpzmat(A, nrow, ncol);
   printf(";\n\n");
 

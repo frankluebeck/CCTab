@@ -53,7 +53,7 @@ void printtogapfmpzmat(fmpz_mat_t A, long n, long m)
     if (i < n-1)
       flint_printf(",\n");
   };
-  flint_printf("];;\n");
+  flint_printf("]\n");
 }
 
 // function for fraction free Gauss on A with pivot search of smallest entry
@@ -122,11 +122,12 @@ int main(int argc, char* argv[])
   perm = fractionfreegausswithpermutation();
 
   // GAP readable print of result
-  printf("TMPRES774684629486 := rec();;\nTMPRES774684629486.perm:= [");
+  printf("return  [ [");
   for (i=0; i<n; i++)
     printf("%ld, ", perm[i]+1);
-  printf("];;\nTMPRES774684629486.A:= \n");
+  printf("], \n");
   printtogapfmpzmat(A, n, n);
+  printf("];;\n");
 
   fmpz_clear(d);
   fmpz_mat_clear(A);

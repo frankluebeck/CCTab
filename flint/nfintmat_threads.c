@@ -778,7 +778,7 @@ static void DoNFIM(imat mat, slong nr, slong nc, int options)
     }
     SNFofREF(A, n-2, m-2);
     PROF(6);
-    printf("TMPRES_NFIM_5830197461 := rec(\nnormal := ");
+    printf("return rec(\nnormal := ");
     printgapmat(stdout, A, 1, n-2, 1, m-2);
     printf(",\nrank := %ld", (long)(r-1));
     if (n == m)
@@ -883,7 +883,7 @@ static void DoNFIM(imat mat, slong nr, slong nc, int options)
       fmpz_one(Q[i]+i);
 
   PROF(8);
-  printf("TMPRES_NFIM_5830197461 := rec(\nnormal := ");
+  printf("return rec(\nnormal := ");
   printgapmat(stdout, A, 2, n-1, 2, m-1);
   if (opt3) {
     printf(",\nrowC := ");

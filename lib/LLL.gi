@@ -33,7 +33,6 @@ BindGlobal("PrintIntegerMatToFlint", function(fname, mat)
 end);
 
 # Interface to Hermite normal form functions in FLINT
-TMPRES9676895304721 := fail;
 BindGlobal("HNFThreaded", function(mat)
   local prg, str, out, inp, res, ret;
   prg := Filename(DirectoriesPackagePrograms("CCTab"), "hnfintmat");
@@ -55,10 +54,8 @@ BindGlobal("HNFThreaded", function(mat)
   CloseStream(inp);
   CloseStream(out);
   inp := InputTextString(res);
-  Read(inp);
+  res := ReadAsFunction(inp)();
   CloseStream(inp);
-  res := TMPRES9676895304721.hnf;
-  Unbind(TMPRES9676895304721);
   return res;
 end);
 ##  <#GAPDoc Label="HermiteIntMat">
@@ -79,7 +76,6 @@ end);
 #     we do not use FLINT's hnf_int_mat, it is often quite slow in our context
 # DoNFIMthreads(mat, options) can also give Smith- and other normal forms,
 # including transformation matrices.
-TMPRES_NFIM_5830197461 := fail;
 BindGlobal("DoNFIMthreads", function(mat, options)
   local prg, str, out, inp, res, i, ret;
   prg := Filename(DirectoriesPackagePrograms("CCTab"), "nfintmat_threads");
@@ -107,10 +103,8 @@ BindGlobal("DoNFIMthreads", function(mat, options)
   CloseStream(inp);
   CloseStream(out);
   inp := InputTextString(res);
-  Read(inp);
+  res := ReadAsFunction(inp)();
   CloseStream(inp);
-  res := TMPRES_NFIM_5830197461;
-  Unbind(TMPRES_NFIM_5830197461);
   # option 16: as in DoNFIM the result is stored in mat
   if options >= 16 then
     for i in [1..Length(mat)] do
@@ -193,7 +187,6 @@ BindGlobal("PermutedFractionFreeIntegerGaussPositiveDefinite_GAP", function(A)
 end);
 
 # multithreaded standalone version of the previous function 
-TMPRES774684629486 := fail;
 BindGlobal("PFFIGThreaded", function(gr)
   local prg, str, inp, res, out, ret;
   prg := Filename(DirectoriesPackagePrograms("CCTab"), "pffgintmat_threads");
@@ -214,11 +207,9 @@ BindGlobal("PFFIGThreaded", function(gr)
   CloseStream(inp);
   CloseStream(out);
   inp := InputTextString(res);
-  Read(inp);
+  res := ReadAsFunction(inp)();
   CloseStream(inp);
-  res := [TMPRES774684629486.A, PermList(TMPRES774684629486.perm)^-1];
-  Unbind(TMPRES774684629486);
-  return res;
+  return [res[2], PermList(res[1])^-1];
 end);
 ##  <#GAPDoc Label="PermutedFractionFreeIntegerGaussPositiveDefinite">
 ##  <ManSection>
@@ -296,7 +287,6 @@ BindGlobal("InverseUnimodularMat_GAP", function(m)
   return res;
 end);
 # standalone version of function above using FLINT and multiple threads
-TMPRES897966487097 := fail;
 BindGlobal("InvUniThreaded", function(mat)
   local prg, str, inp, res, out, ret;
   prg := Filename(DirectoriesPackagePrograms("CCTab"), "invuni_threads");
@@ -318,10 +308,8 @@ BindGlobal("InvUniThreaded", function(mat)
   CloseStream(inp);
   CloseStream(out);
   inp := InputTextString(res);
-  Read(inp);
+  res := ReadAsFunction(inp)();
   CloseStream(inp);
-  res := TMPRES897966487097.invmat;
-  Unbind(TMPRES897966487097);
   return res;
 end);
 ##  <#GAPDoc Label="InverseUnimodularMat">
@@ -553,7 +541,6 @@ BindGlobal("LLLTransformUnimodularGram_GAP", function(gr)
 end);
 
 # a multithreaded variant of the previous GAP function
-TMPRES03695464 := fail;
 BindGlobal("LLLTUGIT", function(gr)
   local n, prg, str, out, inp, res, HH, mat, v, H, i, ret;
   n := Length(gr);
@@ -575,10 +562,8 @@ BindGlobal("LLLTUGIT", function(gr)
   CloseStream(inp);
   CloseStream(out);
   inp := InputTextString(res);
-  Read(inp);
+  H := ReadAsFunction(inp)();
   CloseStream(inp);
-  H := TMPRES03695464.H;
-  Unbind(TMPRES03695464);
   return H;
 end);
 
