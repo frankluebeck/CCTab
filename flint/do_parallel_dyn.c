@@ -3,6 +3,7 @@
  *
  * This file implements the missing case FLINT_PARALLEL_DYNAMIC
  * of the FLINT (https://flintlib.org/) function flint_parallel_do()
+ * (should probably be moved to the flint library)
  */
 #include <flint/flint.h>
 #include <flint/thread_pool.h>

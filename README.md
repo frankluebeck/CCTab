@@ -60,6 +60,6 @@ Use the issue tracker
 
 ## License
 
-Distributed under the terms of the GNU General Public License (GPL) v3,
+Distributed under the terms of the GNU General Public License GPL-3.0-or-later,
 see the 'LICENSE' file for more details.
 
