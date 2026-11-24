@@ -16,8 +16,8 @@
 ##      otherwise: regular character
 ##      
 ##  Using power maps we can construct from known generalized characters chi:
-##      pPrimeCharacter(chi, p)  with values chi(x_{p'}) for primes p
-##      pPrimeRestriction(chi, p) with values 0 in p-singular classes
+##      PPrimeCharacter(chi, p)  with values chi(x_{p'}) for primes p
+##      PPrimeRestriction(chi, p) with values 0 in p-singular classes
 ##                               |G|_p chi(x) for x p-regular
 ##  
 
@@ -125,7 +125,7 @@ end);
 # Both, y and z are powers of x, this function returns k with
 # y = x^k and z = x/y. This only depends on the order o of x.
 
-InstallGlobalFunction(pPrimeDecompositionPower, function(o, p)
+InstallGlobalFunction(PPrimeDecompositionPower, function(o, p)
   local q, m, g, res;
   if o mod p <> 0 then
     return 1;
@@ -152,23 +152,23 @@ InstallOtherMethod(OrdersClassRepresentatives, ["IsGroup"],
   G-> List(ConjugacyClasses(G), c-> Order(Representative(c))));
 
 # empty on first call
-InstallMethod( pPrimeDecompositions, [ IsCharacterTable ],
+InstallMethod( PPrimeDecompositions, [ IsCharacterTable ],
 function(tbl)
     return rec ();
 end);
 # delegate to character table
-InstallMethod(pPrimeDecomposition, [IsGroup, IsPosInt],
+InstallMethod(PPrimeDecomposition, [IsGroup, IsPosInt],
 function(G, p)
-    return pPrimeDecomposition( CharacterTable(G), p );
+    return PPrimeDecomposition( CharacterTable(G), p );
 end);
 # 
-InstallMethod(pPrimeDecomposition, 
+InstallMethod(PPrimeDecomposition, 
               [IsOrdinaryTable, IsPosInt],
 function(tbl, p)
   local map, pms, ords, res, k, i;
-  map := pPrimeDecompositions(tbl);
+  map := PPrimeDecompositions(tbl);
   if not IsPrimeInt(p) then
-    Error("pPrimeDecomposition: second argument must be prime.");
+    Error("PPrimeDecomposition: second argument must be prime.");
   fi;
   if IsBound(map.(p)) then
     return map.(p);
@@ -177,7 +177,7 @@ function(tbl, p)
   ords := OrdersClassRepresentatives(tbl);
   res := [];
   for i in [1..Length(ords)] do
-      k := pPrimeDecompositionPower(ords[i], p);
+      k := PPrimeDecompositionPower(ords[i], p);
       Add(res, pms[i][(k mod ords[i])+1]);
   od;
   MakeImmutable(res);
@@ -189,17 +189,17 @@ end);
 # chi(h) where h is the p-prime part of g is again a generalized character
 # [Isaacs, problem (8.3)]
 
-InstallGlobalFunction(pPrimeCharacter,
+InstallGlobalFunction(PPrimeCharacter,
 function(chi, p)
     local tbl;
     tbl := UnderlyingCharacterTable(chi);
-    return Character(tbl, chi{pPrimeDecomposition(tbl, p)});
+    return Character(tbl, chi{PPrimeDecomposition(tbl, p)});
 end);
 
 # for a generalized character chi and prime p the restriction to p'-elements
 # (otherwise 0) multiplied by the p-part of the group order
 # is again a generalized character [Isaacs, problem (15.3)]
-InstallGlobalFunction(pPrimeRestriction,
+InstallGlobalFunction(PPrimeRestriction,
 function(chi, p)
   local tbl, s, q, ch, ords, i;
   tbl := UnderlyingCharacterTable(chi);

@@ -85,6 +85,7 @@ InstallMethod(Irr, ["IsGroup", "IsZeroCyc"],
 # ... and a workaround for a bad method in GAP library
 InstallMethod(Irr, ["IsGroup and IsHandledByNiceMonomorphism", "IsZeroCyc"], 
   GAPInfo.tmpIrr);
+Unbind(GAPInfo.tmpIrr);
 
 BindGlobal("PowerMapByPowerMapsOfAllClasses", 
 function(t, n)

@@ -8,12 +8,12 @@
 
 DeclareAttribute("NaturalCharacters", IsGroup);
 
-DeclareGlobalFunction ("pPrimeDecompositionPower");
+DeclareGlobalFunction ("PPrimeDecompositionPower");
 
-DeclareAttribute( "pPrimeDecompositions", IsCharacterTable, "mutable" );
-DeclareOperation( "pPrimeDecomposition", [ IsCharacterTable, IsPosInt ]  );
-DeclareOperation( "pPrimeDecomposition", [ IsGroup, IsPosInt ]  );
+DeclareAttribute( "PPrimeDecompositions", IsCharacterTable, "mutable" );
+DeclareOperation( "PPrimeDecomposition", [ IsCharacterTable, IsPosInt ]  );
+DeclareOperation( "PPrimeDecomposition", [ IsGroup, IsPosInt ]  );
 
 
-DeclareGlobalFunction ("pPrimeCharacter");
-DeclareGlobalFunction ("pPrimeRestriction");
+DeclareGlobalFunction ("PPrimeCharacter");
+DeclareGlobalFunction ("PPrimeRestriction");
