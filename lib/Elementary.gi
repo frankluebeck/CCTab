@@ -180,10 +180,8 @@ BindGlobal("InducedFromElementary", function(GorCCT, i, p, opts...)
   o := Order(x);
   # centralizer of representative
   cen := StabilizerOfExternalSet(cl);
-  # p-part (and remove it from attribute)
+  # p-part 
   s := SylowSubgroup(cen, p);
-  Remove(ComputedSylowSubgroups(cen));
-  Remove(ComputedSylowSubgroups(cen));
   IsPGroup(s);
   ss := Size(s);
   if IsInt(max) and NrConjugacyClasses(s)*o > max then
@@ -286,7 +284,7 @@ BindGlobal("FusionElementaryCCTable", function(CCT, i, p)
   cls := ConjugacyClasses(CCT);
   ncl := NrConjugacyClasses(CCT);
   ords := OrdersClassRepresentatives(CCT);
-  # p-group (it is not needed later, we remove the stored attribute)
+  # p-group
   cen := StabilizerOfExternalSet(cls[i]);
   s := SylowSubgroup(cen, p);
   ssz := Size(s);
@@ -483,8 +481,6 @@ BindGlobal("InductionDataFromElementaryCCTable", function(CCT, i, p)
   # p-group
   st := StabilizerOfExternalSet(cls[i]);
   s := SylowSubgroup(st, p);
-  Remove(ComputedSylowSubgroups(st));
-  Remove(ComputedSylowSubgroups(st));
   ssz := Size(s);
   scls := ConjugacyClasses(s);
   szscls := List(scls, Size);
