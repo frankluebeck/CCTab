@@ -122,14 +122,14 @@ gap> ForAll([1..NrConjugacyClasses(CCT)], i-> ForAll([1..i], j->
 >        ScalarProduct(tab, irr[i], irr[j]) = ScalarProduct(CCT, ir[i], ir[j])));
 true
 
-##  'NaturalCharacters', 'pPrimeCharacter', 'pPrimeRestriction' for a
+##  'NaturalCharacters', 'PPrimeCharacter', 'PPrimeRestriction' for a
 ##  permutation group.
 gap> nc:= NaturalCharacters( GA5 );;
 gap> List( nc, AsList );
 [ [ 4, 0, 1, -1, -1 ] ]
-gap> AsList( pPrimeCharacter( nc[1], 2 ) );
+gap> AsList( PPrimeCharacter( nc[1], 2 ) );
 [ 4, 4, 1, -1, -1 ]
-gap> AsList( pPrimeRestriction( nc[1], 2 ) );
+gap> AsList( PPrimeRestriction( nc[1], 2 ) );
 [ 4, 0, 1, -1, -1 ]
 
 ##  Full pipeline via the &GAP; library interface ('OrdinaryCharacterTable',

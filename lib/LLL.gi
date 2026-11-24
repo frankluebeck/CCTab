@@ -6,23 +6,6 @@
 ##  Utilities for LLL reduction of integer lattices.
 ##  
 
-# utilities:  symmetric mod for integer a and positive integer b
-BindGlobal("SMod", function(a, b)
-  local res;
-  res := a mod b;
-  if 2*res > b then
-    return res-b;
-  else
-    return res;
-  fi;
-end);
-BindGlobal("SModList", function(l, b)
-  if IsList(l) then
-    return List(l, a-> SModList(a, b));
-  fi;
-  return SMod(l, b);
-end);
-
 # Print integer matrix in format read by the FLINT function
 # read_fmpz_mat()
 BindGlobal("PrintIntegerMatToFlint", function(fname, mat)
@@ -64,7 +47,7 @@ BindGlobal("HNFThreaded", function(mat)
   inp := InputTextString(str);
   res := "";
   out := OutputTextString(res, false);
-  ret := Process(DirectoryCurrent(), prg, inp, out, [String(NRFlintThreads), 
+  ret := Process(DirectoryCurrent(), prg, inp, out, [String(GAPInfo.NRFlintThreads), 
                           String(Length(mat)), String(Length(mat[1])) ]);
   if ret <> 0 then
     Error("hnfintmat: has exit status ", ret);
@@ -117,7 +100,7 @@ BindGlobal("DoNFIMthreads", function(mat, options)
   res := "";
   out := OutputTextString(res, false);
   ret := Process(DirectoryCurrent(), prg, inp, out,
-          [String(NRFlintThreads), String(options mod 16)]);
+          [String(GAPInfo.NRFlintThreads), String(options mod 16)]);
   if ret <> 0 then
     Error("nfintmat_threads: has exit status ", ret);
   fi;
@@ -224,7 +207,7 @@ BindGlobal("PFFIGThreaded", function(gr)
   inp := InputTextString(str);
   res := "";
   out := OutputTextString(res, false);
-  ret := Process(DirectoryCurrent(), prg, inp, out, [String(Length(gr)), String(NRFlintThreads)]);
+  ret := Process(DirectoryCurrent(), prg, inp, out, [String(Length(gr)), String(GAPInfo.NRFlintThreads)]);
   if ret <> 0 then
     Error("pffgintmat_threads: has exit status ", ret);
   fi;
@@ -274,7 +257,22 @@ fi;
 
 # a simplified version of InverseRatMat
 BindGlobal("InverseUnimodularMat_GAP", function(m)
-  local p, mi, n, null, res, v, pi, r, x, i;
+  local p, mi, n, null, res, v, pi, r, x, i, SModList, SMod;
+  SMod := function(a, b)
+    local res;
+    res := a mod b;
+    if 2*res > b then
+      return res-b;
+    else
+      return res;
+    fi;
+  end;
+  SModList := function(l, b)
+    if IsList(l) then
+      return List(l, a-> SModList(a, b));
+    fi;
+    return SMod(l, b);
+  end;
   p := 251;
   mi := Z(p)^0*m;
   ConvertToMatrixRep(mi,p);
@@ -312,7 +310,7 @@ BindGlobal("InvUniThreaded", function(mat)
   inp := InputTextString(str);
   res := "";
   out := OutputTextString(res, false);
-  ret := Process(DirectoryCurrent(), prg, inp, out, [String(NRFlintThreads), 
+  ret := Process(DirectoryCurrent(), prg, inp, out, [String(GAPInfo.NRFlintThreads), 
           String(Length(mat)), "4294967291" ]);
   if ret <> 0 then
     Error("invuni_threads: has exit status ", ret);
@@ -367,7 +365,7 @@ fi;
 # 
 BindGlobal("LLLTransformUnimodularGram_GAP", function(gr)
   local n, a, max, M, T, HH, ModSubtractRow, ModSwitchRow, 
-        dd, ddM, lovasz, k, klist, qlist, x, d, mat, v, H, i, j;
+        dd, ddM, lovasz, k, klist, qlist, x, d, mat, v, H, i, j, SMod;
   n := Length(gr);
   # make copy and complete if lower triangular
   gr := List(gr, ShallowCopy);
@@ -397,7 +395,15 @@ BindGlobal("LLLTransformUnimodularGram_GAP", function(gr)
   T := T[1];
   
   # from now we don't need gr any more and work with T
-
+  SMod := function(a, b)
+    local res;
+    res := a mod b;
+    if 2*res > b then
+      return res-b;
+    else
+      return res;
+    fi;
+  end;
   ModSubtractRow := function(HH, T, M, k, r, q, swapped)
     local a, b, j, i;
     if q <> 0 then
@@ -562,7 +568,7 @@ BindGlobal("LLLTUGIT", function(gr)
   inp := InputTextString(str);
   res := "";
   out := OutputTextString(res, false);
-  ret := Process(DirectoryCurrent(), prg, inp, out, [String(Length(gr)), String(NRFlintThreads)]);
+  ret := Process(DirectoryCurrent(), prg, inp, out, [String(Length(gr)), String(GAPInfo.NRFlintThreads)]);
   if ret <> 0 then
     Error("lll_modular_threads: has exit status ", ret);
   fi;

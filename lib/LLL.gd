@@ -8,10 +8,8 @@
 
 # Configure number of threads for various standalone programs which 
 # use the FLINT library and several threads.
-NRFlintThreads := 8;
+GAPInfo.NRFlintThreads := 8;
 
-DeclareGlobalName("SMod");
-DeclareGlobalName("SModList");
 DeclareGlobalName("PrintIntegerMatToFlint");
 DeclareGlobalName("HermiteIntMat");
 DeclareGlobalName("HNFThreaded");
