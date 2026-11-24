@@ -26,7 +26,7 @@ end);
 # Print integer matrix in format read by the FLINT function
 # read_fmpz_mat()
 BindGlobal("PrintIntegerMatToFlint", function(fname, mat)
-  local fu;
+  local fu, out;
   fu := function()
     local r, x;
     Print( Length( mat ), " ", Length( mat[1] ), "  \c" );
@@ -37,13 +37,22 @@ BindGlobal("PrintIntegerMatToFlint", function(fname, mat)
     od;
     Print( "\n\n" );
   end;
-  PrintTo1(fname, fu);
+  if IsStream(fname) then
+    out := fname;
+  elif IsString(fname) then
+    out := OutputTextFile(fname, false);
+  fi;
+  SetPrintFormattingStatus(out, false);
+  PrintTo1(out, fu);
+  if IsString(fname) then
+    CloseStream(out);
+  fi;
 end);
 
 # Interface to Hermite normal form functions in FLINT
 TMPRES9676895304721 := fail;
 BindGlobal("HNFThreaded", function(mat)
-  local prg, str, out, inp, res;
+  local prg, str, out, inp, res, ret;
   prg := Filename(DirectoriesPackagePrograms("CCTab"), "hnfintmat");
   if prg = fail then
     return fail;
@@ -55,8 +64,11 @@ BindGlobal("HNFThreaded", function(mat)
   inp := InputTextString(str);
   res := "";
   out := OutputTextString(res, false);
-  Process(DirectoryCurrent(), prg, inp, out, [String(NRFlintThreads), 
+  ret := Process(DirectoryCurrent(), prg, inp, out, [String(NRFlintThreads), 
                           String(Length(mat)), String(Length(mat[1])) ]);
+  if ret <> 0 then
+    Error("hnfintmat: has exit status ", ret);
+  fi;
   CloseStream(inp);
   CloseStream(out);
   inp := InputTextString(res);
@@ -86,7 +98,7 @@ end);
 # including transformation matrices.
 TMPRES_NFIM_5830197461 := fail;
 BindGlobal("DoNFIMthreads", function(mat, options)
-  local prg, str, out, inp, res, i;
+  local prg, str, out, inp, res, i, ret;
   prg := Filename(DirectoriesPackagePrograms("CCTab"), "nfintmat_threads");
   if prg = fail then
     return DoNFIM(mat, options);
@@ -104,8 +116,11 @@ BindGlobal("DoNFIMthreads", function(mat, options)
   inp := InputTextString(str);
   res := "";
   out := OutputTextString(res, false);
-  Process(DirectoryCurrent(), prg, inp, out,
+  ret := Process(DirectoryCurrent(), prg, inp, out,
           [String(NRFlintThreads), String(options mod 16)]);
+  if ret <> 0 then
+    Error("nfintmat_threads: has exit status ", ret);
+  fi;
   CloseStream(inp);
   CloseStream(out);
   inp := InputTextString(res);
@@ -197,7 +212,7 @@ end);
 # multithreaded standalone version of the previous function 
 TMPRES774684629486 := fail;
 BindGlobal("PFFIGThreaded", function(gr)
-  local prg, str, inp, res, out;
+  local prg, str, inp, res, out, ret;
   prg := Filename(DirectoriesPackagePrograms("CCTab"), "pffgintmat_threads");
   if prg = fail then
     return fail;
@@ -209,7 +224,10 @@ BindGlobal("PFFIGThreaded", function(gr)
   inp := InputTextString(str);
   res := "";
   out := OutputTextString(res, false);
-  Process(DirectoryCurrent(), prg, inp, out, [String(Length(gr)), String(NRFlintThreads)]);
+  ret := Process(DirectoryCurrent(), prg, inp, out, [String(Length(gr)), String(NRFlintThreads)]);
+  if ret <> 0 then
+    Error("pffgintmat_threads: has exit status ", ret);
+  fi;
   CloseStream(inp);
   CloseStream(out);
   inp := InputTextString(res);
@@ -282,7 +300,7 @@ end);
 # standalone version of function above using FLINT and multiple threads
 TMPRES897966487097 := fail;
 BindGlobal("InvUniThreaded", function(mat)
-  local prg, str, inp, res, out;
+  local prg, str, inp, res, out, ret;
   prg := Filename(DirectoriesPackagePrograms("CCTab"), "invuni_threads");
   if prg = fail then
     return fail;
@@ -294,8 +312,11 @@ BindGlobal("InvUniThreaded", function(mat)
   inp := InputTextString(str);
   res := "";
   out := OutputTextString(res, false);
-  Process(DirectoryCurrent(), prg, inp, out, [String(NRFlintThreads), 
+  ret := Process(DirectoryCurrent(), prg, inp, out, [String(NRFlintThreads), 
           String(Length(mat)), "4294967291" ]);
+  if ret <> 0 then
+    Error("invuni_threads: has exit status ", ret);
+  fi;
   CloseStream(inp);
   CloseStream(out);
   inp := InputTextString(res);
@@ -528,7 +549,7 @@ end);
 # a multithreaded variant of the previous GAP function
 TMPRES03695464 := fail;
 BindGlobal("LLLTUGIT", function(gr)
-  local n, prg, str, out, inp, res, HH, mat, v, H, i;
+  local n, prg, str, out, inp, res, HH, mat, v, H, i, ret;
   n := Length(gr);
   prg := Filename(DirectoriesPackagePrograms("CCTab"), "lll_modular_threads");
   if prg = fail then
@@ -541,7 +562,10 @@ BindGlobal("LLLTUGIT", function(gr)
   inp := InputTextString(str);
   res := "";
   out := OutputTextString(res, false);
-  Process(DirectoryCurrent(), prg, inp, out, [String(Length(gr)), String(NRFlintThreads)]);
+  ret := Process(DirectoryCurrent(), prg, inp, out, [String(Length(gr)), String(NRFlintThreads)]);
+  if ret <> 0 then
+    Error("lll_modular_threads: has exit status ", ret);
+  fi;
   CloseStream(inp);
   CloseStream(out);
   inp := InputTextString(res);

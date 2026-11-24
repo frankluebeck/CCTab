@@ -395,7 +395,10 @@ int main(int argc, char* argv[])
 
   // initialize and read main matrix A
   fmpz_mat_init(A, n, n);
-  fmpz_mat_read(A);
+  if (!fmpz_mat_read(A)) {
+     fprintf(stderr, "lll_modular_threads: error reading input matrix\n");
+     return 2;
+   }
   
   // compute inverse transpose of result into matrix HH
   llltransformunimodulargram();

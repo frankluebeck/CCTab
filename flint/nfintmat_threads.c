@@ -2,11 +2,10 @@
  * (C) 2026 Frank Lübeck, Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen
  *
  * This file implements a translation of the GAP library function DoNFIM
- * to a standalone C program.
+ * (see lib/matint.gi in GAP library) to a standalone C program.
  *
  * It uses FLINT (https://flintlib.org/) for the arithmetic and a thread
  * farm. The main loops are parallelized.
- *
  *
  *      nfintmat nrthreads options  < inputflintmat > outputgaprec
  *

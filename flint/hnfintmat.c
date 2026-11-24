@@ -52,7 +52,10 @@ int main(int argc, char* argv[])
   nrow = atol(argv[2]);
   ncol = atol(argv[3]);
   fmpz_mat_init(A, nrow, ncol);
-  fmpz_mat_read(A);
+  if (!fmpz_mat_read(A)) {
+     fprintf(stderr, "hnfintmat: error reading input matrix\n");
+     return 2;
+   }
 
   /* do the work */
   fmpz_mat_hnf(A, A);

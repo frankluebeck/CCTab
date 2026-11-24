@@ -322,6 +322,14 @@ gap> SplitByCentre(c);
 gap> Length(Irr(c));
 64
 
+##  Test if long integers are printed without line break to FLINT
+gap> str := "";;
+gap> out := OutputTextString(str, false);;
+gap> PrintIntegerMatToFlint(out, [[11^99,1],[13^100,42424]]);
+gap> CloseStream(out);
+gap> '\\' in str;
+false
+
 ##
 gap> STOP_TEST( "cctab.tst", 10000000 );
 gap> SizeScreen( save );;

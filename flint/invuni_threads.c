@@ -85,7 +85,11 @@ int main(int argc, char* argv[])
 
   n = atol(argv[2]);
   fmpz_mat_init(A, n, n);
-  fmpz_mat_read(A);
+  if (!fmpz_mat_read(A)) {
+     fprintf(stderr, "invuni_threads: error reading input matrix\n");
+     return 2;
+   }
+
 
   p = atol(argv[3]);
   nmod_mat_init(Ap, n, n, p);
