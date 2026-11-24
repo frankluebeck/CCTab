@@ -200,9 +200,9 @@ There are variants of these functions written in &GAP;. But we also
 provide variants which use standalone programs which need to be compiled
 during installation. These depend on the FLINT library, see
 <Cite Key="FLINT"/>. These standalone programs use several threads. The
-number of these threads is configured in the variable <C>NRFlintThreads</C>,
-it defaults to <C>8</C> (but you can change it, depending on the number
-of cores of your machine).
+number of these threads is configured by setting 
+<C>GAPInfo.NRFlintThreads</C>, it defaults to <C>8</C> (but you can change 
+it, depending on the number of cores of your machine).
 <P/>
 
 <#Include Label="HermiteIntMat">
