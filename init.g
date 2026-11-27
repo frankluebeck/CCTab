@@ -13,6 +13,11 @@ ReadPackage( "CCTab", "lib/LLL.gd");
 ReadPackage( "CCTab", "lib/SplitByCentre.gd");
 ReadPackage( "CCTab", "lib/Interface.gd");
 
+# utilities for conjugacy classes of specific types of groups
+ReadPackage( "CCTab", "Classical/ClUtils.gd");
+ReadPackage( "CCTab", "Classical/Wall.gd");
+
+
 if (not IsBound(CCTScalarProductInternal)) and
         IsKernelExtensionAvailable("CCTab","scalar") then
   LoadKernelExtension("CCTab", "scalar");

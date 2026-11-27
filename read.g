@@ -11,3 +11,8 @@ ReadPackage( "CCTab", "lib/Elementary.gi");
 ReadPackage( "CCTab", "lib/ScalarProducts.gi");
 ReadPackage( "CCTab", "lib/CCTable.gi");
 ReadPackage( "CCTab", "lib/Interface.gi");
+
+# utilities for conjugacy classes of specific types of groups
+ReadPackage( "CCTab", "Classical/ClUtils.gi");
+ReadPackage( "CCTab", "Classical/Wall.gi");
+ReadPackage( "CCTab", "Classical/WallMethods.gi");
