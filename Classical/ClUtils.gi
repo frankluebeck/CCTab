@@ -1,10 +1,63 @@
-##  Costs:
-##  Step 	                           Cost
-##  Scalar recurrence table            O(Nh) operations in FF
+###########################################################################
+##  ClUtils.gi
+##
+##  (C) 2026 Frank Lübeck, Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen
+##
+##  Enumeration of monic irreducible polynomials over finite fields, also
+##  grouped with respect to the duality used for classical groups.
+##
+##  The roots of the polynomials of degree d over F = GF(q) are the powers
+##  w^k of a root w of a primitive polynomial of degree d, and the
+##  polynomials correspond to the orbits of k -> q*k on Z/(q^d-1) of
+##  length d.  Instead of computing in the field GF(q^d) we use the linear
+##  recurrence a_t = lambda(w^t), lambda the first coordinate with respect to
+##  the basis 1, w, ..., w^(d-1); the minimal polynomial of w^k is found by
+##  the Berlekamp-Massey algorithm from the subsequence a_0, a_k, a_2k, ...
+##
+##  Costs, N = q^d - 1, R the number of results:
+##  Step                               Cost
+##  Scalar recurrence table            O(Nh) operations in F (h = number of
+##                                     nonzero coefficients of the input)
 ##  Cyclotomic coset enumeration       O(N) modular-index operations
-##  Berlekamp–Massey for all answers   O(Rd2) operations in FF
+##  Berlekamp-Massey for all answers   O(R d^2) operations in F
 ##  Storage, including output          O(N) field-element slots, plus a bitlist
-# args: finite field, number n or coefficient list of primitive polynomial
+##
+
+##  <#GAPDoc Label="MonicIrreduciblesFromPrimitivePolynomial">
+##  <ManSection>
+##  <Func Name="MonicIrreduciblesFromPrimitivePolynomial" Arg="F, coeff"/>
+##  <Returns>a list of coefficient lists</Returns>
+##  <Description>
+##  Let <A>F</A> be a finite field with <M>q</M> elements and <A>coeff</A>
+##  the coefficient list (constant term first) of a monic primitive
+##  polynomial of degree <M>d</M> over <A>F</A>. This function returns the
+##  list of all monic irreducible polynomials of degree <M>d</M> over
+##  <A>F</A>, each given by its coefficient list (constant term first).
+##  <P/>
+##  Instead of <A>coeff</A> one can also give the degree <M>d</M>, then a
+##  random primitive polynomial of degree <M>d</M> is used (see <Ref
+##  BookName="Reference" Func="RandomPrimitivePolynomial"/>). The order of
+##  the result depends on the primitive polynomial.
+##  <P/>
+##  The primitivity of the input polynomial is not checked. The
+##  computation does not use the field with <M>q^d</M> elements, it uses
+##  <M>O(q^d)</M> operations in <A>F</A> and storage for <M>q^d</M> elements
+##  of <A>F</A>. For <M>d = 1</M> the
+##  result contains all <M>q</M> polynomials <M>X-a</M>, <M>a \in</M>
+##  <A>F</A>.
+##
+##  <Example>gap> c := CoefficientsOfUnivariatePolynomial(ConwayPolynomial(3,2));
+##  [ Z(3), Z(3), Z(3)^0 ]
+##  gap> l := MonicIrreduciblesFromPrimitivePolynomial(GF(3), c);;
+##  gap> List(l, a -> UnivariatePolynomial(GF(3), a, 1));
+##  [ x_1^2-x_1-Z(3)^0, x_1^2+Z(3)^0, x_1^2+x_1-Z(3)^0 ]
+##  gap> Length(MonicIrreduciblesFromPrimitivePolynomial(GF(5), 6));
+##  2580
+##  </Example>
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
+##
 BindGlobal("MonicIrreduciblesFromPrimitivePolynomial", function(F, coeff)
     local q, d, N, zero, one, negcoeff, support,
           a, seen, seq, result, BM,
@@ -170,9 +223,15 @@ BindGlobal("MonicIrreduciblesFromPrimitivePolynomial", function(F, coeff)
 end);
 
 # args: finite field, number n or coefficient list of primitive polynomial,
-#       "selfdual" or "pairs"
-BindGlobal("CCTAB_DualityEnumeration", function(F, input, mode)
-    local q, d, zero, one, storageQ,
+#       "selfdual" or "pairs" [, r]
+#
+# Without r the duality is f(X) -> X^d f(1/X)/f(0), i.e. on roots
+# alpha -> alpha^-1.  If r is given then |F| = r^2 and the duality is the
+# twisted one used for unitary groups, alpha -> alpha^-r (coefficients
+# conjugated by the field automorphism of order 2).  The selfdual ones
+# then have odd degree, their roots lie in the subgroup of order r^d+1.
+BindGlobal("CCTAB_DualityEnumeration", function(F, input, mode, opt...)
+    local q, d, tw, T, zero, one, storageQ,
           Pack, NewVector, BM,
           coeff, h, poly, x, beta, power, seed, half,
           M, a, negcoeff, support, seen, seq, result,
@@ -188,6 +247,14 @@ BindGlobal("CCTAB_DualityEnumeration", function(F, input, mode)
     fi;
 
     q := Size(F);
+    if Length(opt) = 0 then
+        tw := 1;
+    else
+        tw := opt[1];
+        if tw^2 <> q then
+            Error("r^2 must be the size of F");
+        fi;
+    fi;
     zero := Zero(F);
     one := One(F);
 
@@ -243,7 +310,7 @@ BindGlobal("CCTAB_DualityEnumeration", function(F, input, mode)
     coeff := Pack(coeff);
 
     # The only selfdual linear polynomials are X-1 and X+1.
-    if mode = "selfdual" and d = 1 then
+    if mode = "selfdual" and d = 1 and tw = 1 then
         result := [Pack([-one, one])];
         if -one <> one then
             Add(result, Pack([one, one]));
@@ -252,7 +319,8 @@ BindGlobal("CCTAB_DualityEnumeration", function(F, input, mode)
     fi;
 
     # A selfdual irreducible polynomial of degree > 1 has even degree.
-    if mode = "selfdual" and d mod 2 = 1 then
+    # (In the twisted case it has odd degree.)
+    if mode = "selfdual" and (d mod 2 = 1) = (tw = 1) then
         return [];
     fi;
 
@@ -315,19 +383,24 @@ BindGlobal("CCTAB_DualityEnumeration", function(F, input, mode)
     end;
 
     if mode = "selfdual" then
-        # Put d = 2*m.
+        # Put d = 2*m and T = q^m (untwisted), or T = r^d (twisted).
         #
-        # beta = w^(q^m - 1) generates the subgroup of order q^m + 1.
+        # beta = w^(T - 1) generates the subgroup of order T + 1.
         # Every degree-d selfdual root is in this subgroup.
-        half := QuoInt(d, 2);
-        M := q^half + 1;
+        if tw = 1 then
+            half := QuoInt(d, 2);
+            T := q^half;
+        else
+            T := tw^d;
+        fi;
+        M := T + 1;
 
         # Obtain the minimal polynomial h of beta using arithmetic
         # modulo the input polynomial, without constructing an
         # extension field.
         poly := UnivariatePolynomial(F, coeff, 1);
         x := Indeterminate(F, 1);
-        beta := PowerMod(x, q^half - 1, poly);
+        beta := PowerMod(x, T - 1, poly);
 
         # Project beta^j onto its constant coefficient in the w-basis.
         seed := NewVector(2*d);
@@ -378,7 +451,7 @@ BindGlobal("CCTAB_DualityEnumeration", function(F, input, mode)
             r := k;
             orbitLength := 0;
             selfdual := false;
-            negativeK := (M - k) mod M;
+            negativeK := (-tw * k) mod M;
 
             repeat
                 seen[r + 1] := true;
@@ -390,12 +463,8 @@ BindGlobal("CCTAB_DualityEnumeration", function(F, input, mode)
                         selfdual := true;
                     fi;
 
-                    # Also mark the dual orbit C(-k).
-                    if r = 0 then
-                        seen[1] := true;
-                    else
-                        seen[M - r + 1] := true;
-                    fi;
+                    # Also mark the dual orbit C(-tw*k).
+                    seen[(-tw * r) mod M + 1] := true;
                 fi;
 
                 r := (q * r) mod M;
@@ -423,12 +492,79 @@ BindGlobal("CCTAB_DualityEnumeration", function(F, input, mode)
 end);
 
 
-BindGlobal("SelfDualMonicIrreducibles",  function(F, input)
-    return CCTAB_DualityEnumeration(F, input, "selfdual");
+##  <#GAPDoc Label="SelfDualMonicIrreducibles">
+##  <ManSection>
+##  <Func Name="SelfDualMonicIrreducibles" Arg="F, coeff[, r]"/>
+##  <Func Name="NonSelfDualMonicIrreducibleRepresentatives" Arg="F, coeff[, r]"/>
+##  <Returns>a list of coefficient lists</Returns>
+##  <Description>
+##  Let <A>F</A> be a finite field with <M>q</M> elements. For a monic
+##  polynomial <M>f</M> of degree <M>d</M> over <A>F</A> with
+##  <M>f(0) \neq 0</M> its <E>dual</E> is the monic polynomial
+##  <M>f^*(X) = f(0)^{-1} X^d f(1/X)</M>, whose roots are the inverses of
+##  the roots of <M>f</M>. If <M>q = r^2</M> and the optional argument
+##  <A>r</A> is given then the twisted dual is used instead, this is
+##  <M>f^*(X) = f^\sigma(0)^{-1} X^d f^\sigma(1/X)</M>, where
+##  <M>f^\sigma</M> is obtained by applying the automorphism
+##  <M>\sigma: a \mapsto a^r</M> of <A>F</A> to the coefficients of
+##  <M>f</M>; the roots of <M>f^*</M> are the
+##  <M>\alpha^{-r}</M> for the roots <M>\alpha</M> of <M>f</M>. These
+##  dualities are used to parameterize the conjugacy classes of
+##  symplectic and orthogonal groups, respectively of unitary groups.
+##  <P/>
+##  The arguments <A>F</A> and <A>coeff</A> are as in <Ref
+##  Func="MonicIrreduciblesFromPrimitivePolynomial"/>, that is <A>coeff</A>
+##  is the coefficient list of a primitive polynomial of degree <M>d</M>
+##  over <A>F</A> or just the degree <M>d</M>.
+##  <P/>
+##  <Ref Func="SelfDualMonicIrreducibles"/> returns the list of all monic
+##  irreducible polynomials <M>f</M> of degree <M>d</M> over <A>F</A> with
+##  <M>f^* = f</M>. Without <A>r</A> these are <M>X-1</M>, <M>X+1</M> for
+##  <M>d = 1</M>, and otherwise <M>d</M> must be even (for odd
+##  <M>d &gt; 1</M> the result is empty). With <A>r</A> such polynomials
+##  have odd degree <M>d</M>, their roots lie in the subgroup of order
+##  <M>r^d+1</M> of the multiplicative group of the field with <M>q^d</M>
+##  elements.
+##  <P/>
+##  <Ref Func="NonSelfDualMonicIrreducibleRepresentatives"/> returns a
+##  list containing one of <M>f</M>, <M>f^*</M> for each pair of monic
+##  irreducible polynomials of degree <M>d</M> over <A>F</A> with
+##  <M>f^* \neq f</M> (and <M>f \neq X</M>).
+##  <P/>
+##  The functions use the same method as <Ref
+##  Func="MonicIrreduciblesFromPrimitivePolynomial"/>; in the self-dual
+##  case only a sequence of length <M>q^{(d/2)}+1</M>, respectively
+##  <M>r^d+1</M>, is needed.
+##
+##  <Example>gap> c := CoefficientsOfUnivariatePolynomial(ConwayPolynomial(3,2));;
+##  gap> List(SelfDualMonicIrreducibles(GF(3), c), 
+##  >         a -> UnivariatePolynomial(GF(3), a, 1));
+##  [ x_1^2+Z(3)^0 ]
+##  gap> List(NonSelfDualMonicIrreducibleRepresentatives(GF(3), c), 
+##  >         a -> UnivariatePolynomial(GF(3), a, 1));
+##  [ x_1^2-x_1-Z(3)^0 ]
+##  gap> Length(SelfDualMonicIrreducibles(GF(3), 4));
+##  2
+##  gap> NonSelfDualMonicIrreducibleRepresentatives(GF(5), [-Z(5), Z(5)^0]);
+##  [ [ Z(5)^3, Z(5)^0 ] ]
+##  gap> Set(SelfDualMonicIrreducibles(GF(4), 3, 2), List);
+##  [ [ Z(2^2), 0*Z(2), 0*Z(2), Z(2)^0 ], 
+##    [ Z(2^2)^2, 0*Z(2), 0*Z(2), Z(2)^0 ] ]
+##  gap> Length(NonSelfDualMonicIrreducibleRepresentatives(GF(9), 2, 3));
+##  18
+##  </Example>
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
+##
+BindGlobal("SelfDualMonicIrreducibles",  function(F, input, r...)
+    return CallFuncList(CCTAB_DualityEnumeration,
+                        Concatenation([F, input, "selfdual"], r));
 end);
 
 
-BindGlobal("NonSelfDualMonicIrreducibleRepresentatives", function(F, input)
-    return CCTAB_DualityEnumeration(F, input, "pairs");
+BindGlobal("NonSelfDualMonicIrreducibleRepresentatives", function(F, input, r...)
+    return CallFuncList(CCTAB_DualityEnumeration,
+                        Concatenation([F, input, "pairs"], r));
 end);
 

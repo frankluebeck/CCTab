@@ -12,7 +12,9 @@ LoadPackage("GAPDoc");
 MakeGAPDocDoc("doc", "cctab", ["../lib/PowerMaps.gi", "../lib/Elementary.gi",
     "../lib/PositionConjugacyClass.gi", "../lib/ScalarProducts.gi",
     "../lib/SomeCharacters.gi", "../lib/SplitByCentre.gi",
-    "../lib/CCTable.gi", "../lib/LLL.gi"], "CCTab", relpath, "MathJax");
+    "../lib/CCTable.gi", "../lib/LLL.gi",
+    "../Classical/ClUtils.gi",
+    "../Classical/Wall.gi", "../Classical/WallMethods.gi"], "CCTab", relpath, "MathJax");
 GAPDocManualLab("CCTab");
 CopyHTMLStyleFiles("doc");
 QUIT;

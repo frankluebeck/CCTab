@@ -1,21 +1,23 @@
 #############################################################################
+##  Wall.gd
 ##
-##  wall.gd   declarations for the conjugacy classes of finite classical
-##            groups following G. E. Wall (1963)
+##  (C) 2026 Frank Lübeck, Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen
 ##
-##  Files:  wall.gd          declarations of all global names
-##          wall.gi          implementation, with GAPDoc documentation of
+##  Declarations for the conjugacy classes of finite classical groups
+##  following G. E. Wall (1963).
+##
+##  Files:  Wall.gd          declarations of all global names
+##          Wall.gi          implementation, with GAPDoc documentation of
 ##                           the API functions
-##          wallmethods.gi   methods for GAP's classical groups (optional)
-##  Load with  Read("wall.gd"); Read("wall.gi");  (in this order), then
-##  optionally  Read("wallmethods.gi");
+##          WallMethods.gi   methods for GAP's classical groups
+##  (read by the init.g and read.g files of the CCTab package)
 ##
 ##  Public names start with Wall, internal ones with WALL_, WALL2_
 ##  (characteristic 2) and WALL3_ (conformal groups).
 ##
 #############################################################################
 
-## public functions (documented by GAPDoc sections in wall.gi)
+## public functions (documented by GAPDoc sections in Wall.gi)
 
 #############################################################################
 ##  Forms and groups
@@ -83,6 +85,36 @@ DeclareGlobalName( "WallConformalCentralizer" );
 DeclareGlobalName( "WallConformalCentralizerOrder" );
 DeclareGlobalName( "WallConformalClassSize" );
 
+#############################################################################
+##  Spin groups (q odd)
+#############################################################################
+DeclareGlobalName( "WallSpinGroup" );
+DeclareGlobalName( "Spin" );
+DeclareAttribute( "HomomorphismToOmega", IsGroup );
+DeclareAttribute( "WallSpinData", IsGroup, "mutable" );
+DeclareGlobalName( "WALL_SpinGammaH" );
+DeclareGlobalName( "WALL_SpinData" );
+DeclareGlobalName( "WALL_SpinGammaVec" );
+DeclareGlobalName( "WALL_SpinLiftOrFail" );
+DeclareGlobalName( "WALL_SpinLift" );
+DeclareGlobalName( "WALL_SpinImageCheck" );
+DeclareGlobalName( "WALL_SpinImage" );
+DeclareGlobalName( "WALL_SpinIsElement" );
+DeclareGlobalName( "WallSpinClassInvariants" );
+DeclareGlobalName( "WallSpinNrClasses" );
+DeclareGlobalName( "WallSpinRepresentative" );
+DeclareGlobalName( "WallSpinRepresentativeWithCentralizer" );
+DeclareGlobalName( "WallSpinCentralizerOrder" );
+DeclareGlobalName( "WallSpinClassSize" );
+DeclareGlobalName( "WallSpinConjugatingElement" );
+DeclareGlobalName( "WallSpinInvariant" );
+DeclareGlobalName( "WallSpinIsConjugate" );
+DeclareGlobalName( "WallSpinCentralizer" );
+DeclareGlobalName( "WALL_SpinFused" );
+DeclareGlobalName( "WALL_SpinEpsilon" );
+DeclareGlobalName( "WALL_SpinClassData" );
+DeclareGlobalName( "WALL_SpinPhi" );
+
 ## internal functions
 DeclareGlobalName( "WALL_Frob" );
 DeclareGlobalName( "WALL_K" );
@@ -107,6 +139,16 @@ DeclareGlobalName( "WALL_E2" );
 DeclareGlobalName( "WALL_SeriesMul" );
 DeclareGlobalName( "WALL_SeriesGeom" );
 DeclareGlobalName( "WALL_SeriesBinom" );
+DeclareGlobalName( "WALL_SeriesGeomPow" );
+DeclareGlobalName( "WALL_SeriesBinomPow" );
+DeclareGlobalName( "WALL_SeriesProduct" );
+DeclareGlobalName( "WALL_NrClassesGLSeries" );
+DeclareGlobalName( "WALL_NrClassesGUSeries" );
+DeclareGlobalName( "WALL_NrClassesSLSU" );
+DeclareGlobalName( "WALL_NrClassesSL" );
+DeclareGlobalName( "WALL_SUNrClasses" );
+DeclareGlobalName( "WALL_SONrClasses" );
+DeclareGlobalName( "WALL_OmegaNrClasses" );
 DeclareGlobalName( "WALL_OrbitOf" );
 DeclareGlobalName( "WALL_Atoms" );
 DeclareGlobalName( "WALL_PlusMinusOptions" );
@@ -149,6 +191,20 @@ DeclareGlobalName( "WALL_LabelOf" );
 DeclareGlobalName( "WALL_PiElements" );
 DeclareGlobalName( "WALL_ElementWithPi" );
 DeclareGlobalName( "WALL_KernelGens" );
+DeclareGlobalName( "WALLL_Form" );
+DeclareGlobalName( "WALLL_IsInGroup" );
+DeclareGlobalName( "WALLL_Invariant" );
+DeclareGlobalName( "WALLL_CentralizerOrder" );
+DeclareGlobalName( "WALLL_Atoms" );
+DeclareGlobalName( "WALLL_ClassInvariants" );
+DeclareGlobalName( "WALLL_Model" );
+DeclareGlobalName( "WALLL_RepresentativeWithCentralizer" );
+DeclareGlobalName( "WALLL_ConjugatingElement" );
+DeclareGlobalName( "WALLL_Group" );
+DeclareGlobalName( "WALL_SUDetOrder" );
+DeclareGlobalName( "WALL_MonodromyData" );
+DeclareGlobalName( "WALL_PrimitiveAction" );
+DeclareGlobalName( "WALL_CentralizerOrderLowerBound" );
 DeclareGlobalName( "WALL_SUOmega" );
 DeclareGlobalName( "WALL_SUDetExp" );
 DeclareGlobalName( "WALL_SUDetExpOfInvariant" );
@@ -171,7 +227,9 @@ DeclareGlobalName( "WALL2_UnipotentOptions" );
 DeclareGlobalName( "WALL2_OptionArf" );
 DeclareGlobalName( "WALL2_MakeInvariant" );
 DeclareGlobalName( "WALL2_ClassInvariants" );
+DeclareGlobalName( "WALL2_ChiSeries" );
 DeclareGlobalName( "WALL2_NrClasses" );
+DeclareGlobalName( "WALL2_OmegaNrClasses" );
 DeclareGlobalName( "WALL2_UnipotentCentralizerOrder" );
 DeclareGlobalName( "WALL2_CentralizerOrder" );
 DeclareGlobalName( "WALL2_Piece" );
@@ -214,6 +272,7 @@ DeclareGlobalName( "WALL3_ConjugatingElement" );
 DeclareGlobalName( "WALL3_ConfKind" );
 DeclareGlobalName( "WALL3_MultGen" );
 DeclareGlobalName( "WALL3_ScalarFactor" );
+DeclareGlobalName( "WALL3_DeltaStableNrClasses" );
 DeclareGlobalName( "WALL3_ScalarPart" );
 DeclareGlobalName( "WALL3_Delta" );
 DeclareGlobalName( "WALL3_DeltaImage" );
@@ -231,12 +290,13 @@ DeclareGlobalName( "WALL2_OddConjugatingElement" );
 DeclareGlobalName( "WALL2_OddRepresentativeWithCentralizer" );
 DeclareGlobalName( "WALL_SetFormAttributes" );
 
-## used by wallmethods.gi
+## used by WallMethods.gi
 DeclareGlobalName( "WALL_KnownTrue" );
 DeclareGlobalName( "WALL_FormOfClassicalGroup" );
 DeclareGlobalName( "WALL_NrConjugacyClassesIsometryGroup" );
 DeclareGlobalName( "WALL_ClassesFromInvariants" );
 DeclareGlobalName( "WALL_ConjugacyClassesIsometryGroup" );
+DeclareGlobalName( "WALL_ConjugacyClassesGLSL" );
 DeclareGlobalName( "WALL_ClassicalGroupData" );
 DeclareAttribute( "WallClassicalGroupData", IsGroup, "mutable" );
 DeclareAttribute( "WallClassInvariant", IsConjugacyClassGroupRep );

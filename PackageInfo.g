@@ -55,7 +55,8 @@ PackageDoc := rec(
 
 Dependencies := rec(
   GAP := ">= 4.16",
-  NeededOtherPackages := [ [ "GAPDoc", ">= 1.5" ], [ "EDIM", ">=1.3.8"] ],
+  NeededOtherPackages := [ [ "GAPDoc", ">= 1.5" ], [ "EDIM", ">=1.3.8"],
+                          [ "StandardFF", ">= 1.1" ] ],
   SuggestedOtherPackages := [ ["nofoma", ">= 1.0"] ],
   ExternalConditions := [ ["libflint", ">= 3.1.3" ] ],
   NeededSystemPackages := rec(

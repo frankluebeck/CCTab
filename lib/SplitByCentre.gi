@@ -46,8 +46,9 @@
 ##  gap> SplitByCentre(CCT);
 ##  gap> HasSplittingCentre(CCT);
 ##  true
-##  gap> SplittingCentre(CCT);
-##  [ 1, 10, 19, 28 ]
+##  gap> Set(SplittingCentre(CCT), i-> 
+##  >         Representative(ConjugacyClasses(G)[i])[1][1]);
+##  [ Z(5)^0, Z(5), Z(5)^2, Z(5)^3 ]
 ##  </Example>
 ##  </Description>
 ##  </ManSection>

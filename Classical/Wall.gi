@@ -1,12 +1,15 @@
 #############################################################################
+##  Wall.gi
 ##
-##  wall.gi   conjugacy classes of finite classical groups following
-##            G. E. Wall (1963) and, for unipotent classes in characteristic
-##            2, De Franceschi, Liebeck, O'Brien (2025).
+##  (C) 2026 Frank Lübeck, Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen
+##
+##  Conjugacy classes of finite classical groups following G. E. Wall (1963)
+##  and, for unipotent classes in characteristic 2, De Franceschi, Liebeck,
+##  O'Brien (2025).
 ##
 ##  This file contains the implementation.  The declarations of all
-##  global names are in wall.gd; the mathematical
-##  description is in wall-classes.tex.  The API functions are documented by
+##  global names are in Wall.gd; a description of the mathematical
+##  background is in preparation.  The API functions are documented by
 ##  GAPDoc sections directly in front of their implementation; the section
 ##  "WallIntro" below explains form records, conventions and invariants.
 ##
@@ -15,19 +18,20 @@
 ##  <#GAPDoc Label="WallIntro">
 ##  The functions described here compute conjugacy classes of finite classical
 ##  groups following G.&nbsp;E.&nbsp;Wall, <Q>On the conjugacy classes in the
-##  unitary, symplectic and orthogonal groups</Q> (J. Austral. Math. Soc. 3, 1963),
+##  unitary, symplectic and orthogonal groups</Q> <Cite Key="Wall63"/>,
 ##  and, for unipotent classes in characteristic <M>2</M>, De&nbsp;Franceschi,
-##  Liebeck, O'Brien, <Q>Conjugacy in Finite Classical Groups</Q> (2025).
-##  The mathematical background is described in the document
-##  <F>wall-classes.pdf</F>.
+##  Liebeck, O'Brien, <Q>Conjugacy in Finite Classical Groups</Q>
+##  <Cite Key="DLO25"/>.
+##  A documentation of the mathematical background is in preparation.
 ##  <P/>
 ##  A group is given by a <E>form record</E> <A>f</A>, created by
 ##  <Ref Func="WallClassicalForm"/> or <Ref Func="WallFormOfGroup"/>, for an
 ##  arbitrary non-degenerate form. Conventions are as in &GAP;: vectors are rows,
 ##  and <M>x</M> is an isometry of the form with Gram matrix <M>F</M> iff
-##  <M>x F \bar{x}^{tr} = F</M>, where <M>\bar{x}</M> applies the field
-##  automorphism <M>z \mapsto z^r</M> of <M>GF(r^2)</M> in the unitary case and
-##  nothing otherwise. The form record also caches data; use the same record for
+##  <M>x F (x^\sigma)^{tr} = F</M>, where <M>x^\sigma</M> is obtained by
+##  applying the field automorphism <M>\sigma: z \mapsto z^r</M> of
+##  <M>GF(r^2)</M> to the entries of <M>x</M> in the unitary case, and
+##  <M>\sigma</M> is the identity otherwise. The form record also caches data; use the same record for
 ##  all computations concerning the same group.
 ##  <P/>
 ##  Classes are described by <E>invariants</E>, which are plain records and can be
@@ -40,14 +44,15 @@
 ##  <C>signs</C> (a sorted list of triples <M>[a, m, s_{a,m}]</M>, the sign
 ##  invariants for the eigenvalues <M>a = \pm 1</M>); for even <M>q</M> there are
 ##  the additional components <C>s</C>, <C>deltas</C> and <C>delta0</C>.
-##  Classes of the subgroups <M>SO</M>, <M>\Omega</M>, <M>SU</M> are given by
+##  Classes of the subgroups <M>SO</M>, <M>\Omega</M>, <M>SU</M>, <M>SL</M> are given by
 ##  records <C>rec( inv, label )</C>, and classes of conformal groups by records
 ##  <C>rec( mult, twisted, inv )</C>.
 ##  <P/>
 ##  Covered are <M>GU(n,r)</M> (all <M>r</M>), <M>Sp(2m,q)</M>,
 ##  <M>GO(2m+1,q)</M>, <M>GO^\pm(2m,q)</M> (all <M>q</M>), their subgroups
 ##  <M>SO</M> and <M>\Omega</M> (except in odd dimension for even <M>q</M>),
-##  <M>SU(n,r)</M>, and the conformal groups.
+##  <M>SU(n,r)</M>, the conformal groups, and also <M>GL(n,q)</M> and
+##  <M>SL(n,q)</M> (form type <C>"L"</C>, no form).
 ##  <#/GAPDoc>
 
 
@@ -95,16 +100,10 @@ BindGlobal( "WALL_Leg", function( z, q )
   if IsOne( z^( (q-1)/2 ) ) then return 1; else return -1; fi;
 end );
 
+# a square root of z in K, or fail (FFSqrt from the StandardFF package,
+# Tonelli-Shanks/Cipolla, much faster than LogFFE in big fields)
 BindGlobal( "WALL_Sqrt", function( z, K )
-  local w, l;
-  w := PrimitiveRoot( K );
-  if IsZero( z ) then return z; fi;
-  l := LogFFE( z, w );
-  if IsOddInt( l ) then
-    if IsEvenInt( Size( K ) ) then return z^( Size( K ) / 2 ); fi;
-    return fail;
-  fi;
-  return w^( l / 2 );
+  return FFSqrt( K, z );
 end );
 
 BindGlobal( "WALL_BlockDiag", function( K, blocks )
@@ -157,7 +156,10 @@ end );
 ##  <Func Name="WallClassicalForm" Arg="type, F, K"/>
 ##  <Returns>a form record</Returns>
 ##  <Description>
-##  <A>type</A> is one of <C>"U"</C>, <C>"Sp"</C>, <C>"O"</C>, <A>F</A> is a
+##  <A>type</A> is one of <C>"L"</C>, <C>"U"</C>, <C>"Sp"</C>, <C>"O"</C>. For
+##  <C>"L"</C> the result describes <M>GL(n,K)</M>; then <A>F</A> is the dimension
+##  <M>n</M> (or any <M>n \times n</M> matrix, which is ignored), and the
+##  conformal group functions are not available. Otherwise <A>F</A> is a
 ##  non-degenerate Gram matrix over the finite field <A>K</A>: hermitian for
 ##  <C>"U"</C> (then <A>K</A> <M>= GF(r^2)</M>), alternating for <C>"Sp"</C>, and
 ##  symmetric for <C>"O"</C> with odd <M>q</M>. For <C>"O"</C> and even <M>q</M>,
@@ -171,6 +173,7 @@ end );
 ##
 BindGlobal( "WallClassicalForm", function( type, F, K )
   local f, q, r, n;
+  if type = "L" then return WALLL_Form( F, K ); fi;
   n := Length( F );
   q := Size( K );
   f := rec( type := type, gram := Immutable( F ), field := K, n := n,
@@ -187,7 +190,7 @@ BindGlobal( "WallClassicalForm", function( type, F, K )
     f.sigma := 1;
     if type = "Sp" then f.eps := -1; else f.eps := 1; fi;
   else
-    Error( "WallClassicalForm: type must be \"U\", \"Sp\" or \"O\"" );
+    Error( "WallClassicalForm: type must be \"L\", \"U\", \"Sp\" or \"O\"" );
   fi;
   f.q := q;   # size of the field of definition K
   if WALL_Star( f, F ) <> f.eps * F then
@@ -221,7 +224,10 @@ end );
 ##  invariant form (<Ref Attr="InvariantSesquilinearForm" BookName="ref"/>,
 ##  <Ref Attr="InvariantQuadraticForm" BookName="ref"/> for even <M>q</M>,
 ##  otherwise <Ref Attr="InvariantBilinearForm" BookName="ref"/>), for example
-##  for &GAP;'s <C>GU</C>, <C>Sp</C>, <C>GO</C> and their subgroups.
+##  for &GAP;'s <C>GU</C>, <C>Sp</C>, <C>GO</C> and their subgroups. For
+##  &GAP;'s <C>GL(n,q)</C> and <C>SL(n,q)</C> (no stored form, property
+##  <C>IsNaturalGL</C> or <C>IsNaturalSL</C>) it returns the record of type
+##  <C>"L"</C> for <M>GL(n,q)</M>.
 ##  </Description>
 ##  </ManSection>
 ##  <#/GAPDoc>
@@ -229,6 +235,10 @@ end );
 BindGlobal( "WallFormOfGroup", function( G )
   local K, F;
   K := DefaultFieldOfMatrixGroup( G );
+  if not ( HasInvariantSesquilinearForm( G ) or HasInvariantBilinearForm( G ) or
+           HasInvariantQuadraticForm( G ) ) and ( IsNaturalGL( G ) or IsNaturalSL( G ) ) then
+    return WallClassicalForm( "L", DimensionOfMatrixGroup( G ), K );
+  fi;
   if HasInvariantSesquilinearForm( G ) then
     F := InvariantSesquilinearForm( G ).matrix;
     if IsOddInt( DegreeOverPrimeField( K ) ) then
@@ -261,6 +271,7 @@ end );
 ##  <#/GAPDoc>
 ##
 BindGlobal( "WallIsInGroup", function( f, x )
+  if f.type = "L" then return WALLL_IsInGroup( f, x ); fi;
   if Length( x ) <> f.n or x * f.gram * WALL_Star( f, x ) <> f.gram then
     return false;
   fi;
@@ -331,11 +342,15 @@ BindGlobal( "WALL_CanonicalBaseChange", function( f, F )
     Add( res, [ v, d ] );
   od;
   if f.type = "U" then
+    # scale v by y with norm y^(r+1) = 1/d, d = vd[2] in GF(r):
+    # y := Sqrt(1/d) in K; if y is not in GF(r) then y^r = -y, so
+    # y^(r+1) = -1/d, and we multiply by w^((r-1)/2), which has norm -1.
     w := PrimitiveRoot( K );
     P := List( res, function( vd )
-           local l;
-           l := LogFFE( vd[ 2 ]^-1, w );         # vd[2] lies in GF(r)
-           return w^( l / ( f.r + 1 ) ) * vd[ 1 ];
+           local y;
+           y := WALL_Sqrt( vd[ 2 ]^-1, K );
+           if y^f.r <> y then y := y * w^( ( f.r - 1 ) / 2 ); fi;
+           return y * vd[ 1 ];
          end );
     return rec( P := P, C := IdentityMat( n, K ) );
   fi;
@@ -348,10 +363,13 @@ BindGlobal( "WALL_CanonicalBaseChange", function( f, F )
     else Add( nus, WALL_Sqrt( nu / v[ 2 ], K ) * v[ 1 ] ); fi;
   od;
   if Length( nus ) >= 2 then
-    # find x,y with x^2+y^2 = nu^-1
-    x := Zero( K ); y := WALL_Sqrt( nu^-1, K );
+    # find x,y with x^2+y^2 = nu^-1; x runs through 1, nu, nu^2, ...
+    # (all non-zero elements; x = 0 is impossible since nu^-1 is a
+    # non-square, and a solution exists; x in the prime field only is not
+    # enough, e.g., for q = 25, 27)
+    x := One( K ); y := WALL_Sqrt( nu^-1 - x^2, K );
     while y = fail do
-      x := x + One( K );            # x runs through the prime field
+      x := x * nu;
       y := WALL_Sqrt( nu^-1 - x^2, K );
     od;
     while Length( nus ) >= 2 do
@@ -467,6 +485,7 @@ end );
 ##
 BindGlobal( "WallInvariant", function( f, x )
   local K, chi, facs, polys, signs, pr, c, part, a;
+  if f.type = "L" then return WALLL_Invariant( f, x ); fi;
   if IsBound( f.oddChar2 ) then return WallInvariant( f.sp, WALL2_OddImage( f, x ) ); fi;
   if IsBound( f.twist ) then return WALL3_Invariant( f, x ); fi;
   if IsBound( f.char2 ) then return WALL2_Invariant( f, x ); fi;
@@ -553,6 +572,7 @@ end );
 ##
 BindGlobal( "WallCentralizerOrder", function( f, inv )
   local res, Q, p, c, d, dual, part, ml, e2, a, mm, s, sg, ord;
+  if f.type = "L" then return WALLL_CentralizerOrder( f, inv ); fi;
   if IsBound( f.oddChar2 ) then return WallCentralizerOrder( f.sp, inv ); fi;
   if IsBound( f.twist ) then return WALL3_CentralizerOrder( f, inv ); fi;
   if IsBound( f.char2 ) then return WALL2_CentralizerOrder( f, inv ); fi;
@@ -607,6 +627,7 @@ end );
 ##  <#/GAPDoc>
 ##
 BindGlobal( "WallGroupOrder", function( f )
+  if f.type = "L" then return WALL_OrderGL( f.n, f.q ); fi;
   if IsBound( f.oddChar2 ) then return WallGroupOrder( f.sp ); fi;
   if f.type = "U" then return WALL_OrderGU( f.n, f.r );
   elif f.type = "Sp" then return WALL_OrderSp( f.n, f.q );
@@ -663,6 +684,7 @@ end );
 ##
 BindGlobal( "WallNrClasses", function( f )
   local N, S, D, l, i, q;
+  if f.type = "L" then return WALL_NrClassesGLSeries( f.q, f.n )[ f.n + 1 ]; fi;
   if IsBound( f.oddChar2 ) then return WallNrClasses( f.sp ); fi;
   if IsBound( f.char2 ) then return WALL2_NrClasses( f ); fi;
   N := f.n; q := f.q;
@@ -712,50 +734,35 @@ BindGlobal( "WALL_OrbitOf", function( k, Q, N )
   return o;
 end );
 
+# The polynomials are enumerated with the functions from ClUtils.gi, which
+# work with a primitive polynomial over K and linear recurrences, without
+# constructing the extension fields GF(Q^d).  The result is sorted, so it
+# does not depend on the (random) primitive polynomials used.
 BindGlobal( "WALL_Atoms", function( f )
-  local K, Q, n, atoms, d, L, w, N, seen, k, o, dk, c, cd, T, j, step, r;
-  K := f.field; Q := f.q; n := f.n;
+  local K, n, tw, atoms, d, c, cd;
+  K := f.field; n := f.n;
+  if f.type = "U" then tw := [ f.r ]; else tw := []; fi;
   atoms := [];        # rec( pols := [c] or [c, cd], weight := ...)
-  # self-dual ones
+  # self-dual ones (for Sp/O of even degree, t-1, t+1 are treated separately)
   for d in [ 1 .. n ] do
-    if f.type = "U" then
-      if IsEvenInt( d ) then continue; fi;
-      T := f.r^d;                       # tau = (r^d)-Frobenius
-    else
-      if IsOddInt( d ) then continue; fi;
-      T := Q^( d / 2 );
-    fi;
-    L := WALL_ExtField( Q, d ); w := PrimitiveRoot( L ); N := Q^d - 1;
-    step := T - 1;                       # alpha^(T+1) = 1  <=> step | k
-    seen := [];
-    for j in [ 0 .. T ] do
-      k := j * step mod N;
-      if k in seen then continue; fi;
-      o := WALL_OrbitOf( k, Q, N );
-      UniteSet( seen, o );
-      if Length( o ) <> d then continue; fi;
-      c := List( CoefficientsOfUnivariatePolynomial( MinimalPolynomial( K, w^k ) ), WALL_K );
-      Add( atoms, rec( pols := [ c ], weight := d, selfdual := true ) );
+    if ( f.type = "U" ) = IsEvenInt( d ) then continue; fi;
+    for c in CallFuncList( SelfDualMonicIrreducibles,
+                           Concatenation( [ K, d ], tw ) ) do
+      Add( atoms, rec( pols := [ List( c, WALL_K ) ], weight := d,
+                       selfdual := true ) );
     od;
   od;
-  # pairs
+  # pairs, the smaller polynomial first
   for d in [ 1 .. QuoInt( n, 2 ) ] do
-    L := WALL_ExtField( Q, d ); w := PrimitiveRoot( L ); N := Q^d - 1;
-    seen := BlistList( [ 1 .. N ], [] );   # seen[k+1]
-    for k in [ 0 .. N - 1 ] do
-      if seen[ k + 1 ] then continue; fi;
-      o := WALL_OrbitOf( k, Q, N );
-      for j in o do seen[ j + 1 ] := true; od;
-      if Length( o ) <> d then continue; fi;
-      if f.type = "U" then dk := ( -f.r * k ) mod N; else dk := ( -k ) mod N; fi;
-      if dk in o then continue; fi;        # self-dual (or +-1)
-      for j in WALL_OrbitOf( dk, Q, N ) do seen[ j + 1 ] := true; od;
-      c := List( CoefficientsOfUnivariatePolynomial( MinimalPolynomial( K, w^k ) ), WALL_K );
+    for c in CallFuncList( NonSelfDualMonicIrreducibleRepresentatives,
+                           Concatenation( [ K, d ], tw ) ) do
+      c := List( c, WALL_K );
       cd := WALL_DualCoeffs( f, c );
-      Add( atoms, rec( pols := [ c, cd ], weight := 2 * d, selfdual := false ) );
+      if cd < c then c := [ cd, c ]; else c := [ c, cd ]; fi;
+      Add( atoms, rec( pols := c, weight := 2 * d, selfdual := false ) );
     od;
   od;
-  SortBy( atoms, a -> a.weight );
+  SortBy( atoms, a -> [ a.weight, a.pols[ 1 ] ] );
   return atoms;
 end );
 
@@ -820,6 +827,7 @@ end );
 ##
 BindGlobal( "WallClassInvariants", function( f )
   local n, atoms, result, pm, s, rec1, recurse, base, s1, s2, o1, o2;
+  if f.type = "L" then return WALLL_ClassInvariants( f ); fi;
   if IsBound( f.oddChar2 ) then return WallClassInvariants( f.sp ); fi;
   if IsBound( f.twist ) then return WALL3_ClassInvariants( f ); fi;
   if IsBound( f.char2 ) then return WALL2_ClassInvariants( f ); fi;
@@ -1064,6 +1072,7 @@ end );
 # the model:  rec( x, F, comps )   with  x * F * x^* = F
 BindGlobal( "WallModel", function( f, inv )
   local comps, p, c, dual;
+  if f.type = "L" then return WALLL_Model( f, inv ); fi;
   if IsBound( f.char2 ) then Error( "WallModel: not yet available in characteristic 2" ); fi;
   comps := [];
   for p in inv.polys do
@@ -1085,7 +1094,7 @@ end );
 ##  <Func Name="WallFormIsometry" Arg="f, F0, F"/>
 ##  <Returns>a matrix</Returns>
 ##  <Description>
-##  returns a matrix <M>S</M> with <M>S F0 \bar{S}^{tr} = F</M>, for two
+##  returns a matrix <M>S</M> with <M>S F0 (S^\sigma)^{tr} = F</M>, for two
 ##  equivalent Gram matrices <A>F0</A>, <A>F</A> of the kind given by <A>f</A>
 ##  (not for quadratic forms in characteristic <M>2</M>). An error is raised if
 ##  the forms are not equivalent.
@@ -1317,6 +1326,7 @@ end );
 #   rec( representative, levi, unipotent, generators, leviType,
 #        unipotentOrder, centralizerOrder )
 BindGlobal( "WallRepresentativeWithCentralizer", function( f, inv )
+  if f.type = "L" then return WALLL_RepresentativeWithCentralizer( f, inv ); fi;
   if IsBound( f.oddChar2 ) then return WALL2_OddRepresentativeWithCentralizer( f, inv ); fi;
   if IsBound( f.char2 ) then return WALL2_RepresentativeWithCentralizer( f, inv ); fi;
   if IsBound( f.twist ) then
@@ -1365,6 +1375,7 @@ end );
 ##
 BindGlobal( "WallRepresentative", function( f, inv )
   local model, S;
+  if f.type = "L" then return WALLL_Model( f, inv ).x; fi;
   if IsBound( f.oddChar2 ) then return WALL2_OddPreImage( f, WallRepresentative( f.sp, inv ) ); fi;
   if IsBound( f.twist ) then return WALL3_Representative( f, inv ); fi;
   if IsBound( f.char2 ) then return WALL2_Representative( f, inv ); fi;
@@ -1601,6 +1612,7 @@ end );
 ##
 BindGlobal( "WallConjugatingElement", function( f, x )
   local inv, model, rows, comp, LD, str, H, Z, PW, cd, Q, G, C, P, S, y, rep;
+  if f.type = "L" then return WALLL_ConjugatingElement( f, x ); fi;
   if IsBound( f.oddChar2 ) then return WALL2_OddConjugatingElement( f, x ); fi;
   if IsBound( f.twist ) then return WALL3_ConjugatingElement( f, x ); fi;
   if IsBound( f.char2 ) then return WALL2_ConjugatingElement( f, x ); fi;
@@ -1664,6 +1676,324 @@ BindGlobal( "WallCentralizer", function( f, x )
   return List( r.generators, g -> yi * g * a.conjugator );
 end );
 
+#############################################################################
+##  GL(n,q)  (no form)
+##
+##  A form record of type "L" describes GL(n,q).  Classes are given by the
+##  partitions lambda_phi for all irreducible phi <> t; invariants have the
+##  same format as for the other groups, with empty signs.  The model of a
+##  class is a block diagonal matrix with one block per phi, as the first
+##  half of a pair component (WALL_PairComponent): over Lambda = K[t]/(phi)
+##  the block is (+)_mu  1 (x) alpha (1 + Y_mu).  Adapted bases and the
+##  generators of centralizers (Levi factors GL(m_mu, Lambda), unipotent
+##  radical) are those of pair components, without the dual half.
+##  SL(n,q) is the subgroup "SL" (functions WallSubgroup..., see the SU
+##  section: det(C_GL(x)) = < w^g >, g = gcd(q-1, all parts)).
+#############################################################################
+
+BindGlobal( "WALLL_Form", function( F, K )
+  local n;
+  if IsInt( F ) then n := F; else n := Length( F ); fi;
+  return rec( type := "L", n := n, field := K, q := Size( K ),
+              p := Characteristic( K ), one := One( K ), sigma := 1 );
+end );
+
+BindGlobal( "WALLL_IsInGroup", function( f, x )
+  return IsMatrix( x ) and Length( x ) = f.n and Length( x[ 1 ] ) = f.n and
+         IsSubset( f.field, Flat( x ) ) and not IsZero( DeterminantMat( x ) );
+end );
+
+BindGlobal( "WALLL_Invariant", function( f, x )
+  local K, chi, facs, polys, pr, c;
+  if not WALLL_IsInGroup( f, x ) then Error( "WallInvariant: x is not in GL(n,q)" ); fi;
+  K := f.field;
+  chi := CharacteristicPolynomial( K, K, x );
+  facs := Collected( Factors( PolynomialRing( K ), chi ) );
+  polys := [];
+  for pr in facs do
+    c := CoefficientsOfUnivariatePolynomial( pr[ 1 ] );
+    c := List( c / c[ Length( c ) ], WALL_K );
+    Add( polys, [ c, WALL_Partition( f, x, pr[ 1 ], pr[ 2 ] ) ] );
+  od;
+  return WALL_MakeInvariant( f, polys, [] );
+end );
+
+BindGlobal( "WALLL_CentralizerOrder", function( f, inv )
+  local res, p, Qd;
+  res := 1;
+  for p in inv.polys do
+    Qd := f.q^( Length( p[ 1 ] ) - 1 );
+    res := res * Qd^WALL_E2( p[ 2 ] ) * Product( WALL_Mults( p[ 2 ] ), x -> WALL_OrderGL( x[ 2 ], Qd ) );
+  od;
+  return res;
+end );
+
+# all monic irreducible polynomials <> t of degree <= n, as atoms
+# (enumerated with the functions from ClUtils.gi, sorted)
+BindGlobal( "WALLL_Atoms", function( f )
+  local K, atoms, d, c;
+  K := f.field;
+  atoms := [];
+  for d in [ 1 .. f.n ] do
+    for c in MonicIrreduciblesFromPrimitivePolynomial( K, d ) do
+      if d = 1 and IsZero( c[ 1 ] ) then continue; fi;     # t
+      Add( atoms, rec( pols := [ List( c, WALL_K ) ], weight := d ) );
+    od;
+  od;
+  SortBy( atoms, a -> [ a.weight, a.pols[ 1 ] ] );
+  return atoms;
+end );
+
+BindGlobal( "WALLL_ClassInvariants", function( f )
+  local atoms, result, recurse;
+  atoms := WALLL_Atoms( f );
+  result := [];
+  recurse := function( start, remaining, polys )
+    local i, a, k, lam;
+    if remaining = 0 then
+      Add( result, WALL_MakeInvariant( f, polys, [] ) );
+      return;
+    fi;
+    for i in [ start .. Length( atoms ) ] do
+      a := atoms[ i ];
+      if a.weight > remaining then continue; fi;
+      for k in [ 1 .. QuoInt( remaining, a.weight ) ] do
+        for lam in Partitions( k ) do
+          recurse( i + 1, remaining - k * a.weight,
+                   Concatenation( polys, [ [ a.pols[ 1 ], lam ] ] ) );
+        od;
+      od;
+    od;
+  end;
+  recurse( 1, f.n, [] );
+  return result;
+end );
+
+# the model: one component per phi, as the first half of a pair component
+BindGlobal( "WALLL_Model", function( f, inv )
+  local comps, p, LD, L, comp, xs, mm;
+  comps := [];
+  for p in inv.polys do
+    LD := WALL_LambdaData( f, p[ 1 ], false );
+    L := LD.L;
+    comp := rec( kind := "pair", gl := true, LD := LD, c := p[ 1 ], parts := [] );
+    xs := [];
+    for mm in WALL_Mults( p[ 2 ] ) do
+      Add( xs, KroneckerProduct( IdentityMat( mm[ 2 ], L ),
+           LD.alpha * ( IdentityMat( mm[ 1 ], L ) + WALL_Shift( mm[ 1 ], L ) ) ) );
+      Add( comp.parts, rec( mu := mm[ 1 ], m := mm[ 2 ], kind := "GL" ) );
+    od;
+    comp.xL := WALL_BlockDiag( L, xs );
+    comp.x := WALL_Realize( f, LD, comp.xL );
+    Add( comps, comp );
+  od;
+  return rec( comps := comps, x := WALL_BlockDiag( f.field, List( comps, c -> c.x ) ) );
+end );
+
+BindGlobal( "WALLL_RepresentativeWithCentralizer", function( f, inv )
+  local model, levi, unip, types, i, comp, g;
+  model := WALLL_Model( f, inv );
+  levi := []; unip := []; types := [];
+  for i in [ 1 .. Length( model.comps ) ] do
+    comp := model.comps[ i ];
+    for g in WALL_LeviGensL( f, comp ) do
+      Add( levi, WALL_Embed( f, model, i, WALL_Realize( f, comp.LD, g ) ) );
+    od;
+    for g in WALL_UnipotentGensL( f, comp ) do
+      Add( unip, WALL_Embed( f, model, i, WALL_Realize( f, comp.LD, g ) ) );
+    od;
+    Append( types, List( comp.parts, p -> WALL_PartName( f, comp.LD, p ) ) );
+  od;
+  return rec( representative := model.x, levi := levi, unipotent := unip,
+              generators := Concatenation( levi, unip ), leviType := types,
+              centralizerOrder := WALLL_CentralizerOrder( f, inv ) );
+end );
+
+# adapted basis: Jordan-type basis over Lambda of each generalized eigenspace
+BindGlobal( "WALLL_ConjugatingElement", function( f, x )
+  local inv, model, rows, comp, str, Z, P;
+  inv := WALLL_Invariant( f, x );
+  model := WALLL_Model( f, inv );
+  rows := [];
+  for comp in model.comps do
+    str := WALL_LambdaStructure( f, comp.LD, x, comp.c, false );
+    str.Yfull := str.YL;
+    Z := WALL_AdaptedPair( f, comp, str );
+    Append( rows, Concatenation( List( Z, str.fromL ) ) );
+  od;
+  P := rows;
+  if P * x <> model.x * P then
+    Error( "WallConjugatingElement: adapted basis failed" );
+  fi;
+  return rec( invariant := inv, representative := model.x, conjugator := P );
+end );
+
+BindGlobal( "WALLL_Group", function( f )
+  if not IsBound( f.group ) then
+    f.group := GL( f.n, f.field );
+    SetSize( f.group, WALL_OrderGL( f.n, f.q ) );
+  fi;
+  return f.group;
+end );
+
+#############################################################################
+##  certified lower bounds for the order of a subgroup H of C = C_GL(x)
+##  (used for the pseudo-random centralizer generators in characteristic 2)
+##
+##  N = nilpotent part of x.  Every element of C preserves the monodromy
+##  filtration  M_k = sum_i  Im N^i  cap  ker N^(k+1+i)  of N, and acts on
+##  the primitive parts P_k (k >= 0) of the graded pieces (the tops of the
+##  Jordan blocks of size k+1); pi = this action, a homomorphism into a
+##  group of matrices of total dimension = number of Jordan blocks.  Its
+##  kernel K acts trivially on all M_k / M_(k-1), so (in a basis adapted to M)
+##  g - 1 lowers the weight; K is filtered by the depth (minimal weight drop),
+##  with elementary abelian layers.  Elements of H cap K whose leading terms
+##  are F_2-independent in each layer generate a subgroup of order at least
+##  2^(their number) (the ordered products are pairwise distinct).  Hence
+##      |H| >= |pi(H)| * 2^r,
+##  and if this equals |C| (known), then H = C.  |pi(H)| is computed with
+##  GAP's Size in the small dimension.
+#############################################################################
+
+BindGlobal( "WALL_MonodromyData", function( x, K )
+  local n, N, h, P, ker, im, M, k, i, A, B, wt, prev, new, prim, Wk, Z, R,
+        X, Y, ns, low;
+  n := Length( x );
+  N := JordanDecomposition( x )[ 2 ];
+  h := 1; P := N;
+  while not IsZero( P ) do P := P * N; h := h + 1; od;       # N^h = 0
+  ker := j -> NullspaceMat( N^j );                            # rows v with v N^j = 0
+  im := j -> BaseMat( N^j );
+  M := function( k )                                          # basis of M_k
+    local res, i, S;
+    if k >= h - 1 then return IdentityMat( n, K ); fi;
+    res := [];
+    for i in [ Maximum( 0, -k - 1 ) .. h - 1 ] do
+      if k + 1 + i <= 0 then continue; fi;
+      if i = 0 then S := ker( k + 1 );
+      else S := SumIntersectionMat( im( i ), ker( k + 1 + i ) )[ 2 ]; fi;
+      Append( res, S );
+    od;
+    if res = [] then return []; fi;
+    return BaseMat( res );
+  end;
+  B := []; wt := []; prev := [];
+  for k in [ -( h - 1 ) .. h - 1 ] do
+    A := M( k );
+    if Length( A ) > Length( prev ) then
+      if prev = [] then new := A;
+      else new := BaseSteinitzVectors( A, prev ).factorspace; fi;
+      Append( B, new ); Append( wt, ListWithIdenticalEntries( Length( new ), k ) );
+    fi;
+    prev := A;
+  od;
+  # primitive parts: W_k = { v in M_k : v N^(k+1) in M_(-k-3) }, modulo M_(k-1)
+  prim := [];
+  for k in [ 0 .. h - 1 ] do
+    X := M( k ) * N^( k + 1 ); Y := M( -k - 3 );
+    if Y = [] then ns := NullspaceMat( X );
+    else ns := List( NullspaceMat( Concatenation( X, Y ) ), v -> v{ [ 1 .. Length( X ) ] } ); fi;
+    if ns = [] then continue; fi;
+    Wk := BaseMat( ns * M( k ) );
+    low := M( k - 1 );
+    if low = [] then Z := [];
+    else Z := SumIntersectionMat( Wk, low )[ 2 ]; fi;
+    if Length( Z ) = 0 then R := Wk;
+    else R := BaseSteinitzVectors( Wk, Z ).factorspace; fi;
+    if Length( R ) > 0 then Add( prim, rec( k := k, R := R, RZ := Concatenation( R, Z ) ) ); fi;
+  od;
+  return rec( N := N, B := B, Bi := B^-1, wt := wt, prim := prim, field := K );
+end );
+
+# the action of g on the primitive parts (block diagonal matrix)
+BindGlobal( "WALL_PrimitiveAction", function( md, g )
+  return WALL_BlockDiag( md.field, List( md.prim, p ->
+           List( p.R, r -> SolutionMat( p.RZ, r * g ){ [ 1 .. Length( p.R ) ] } ) ) );
+end );
+
+# lower bound for |<gens>|, gens in C_GL(x), by the method above; stops as
+# soon as the bound reaches target
+BindGlobal( "WALL_CentralizerOrderLowerBound", function( md, gens, target )
+  local K, n, one, pis, piord, wt, layerpos, depthOf, leadVec, table, count,
+        bound, queue, insert, sift, g, h, r, o, i, j, w, rs;
+  K := md.field; n := Length( md.B ); one := IdentityMat( n, K );
+  pis := List( gens, g -> WALL_PrimitiveAction( md, g ) );
+  if pis[ 1 ] = [] then piord := 1;
+  else piord := Size( Group( pis, pis[ 1 ]^0 ) ); fi;
+  if piord >= target then return piord; fi;
+  wt := md.wt;
+  layerpos := [];                       # layerpos[d] = positions (i,j) with wt_i - wt_j = d
+  for i in [ 1 .. n ] do for j in [ 1 .. n ] do
+    w := wt[ i ] - wt[ j ];
+    if w >= 1 then
+      if not IsBound( layerpos[ w ] ) then layerpos[ w ] := []; fi;
+      Add( layerpos[ w ], [ i, j ] );
+    fi;
+  od; od;
+  # matrix in the adapted basis
+  depthOf := function( G )
+    local d, p;
+    for d in [ 1 .. Length( layerpos ) ] do
+      if IsBound( layerpos[ d ] ) and
+         ForAny( layerpos[ d ], p -> not IsZero( G[ p[ 1 ] ][ p[ 2 ] ] - one[ p[ 1 ] ][ p[ 2 ] ] ) ) then
+        return d;
+      fi;
+    od;
+    return infinity;
+  end;
+  leadVec := function( G, d )
+    return Concatenation( List( layerpos[ d ], p ->
+             Coefficients( Basis( K ), G[ p[ 1 ] ][ p[ 2 ] ] - one[ p[ 1 ] ][ p[ 2 ] ] ) ) );
+  end;
+  table := [];                          # table[d] = list of rec( g, v, piv )
+  count := 0; bound := piord;
+  queue := [];
+  # sift g (in the adapted basis); returns the reduced element
+  sift := function( G )
+    local d, v, e;
+    while true do
+      d := depthOf( G );
+      if d = infinity then return fail; fi;
+      v := leadVec( G, d );
+      if IsBound( table[ d ] ) then
+        for e in table[ d ] do
+          if not IsZero( v[ e.piv ] ) then v := v + e.v; G := G * e.gi; fi;
+        od;
+      fi;
+      if not IsZero( v ) then return rec( G := G, d := d, v := v ); fi;
+    od;
+  end;
+  insert := function( G )
+    local s, e;
+    s := sift( G );
+    if s = fail then return; fi;
+    if not IsBound( table[ s.d ] ) then table[ s.d ] := []; fi;
+    e := rec( G := s.G, gi := s.G^-1, v := s.v, piv := PositionNonZero( s.v ) );
+    Add( table[ s.d ], e );
+    count := count + 1; bound := piord * 2^count;
+    # further elements of H cap K: square, commutators, conjugates
+    Add( queue, s.G^2 );
+    for r in Concatenation( Compacted( table ) ) do
+      Add( queue, s.G^-1 * r.gi * s.G * r.G );
+    od;
+    for h in gens do
+      Add( queue, md.B * h^-1 * md.Bi * s.G * md.B * h * md.Bi );
+    od;
+  end;
+  # seeds: g^ord(pi(g)) for the generators and some random products
+  rs := RandomSource( IsMersenneTwister, 17 );
+  for i in [ 1 .. Length( gens ) + 2 * Length( gens ) + 4 ] do
+    if i <= Length( gens ) then g := gens[ i ];
+    else g := Product( List( [ 1 .. 3 ], j -> Random( rs, gens ) ) ); fi;
+    o := Order( WALL_PrimitiveAction( md, g ) );
+    Add( queue, md.B * g^o * md.Bi );
+  od;
+  while queue <> [] and bound < target do
+    g := Remove( queue, 1 );
+    insert( g );
+  od;
+  return bound;
+end );
 #############################################################################
 ##  SO and Omega  (orthogonal groups, q odd)
 ##
@@ -1730,6 +2060,11 @@ BindGlobal( "WALL_PiClosure", function( gens, len )
 end );
 
 BindGlobal( "WALL_CheckS", function( f, S )
+  if f.type = "L" then
+    if S <> "SL" then Error( "for GL(n,q) S must be \"SL\"" ); fi;
+    return;
+  fi;
+  if S = "SL" then Error( "SL only for GL(n,q) (form type \"L\")" ); fi;
   if f.type = "U" then
     if S <> "SU" then Error( "for unitary forms S must be \"SU\"" ); fi;
     return;
@@ -1908,8 +2243,9 @@ end );
 ##  <Description>
 ##  tests whether <A>x</A> lies in the subgroup <A>S</A> of <M>G(F)</M>.
 ##  Here <A>S</A> is <C>"SO"</C> or <C>"Omega"</C> for orthogonal forms (for even
-##  <M>q</M> only <C>"Omega"</C>, since <M>SO = GO</M>), and <C>"SU"</C> for
-##  unitary forms; the same values of <A>S</A> are used in all functions of this
+##  <M>q</M> only <C>"Omega"</C>, since <M>SO = GO</M>), <C>"SU"</C> for
+##  unitary forms, and <C>"SL"</C> for <M>GL(n,q)</M> (form type <C>"L"</C>);
+##  the same values of <A>S</A> are used in all functions of this
 ##  section.
 ##  </Description>
 ##  </ManSection>
@@ -1917,7 +2253,7 @@ end );
 ##
 BindGlobal( "WallIsInSubgroup", function( f, S, x )
   WALL_CheckS( f, S );
-  if S = "SU" then return WALL_SUIsInSubgroup( f, x ); fi;
+  if S = "SU" or S = "SL" then return WALL_SUIsInSubgroup( f, x ); fi;
   if not WallIsInGroup( f, x ) then return false; fi;
   return ForAll( WALL_PiS( f, S, x ), IsOne );
 end );
@@ -1935,7 +2271,7 @@ end );
 ##
 BindGlobal( "WallSubgroupOrder", function( f, S )
   WALL_CheckS( f, S );
-  if S = "SU" then return WALL_SUOrder( f ); fi;
+  if S = "SU" or S = "SL" then return WALL_SUOrder( f ); fi;
   if S = "SO" or IsBound( f.char2 ) then return WallGroupOrder( f ) / 2; fi;
   return WallGroupOrder( f ) / 4;
 end );
@@ -1952,7 +2288,8 @@ end );
 ##  classes of <A>S</A> into which it splits (for <C>"SO"</C>, <C>"Omega"</C> a list
 ##  of signs, for <C>"SU"</C> an integer <M>e</M>, the class of
 ##  <M>r_e^{-1} x_0 r_e</M> with <M>\det(r_e) = \omega^e</M>,
-##  <M>\omega = Z(r^2)^{r-1}</M>).
+##  <M>\omega = Z(r^2)^{r-1}</M>; for <C>"SL"</C> likewise with
+##  <M>\omega = Z(q)</M> and <M>r_e = diag(\omega^e, 1, \ldots, 1)</M>).
 ##  </Description>
 ##  </ManSection>
 ##  <#/GAPDoc>
@@ -1960,7 +2297,7 @@ end );
 BindGlobal( "WallSubgroupClassInvariants", function( f, S )
   local res, inv, H, k, l;
   WALL_CheckS( f, S );
-  if S = "SU" then return WALL_SUClassInvariants( f ); fi;
+  if S = "SU" or S = "SL" then return WALL_SUClassInvariants( f ); fi;
   if S = "SO" or IsBound( f.char2 ) then k := 1; else k := 2; fi;
   res := [];
   for inv in WallClassInvariants( f ) do
@@ -1984,13 +2321,163 @@ end );
 ##  <Func Name="WallSubgroupNrClasses" Arg="f, S"/>
 ##  <Returns>a positive integer</Returns>
 ##  <Description>
-##  returns the number of conjugacy classes of the subgroup <A>S</A>.
+##  returns the number of conjugacy classes of the subgroup <A>S</A>,
+##  computed from generating functions without enumerating the classes.
 ##  </Description>
 ##  </ManSection>
 ##  <#/GAPDoc>
 ##
 BindGlobal( "WallSubgroupNrClasses", function( f, S )
-  return Length( WallSubgroupClassInvariants( f, S ) );
+  WALL_CheckS( f, S );
+  if S = "SU" or S = "SL" then return WALL_SUNrClasses( f ); fi;
+  if IsBound( f.char2 ) then return WALL2_OmegaNrClasses( f ); fi;
+  if S = "SO" then return WALL_SONrClasses( f ); fi;
+  return WALL_OmegaNrClasses( f );
+end );
+
+# (1 - c t^k)^(-m) and (1 + c t^k)^m, truncated at degree N
+BindGlobal( "WALL_SeriesGeomPow", function( c, k, m, N )
+  local a, j;
+  a := ListWithIdenticalEntries( N + 1, 0 );
+  for j in [ 0 .. QuoInt( N, k ) ] do a[ j * k + 1 ] := Binomial( m + j - 1, j ) * c^j; od;
+  return a;
+end );
+
+BindGlobal( "WALL_SeriesBinomPow", function( c, k, m, N )
+  local a, j;
+  a := ListWithIdenticalEntries( N + 1, 0 );
+  for j in [ 0 .. Minimum( m, QuoInt( N, k ) ) ] do a[ j * k + 1 ] := Binomial( m, j ) * c^j; od;
+  return a;
+end );
+
+# product of factors [ c, k, m ] meaning (1 + c t^k)^m (m may be negative)
+BindGlobal( "WALL_SeriesProduct", function( facs, N )
+  local S, x;
+  S := ListWithIdenticalEntries( N + 1, 0 ); S[ 1 ] := 1;
+  for x in facs do
+    if x[ 2 ] > N or x[ 3 ] = 0 then continue; fi;
+    if x[ 3 ] > 0 then
+      S := WALL_SeriesMul( S, WALL_SeriesBinomPow( x[ 1 ], x[ 2 ], x[ 3 ], N ), N );
+    else
+      S := WALL_SeriesMul( S, WALL_SeriesGeomPow( -x[ 1 ], x[ 2 ], -x[ 3 ], N ), N );
+    fi;
+  od;
+  return S;
+end );
+
+# numbers of classes of GL(m,q) and GU(m,r), m = 0..N (Macdonald, Wall 2.6)
+BindGlobal( "WALL_NrClassesGLSeries", function( q, N )
+  return WALL_SeriesProduct( Concatenation( List( [ 1 .. N ], i -> [ -1, i, 1 ] ),
+                                            List( [ 1 .. N ], i -> [ -q, i, -1 ] ) ), N );
+end );
+
+BindGlobal( "WALL_NrClassesGUSeries", function( r, N )
+  return WALL_SeriesProduct( Concatenation( List( [ 1 .. N ], i -> [ 1, i, 1 ] ),
+                                            List( [ 1 .. N ], i -> [ -r, i, -1 ] ) ), N );
+end );
+
+# k(SL(n,q)) resp. k(SU(n,r)) with Q = q-1 resp. r+1 and the series of k(GL) resp. k(GU):
+#   sum_{d | (Q,n)} phi(d) d/Q sum_{e | (Q/d, n/d)} phi(e) k(G(n/(de)))
+BindGlobal( "WALL_NrClassesSLSU", function( n, Q, kser )
+  local res, d, e;
+  res := 0;
+  for d in DivisorsInt( Gcd( Q, n ) ) do
+    for e in DivisorsInt( Gcd( Q / d, n / d ) ) do
+      res := res + Phi( d ) * d / Q * Phi( e ) * kser[ n / ( d * e ) + 1 ];
+    od;
+  od;
+  return res;
+end );
+
+BindGlobal( "WALL_NrClassesSL", function( n, q )
+  return WALL_NrClassesSLSU( n, q - 1, WALL_NrClassesGLSeries( q, n ) );
+end );
+
+BindGlobal( "WALL_SUNrClasses", function( f )
+  if f.type = "L" then return WALL_NrClassesSL( f.n, f.q ); fi;
+  return WALL_NrClassesSLSU( f.n, f.r + 1, WALL_NrClassesGUSeries( f.r, f.n ) );
+end );
+
+# SO, q odd:  k(SO) = k(GO)/2 (n odd),  (k(GO) + 3b)/2 (n even), where b is the number of
+# GO-classes with only even parts at t-1, t+1:  b = (T + sign*D)/2 with
+#   T = prod 1/((1+t^(2i))^2 (1-q t^(2i))),  D = prod (1-t^(4i-2))/(1-q t^(4i))
+BindGlobal( "WALL_SONrClasses", function( f )
+  local n, q, k, T, D;
+  n := f.n; q := f.q; k := WallNrClasses( f );
+  if IsOddInt( n ) then return k / 2; fi;
+  T := WALL_SeriesProduct( Concatenation( List( [ 1 .. n ], i -> [ 1, 2 * i, -2 ] ),
+                                          List( [ 1 .. n ], i -> [ -q, 2 * i, -1 ] ) ), n );
+  D := WALL_SeriesProduct( Concatenation( List( [ 1 .. n ], i -> [ -1, 4 * i - 2, 1 ] ),
+                                          List( [ 1 .. n ], i -> [ -q, 4 * i, -1 ] ) ), n );
+  return ( k + 3 * ( T[ n + 1 ] + f.sign * D[ n + 1 ] ) / 2 ) / 2;
+end );
+
+# Omega, q odd (any dimension n):
+#   k(Omega) = coefficient of t^n in 1/8 sum_{beta,gamma in {0,1}} dF^gamma sum_{sigma = +-1}
+#     [ G_{beta,gamma}(t) P(t^4)^2 ( U_gamma(t) U_{beta+gamma}(sigma t) + 1 )
+#       + prod (1-q t^(4i))^(-1) sum_{c = +-1} E((c c2)^gamma t) E((c c2)^(beta+gamma) sigma t) ]
+#   with dF = (det F/q), c2 = (2/q), eta = (-1/q), E(t) = prod_{m odd} (1+t^m),
+#   U_w = prod_{m odd} (1+t^m)/(1-t^m) for w even, 1 for w odd, and
+#   G_00 = prod (1-t^(2i))^2/(1-q t^(2i)),  G_01 = prod (1-eta^i t^(2i))(1-t^(4i))/(1-q t^(4i)),
+#   G_10 = G_11 = prod_{i odd} (1-t^(2i)) prod_{i even} (1-t^(2i))^2/(1-q t^(2i)).
+BindGlobal( "WALL_OmegaNrClasses", function( f )
+  local n, q, F, leg, eta, c2, dF, odd, G, P4, Qinv, U, E, mul, tot, be, ga, sig, c, k1, k2, a, b;
+  n := f.n; q := f.q; F := GF( q );
+  leg := function( x ) if x^( ( q - 1 ) / 2 ) = One( F ) then return 1; else return -1; fi; end;
+  eta := leg( -One( F ) ); c2 := leg( 2 * One( F ) );
+  dF := leg( DeterminantMat( f.gram ) * One( F ) );
+  odd := Filtered( [ 1 .. n ], IsOddInt );
+  mul := function( a, b ) return WALL_SeriesMul( a, b, n ); end;
+  G := [];
+  G[ 1 ] := WALL_SeriesProduct( Concatenation( List( [ 1 .. n ], i -> [ -1, 2 * i, 2 ] ),
+                                List( [ 1 .. n ], i -> [ -q, 2 * i, -1 ] ) ), n );        # G_00
+  G[ 2 ] := WALL_SeriesProduct( Concatenation( List( [ 1 .. n ], i -> [ -eta^i, 2 * i, 1 ] ),
+                                List( [ 1 .. n ], i -> [ -1, 4 * i, 1 ] ),
+                                List( [ 1 .. n ], i -> [ -q, 4 * i, -1 ] ) ), n );        # G_01
+  G[ 3 ] := WALL_SeriesProduct( Concatenation(
+                                List( [ 1 .. n ], i -> [ -1, 2 * i, 2 - i mod 2 ] ),
+                                List( [ 2, 4 .. 2 * QuoInt( n, 2 ) ], i -> [ -q, 2 * i, -1 ] ) ), n );
+  G[ 4 ] := G[ 3 ];                                                                       # G_10 = G_11
+  P4 := WALL_SeriesProduct( List( [ 1 .. n ], i -> [ -1, 4 * i, -2 ] ), n );           # P(t^4)^2
+  Qinv := WALL_SeriesProduct( List( [ 1 .. n ], i -> [ -q, 4 * i, -1 ] ), n );
+  U := function( w, s )
+    if IsOddInt( w ) then return WALL_SeriesProduct( [ ], n ); fi;
+    return WALL_SeriesProduct( Concatenation( List( odd, m -> [ s^m, m, 1 ] ),
+                                              List( odd, m -> [ -s^m, m, -1 ] ) ), n );
+  end;
+  E := s -> WALL_SeriesProduct( List( odd, m -> [ s^m, m, 1 ] ), n );
+  tot := 0;
+  for be in [ 0, 1 ] do
+    for ga in [ 0, 1 ] do
+      for sig in [ 1, -1 ] do
+        a := mul( G[ 2 * be + ga + 1 ], P4 );
+        a := mul( a, mul( U( ga, 1 ), U( be + ga, sig ) ) ) + a;
+        for c in [ 1, -1 ] do
+          k1 := ( c * c2 )^ga; k2 := ( c * c2 )^( be + ga );
+          a := a + mul( Qinv, mul( E( k1 ), E( k2 * sig ) ) );
+        od;
+        tot := tot + dF^ga * a[ n + 1 ];
+      od;
+    od;
+  od;
+  return tot / 8;
+end );
+
+# Omega, q even (n even): k(Omega^eps) = 1/4 (S + C) + 1/2 T + eps W, where
+#   S = chi(1,1;t^2)/prod(1-q t^(2i)) (= k(GO^+) + k(GO^-)),
+#   C = chi'(1,1;t^2)/prod(1-q t^(2i)) with the weight -x^(v+1)(1-x^(v+1)) in Wall's recursion,
+#   T = prod 1/((1+t^(2i))(1-q t^(2i))),  W = prod (1-t^(4i-2))/(1-q t^(4i)) (= k(GO^+) - k(GO^-)).
+BindGlobal( "WALL2_OmegaNrClasses", function( f )
+  local nu, q, prodq, S, C, T, W;
+  nu := f.n / 2; q := f.q;
+  prodq := WALL_SeriesProduct( List( [ 1 .. nu ], i -> [ -q, i, -1 ] ), nu );   # in x = t^2
+  S := WALL_SeriesMul( WALL2_ChiSeries( 1, 1, 1, nu ), prodq, nu )[ nu + 1 ];
+  C := WALL_SeriesMul( WALL2_ChiSeries( 1, 1, -1, nu ), prodq, nu )[ nu + 1 ];
+  T := WALL_SeriesProduct( Concatenation( List( [ 1 .. nu ], i -> [ 1, i, -1 ] ),
+                                          List( [ 1 .. nu ], i -> [ -q, i, -1 ] ) ), nu )[ nu + 1 ];
+  W := WALL_SeriesProduct( Concatenation( List( [ 1 .. nu ], i -> [ -1, 2 * i - 1, 1 ] ),
+                                          List( [ 1 .. nu ], i -> [ -q, 2 * i, -1 ] ) ), nu )[ nu + 1 ];
+  return ( S + C ) / 4 + T / 2 + f.sign * W;
 end );
 
 ##
@@ -2008,7 +2495,7 @@ end );
 ##
 BindGlobal( "WallSubgroupCentralizerOrder", function( f, S, sinv )
   WALL_CheckS( f, S );
-  if S = "SU" then return WALL_SUCentralizerOrder( f, sinv ); fi;
+  if S = "SU" or S = "SL" then return WALL_SUCentralizerOrder( f, sinv ); fi;
   return WallCentralizerOrder( f, sinv.inv ) /
          Length( WALL_ProjS( S, WallPiImageOfCentralizer( f, sinv.inv ) ) );
 end );
@@ -2111,7 +2598,7 @@ end );
 BindGlobal( "WallSubgroupRepresentativeWithCentralizer", function( f, S, sinv )
   local r, x0, rt, rti, K;
   WALL_CheckS( f, S );
-  if S = "SU" then return WALL_SURepresentativeWithCentralizer( f, sinv ); fi;
+  if S = "SU" or S = "SL" then return WALL_SURepresentativeWithCentralizer( f, sinv ); fi;
   r := WallRepresentativeWithCentralizer( f, sinv.inv );
   x0 := r.representative;
   rt := WALL_ElementWithPi( f, S, sinv.label );
@@ -2137,7 +2624,7 @@ end );
 BindGlobal( "WallSubgroupRepresentative", function( f, S, sinv )
   local x0, rt;
   WALL_CheckS( f, S );
-  if S = "SU" then return WALL_SURepresentative( f, sinv ); fi;
+  if S = "SU" or S = "SL" then return WALL_SURepresentative( f, sinv ); fi;
   x0 := WallRepresentative( f, sinv.inv );
   rt := WALL_ElementWithPi( f, S, sinv.label );
   return rt^-1 * x0 * rt;
@@ -2161,7 +2648,7 @@ end );
 BindGlobal( "WallSubgroupConjugatingElement", function( f, S, x )
   local a, H, t, rt, r, K, need, c, y;
   WALL_CheckS( f, S );
-  if S = "SU" then return WALL_SUConjugatingElement( f, x ); fi;
+  if S = "SU" or S = "SL" then return WALL_SUConjugatingElement( f, x ); fi;
   if not WallIsInSubgroup( f, S, x ) then Error( "x is not in ", S ); fi;
   a := WallConjugatingElement( f, x );                  # y0 x y0^-1 = x0
   H := WALL_ProjS( S, WallPiImageOfCentralizer( f, a.invariant ) );
@@ -2207,11 +2694,19 @@ end );
 ##  0 <= e < g.
 #############################################################################
 
+# order of the determinant group: r+1 (SU), q-1 (SL)
+BindGlobal( "WALL_SUDetOrder", function( f )
+  if f.type = "L" then return f.q - 1; fi;
+  return f.r + 1;
+end );
+
 BindGlobal( "WALL_SUOmega", function( f )
+  if f.type = "L" then return PrimitiveRoot( f.field ); fi;
   return PrimitiveRoot( f.field )^( f.r - 1 );
 end );
 
 BindGlobal( "WALL_SUDetExp", function( f, x )
+  if WALL_SUDetOrder( f ) = 1 then return 0; fi;
   return LogFFE( DeterminantMat( x ), WALL_SUOmega( f ) );
 end );
 
@@ -2223,12 +2718,13 @@ BindGlobal( "WALL_SUDetExpOfInvariant", function( f, inv )
     c := p[ 1 ];
     d := d * ( ( -f.one )^( Length( c ) - 1 ) * c[ 1 ] )^Sum( p[ 2 ] );
   od;
+  if WALL_SUDetOrder( f ) = 1 then return 0; fi;
   return LogFFE( d, WALL_SUOmega( f ) );
 end );
 
 # g with det( C_GU(x) ) = < omega^g >
 BindGlobal( "WALL_SUGcd", function( f, inv )
-  return Gcd( Concatenation( [ f.r + 1 ], Concatenation( List( inv.polys, p -> p[ 2 ] ) ) ) );
+  return Gcd( Concatenation( [ WALL_SUDetOrder( f ) ], Concatenation( List( inv.polys, p -> p[ 2 ] ) ) ) );
 end );
 
 BindGlobal( "WALL_SUIsInSubgroup", function( f, x )
@@ -2236,7 +2732,7 @@ BindGlobal( "WALL_SUIsInSubgroup", function( f, x )
 end );
 
 BindGlobal( "WALL_SUOrder", function( f )
-  return WallGroupOrder( f ) / ( f.r + 1 );
+  return WallGroupOrder( f ) / ( WALL_SUDetOrder( f ) );
 end );
 
 BindGlobal( "WALL_SUClassInvariants", function( f )
@@ -2251,13 +2747,18 @@ BindGlobal( "WALL_SUClassInvariants", function( f )
 end );
 
 BindGlobal( "WALL_SUCentralizerOrder", function( f, sinv )
-  return WallCentralizerOrder( f, sinv.inv ) * WALL_SUGcd( f, sinv.inv ) / ( f.r + 1 );
+  return WallCentralizerOrder( f, sinv.inv ) * WALL_SUGcd( f, sinv.inv ) / ( WALL_SUDetOrder( f ) );
 end );
 
 # element of GU with det omega^e: u -> u + (omega^e - 1) B(u,v)/B(v,v) v,
 # v anisotropic
 BindGlobal( "WALL_SUElementWithDet", function( f, e )
-  local v, col;
+  local v, col, D;
+  if f.type = "L" then
+    D := List( IdentityMat( f.n, f.field ), ShallowCopy );
+    D[ 1 ][ 1 ] := WALL_SUOmega( f )^e;
+    return D;
+  fi;
   if not IsBound( f.suVector ) then
     f.suVector := WALL_CanonicalBaseChange( f, f.gram ).P[ 1 ];
   fi;
@@ -2271,7 +2772,7 @@ end );
 # generators of the kernel
 BindGlobal( "WALL_SUKernelGens", function( f, gens )
   local N, one, T, imgs, es, i, g, s, im, kgens;
-  N := f.r + 1;
+  N := WALL_SUDetOrder( f );
   one := IdentityMat( f.n, f.field );
   es := List( gens, g -> WALL_SUDetExp( f, g ) );
   T := [ one ]; imgs := [ 0 ];
@@ -2300,7 +2801,7 @@ BindGlobal( "WALL_SURepresentativeWithCentralizer", function( f, sinv )
   rt := WALL_SUElementWithDet( f, sinv.label );
   rti := rt^-1;
   K := WALL_SUKernelGens( f, r.generators );
-  if Length( K.images ) * WALL_SUGcd( f, sinv.inv ) <> f.r + 1 then
+  if Length( K.images ) * WALL_SUGcd( f, sinv.inv ) <> WALL_SUDetOrder( f ) then
     Error( "WALL_SURepresentativeWithCentralizer: det(C) has wrong order" );
   fi;
   return rec( representative := rti * r.representative * rt,
@@ -2318,7 +2819,7 @@ BindGlobal( "WALL_SUConjugatingElement", function( f, x )
   local a, N, e0, t, rt, r, K, need, pos, c;
   if not WALL_SUIsInSubgroup( f, x ) then Error( "x is not in SU" ); fi;
   a := WallConjugatingElement( f, x );                  # y0 x y0^-1 = x0
-  N := f.r + 1;
+  N := WALL_SUDetOrder( f );
   e0 := WALL_SUDetExp( f, a.conjugator );
   t := e0 mod WALL_SUGcd( f, a.invariant );
   rt := WALL_SUElementWithDet( f, t );
@@ -2536,42 +3037,34 @@ BindGlobal( "WALL2_ClassInvariants", function( f )
   return result;
 end );
 
+# Wall's chi(a,b;x) of Theorem 3.7.3, as a series in x up to x^N; for sgn = -1 the weight
+# x^(v+1)(1+x^(v+1)) is replaced by -x^(v+1)(1-x^(v+1)) (count weighted by the Dickson invariant)
+BindGlobal( "WALL2_ChiSeries", function( a, b, sgn, N )
+  local sh, cm, c, v, r, tv;
+  sh := function( s, k ) local r, x; r := ListWithIdenticalEntries( N + 1, 0 );
+          for x in [ 1 .. N + 1 - k ] do r[ x + k ] := s[ x ]; od; return r; end;
+  cm := ListWithIdenticalEntries( N + 1, 0 ); cm[ 1 ] := a;      # chi_{-1}
+  c := ListWithIdenticalEntries( N + 1, 0 ); c[ 1 ] := b;        # chi_0
+  for v in [ 0 .. N ] do
+    r := c + sh( cm, 2 * v + 1 );               # chi_{2v+1} = chi_{2v} + x^{2v+1} chi_{2v-1}
+    tv := c + cm;                               # chi_{2v} + chi_{2v-1}
+    tv := sgn * sh( tv, v + 1 ) + sh( tv, 2 * v + 2 );
+    cm := r; c := r + tv;                       # chi_{2v+2} = chi_{2v+1} + e_{v+1}(chi_{2v} + chi_{2v-1})
+  od;
+  return c;
+end );
+
 # Wall, Theorem 3.7.3 (generating functions)
 BindGlobal( "WALL2_NrClasses", function( f )
-  local nu, N, chi, cm1, c0, v, c, e, i, q, prodq, S, D, l, res;
+  local nu, q, prodq, S, D;
   nu := f.n / 2; q := f.q;
-  N := nu + 1;                              # series in u = t^2 up to u^nu
-  # chi_i as series in the variable t (degree <= nu), recursion of Wall
-  chi := function( a, b )
-    local cm, c, r, x, sh, mul, add, tv;
-    sh := function( s, k ) local r; r := ListWithIdenticalEntries( N, 0 );
-            for x in [ 1 .. N - k ] do r[ x + k ] := s[ x ]; od; return r; end;
-    add := function( s1, s2 ) return s1 + s2; end;
-    cm := ListWithIdenticalEntries( N, 0 ); cm[ 1 ] := a;        # chi_{-1}
-    c := ListWithIdenticalEntries( N, 0 ); c[ 1 ] := b;          # chi_0
-    for v in [ 0 .. N ] do
-      # chi_{2v+1} = chi_{2v} + t^{2v+1} chi_{2v-1}
-      r := c + sh( cm, 2 * v + 1 );
-      # chi_{2v+2} = chi_{2v+1} + t^{v+1}(1+t^{v+1})(chi_{2v+1} + (1-t^{2v+1}) chi_{2v-1})
-      tv := r + cm - sh( cm, 2 * v + 1 );
-      tv := sh( tv, v + 1 ) + sh( tv, 2 * v + 2 );
-      cm := r; c := r + tv;
-    od;
-    return c;
-  end;
-  prodq := ListWithIdenticalEntries( N, 0 ); prodq[ 1 ] := 1;
-  for l in [ 1 .. nu ] do
-    prodq := WALL_SeriesMul( prodq, WALL_SeriesGeom( q, l, nu ), nu );
-  od;
+  prodq := WALL_SeriesProduct( List( [ 1 .. nu ], i -> [ -q, i, -1 ] ), nu );   # in x = t^2
   if f.type = "Sp" then
-    return WALL_SeriesMul( chi( 0, 1 ), prodq, nu )[ nu + 1 ];
+    return WALL_SeriesMul( WALL2_ChiSeries( 0, 1, 1, nu ), prodq, nu )[ nu + 1 ];
   fi;
-  S := WALL_SeriesMul( chi( 1, 1 ), prodq, nu );
-  D := ListWithIdenticalEntries( N, 0 ); D[ 1 ] := 1;     # in u = t^2
-  for l in [ 1 .. nu ] do
-    D := WALL_SeriesMul( D, WALL_SeriesBinom( -1, 2 * l - 1, nu ), nu );
-    D := WALL_SeriesMul( D, WALL_SeriesGeom( q, 2 * l, nu ), nu );
-  od;
+  S := WALL_SeriesMul( WALL2_ChiSeries( 1, 1, 1, nu ), prodq, nu );
+  D := WALL_SeriesProduct( Concatenation( List( [ 1 .. nu ], i -> [ -1, 2 * i - 1, 1 ] ),
+                                          List( [ 1 .. nu ], i -> [ -q, 2 * i, -1 ] ) ), nu );
   return ( S[ nu + 1 ] + f.sign * D[ nu + 1 ] ) / 2;
 end );
 
@@ -2961,8 +3454,8 @@ end );
 ##  characteristic 2: conjugating elements
 #############################################################################
 
-BindGlobal( "WALL2_Sqrt", function( K, z )
-  return SquareRoots( K, z )[ 1 ];
+BindGlobal( "WALL2_Sqrt", function( K, z )   # char 2: unique square root
+  return z^( Size( K ) / 2 );
 end );
 
 BindGlobal( "WALL2_Bits", function( K, z ) return Coefficients( Basis( K ), z ); end );
@@ -3102,12 +3595,16 @@ BindGlobal( "WALL2_PieceIsometry", function( f, x, F, Qm, us, m, pc, rs )
     ok := true;
     for D in [ 1 .. m - 1 ] do
       t := m - 1 - D;
-      eqsDiag := Filtered( alleqs, e -> ( e[ 1 ] = "B" and e[ 2 ] = e[ 3 ] and e[ 4 ] = t ) or
-                   ( e[ 1 ] = "Q" and Maximum( 1, m - 1 - 2 * e[ 4 ] ) = D ) );
+      # (1) diagonal B-equations of level D: F_2-affine in the free unknowns
+      eqsDiag := Filtered( alleqs, e -> e[ 1 ] = "B" and e[ 2 ] = e[ 3 ] and e[ 4 ] = t );
       addEqs( eqsDiag, fixedBits );
       if not solveSet() then ok := false; break; fi;
+      # (2) fix the unknowns of index <= D/2
       fixUpTo( QuoInt( D, 2 ) );
-      eqsOff := Filtered( alleqs, e -> e[ 1 ] = "B" and e[ 2 ] <> e[ 3 ] and e[ 4 ] = t );
+      # (3) off-diagonal B-equations and Q-equations of level D: now F_2-affine
+      #     (the Q-equations contain products c_{k1,D/2} c_{k2,D/2} before (2))
+      eqsOff := Filtered( alleqs, e -> ( e[ 1 ] = "B" and e[ 2 ] <> e[ 3 ] and e[ 4 ] = t ) or
+                   ( e[ 1 ] = "Q" and Maximum( 1, m - 1 - 2 * e[ 4 ] ) = D ) );
       addEqs( eqsOff, fixedBits );
       if not solveSet() then ok := false; break; fi;
     od;
@@ -3267,14 +3764,20 @@ end );
 # cap random elements; status "ok" (generated group has the order of Wall's
 # formula), "cap" (cap reached below that order), "exceeded" (generated
 # group larger than the formula value)
+# pseudo-random generators of C_G(x), x the representative: elements
+# y(h) h (Lemma "uniform" in the background notes) are added until the generated
+# group has Wall's order.  The order is certified by
+# WALL_CentralizerOrderLowerBound (no Schreier-Sims in dimension n); only if
+# this fails for 16 generators, GAP's Size is used.
 BindGlobal( "WALL2_CentralizerCapped", function( f, inv, cap )
-  local x, ord, G, gens, H, h, a, c, nextcheck, one, tries;
+  local x, ord, G, gens, h, a, c, one, tries, md, lb, H, viaSize;
   x := WallRepresentative( f, inv );
   ord := WallCentralizerOrder( f, inv );
   G := WALL2_Group( f );
   one := IdentityMat( f.n, f.field );
-  gens := []; H := Group( [ one ] ); nextcheck := 2; tries := 0;
-  while Size( H ) < ord do
+  md := WALL_MonodromyData( x, f.field );
+  gens := []; tries := 0; viaSize := false;
+  while true do
     if tries >= cap then
       return rec( representative := x, generators := gens, centralizerOrder := ord,
                   status := "cap", order := Size( Group( gens, one ) ) );
@@ -3285,20 +3788,28 @@ BindGlobal( "WALL2_CentralizerCapped", function( f, inv, cap )
     if a.representative <> x then Error( "WALL2: representative mismatch" ); fi;
     c := a.conjugator * h;
     if c * x <> x * c then Error( "WALL2: not in the centralizer" ); fi;
-    if not c in H then
-      Add( gens, c );
-      if Length( gens ) >= nextcheck or tries >= cap then
-        H := Group( gens, one );
-        if Size( H ) > ord then
-          return rec( representative := x, generators := gens, centralizerOrder := ord,
-                      status := "exceeded", order := Size( H ) );
-        fi;
-        nextcheck := Length( gens ) + 1;
+    Add( gens, c );
+    if not viaSize then
+      lb := WALL_CentralizerOrderLowerBound( md, gens, ord );
+      if lb > ord then
+        return rec( representative := x, generators := gens, centralizerOrder := ord,
+                    status := "exceeded", order := lb );
+      elif lb = ord then
+        return rec( representative := x, generators := gens, centralizerOrder := ord,
+                    status := "ok", order := ord, certified := "layers" );
+      fi;
+      if Length( gens ) >= 16 then viaSize := true; fi;
+    else
+      H := Group( gens, one );
+      if Size( H ) > ord then
+        return rec( representative := x, generators := gens, centralizerOrder := ord,
+                    status := "exceeded", order := Size( H ) );
+      elif Size( H ) = ord then
+        return rec( representative := x, generators := gens, centralizerOrder := ord,
+                    status := "ok", order := ord, certified := "Size" );
       fi;
     fi;
   od;
-  return rec( representative := x, generators := gens, centralizerOrder := ord,
-              status := "ok", order := ord );
 end );
 
 BindGlobal( "WALL2_RepresentativeWithCentralizer", function( f, inv )
@@ -3418,7 +3929,7 @@ end );
 ##  <Func Name="WallMultiplier" Arg="f, x"/>
 ##  <Returns>a field element</Returns>
 ##  <Description>
-##  returns <M>\lambda</M> with <M>x F \bar{x}^{tr} = \lambda F</M>, assuming
+##  returns <M>\lambda</M> with <M>x F (x^\sigma)^{tr} = \lambda F</M>, assuming
 ##  that <A>x</A> is a similitude (no check).
 ##  </Description>
 ##  </ManSection>
@@ -3426,6 +3937,7 @@ end );
 ##
 BindGlobal( "WallMultiplier", function( f, x )
   local M, i, j;
+  if f.type = "L" then Error( "conformal groups are not defined for GL" ); fi;
   M := x * f.gram * WALL_Star( f, x );
   i := PositionProperty( f.gram, r -> not IsZero( r ) );
   j := PositionProperty( f.gram[ i ], z -> not IsZero( z ) );
@@ -3739,23 +4251,35 @@ end );
 ##  <#/GAPDoc>
 ##
 BindGlobal( "WallConformalGroupOrder", function( f )
+  if f.type = "L" then Error( "conformal groups are not defined for GL" ); fi;
   return WallGroupOrder( f ) * WALL3_ScalarFactor( f );
 end );
 
 # canonical scalar mu and twist flag for a multiplier lambda:
 #   x = mu * g,  g in G (twisted = false) or g a nu-similitude (twisted = true)
+# mu must be a function of lambda only (the invariant is that of mu^-1*x),
+# so of the two square roots +-y we take the smaller one.
 BindGlobal( "WALL3_ScalarPart", function( f, lambda )
-  local w, k;
-  w := PrimitiveRoot( f.field );
+  local K, w, y, r;
+  K := f.field;
   if f.type = "U" then
-    k := LogFFE( lambda, w^( f.r + 1 ) );
-    return rec( mu := w^k, twisted := false );
+    # mu^(r+1) = lambda, lambda in GF(r)
+    r := f.r;
+    if IsEvenInt( r ) then return rec( mu := lambda^( r / 2 ), twisted := false ); fi;
+    y := WALL_Sqrt( lambda, K );
+    if y^r = y then return rec( mu := Minimum( y, -y ), twisted := false ); fi;
+    # lambda non-square in GF(r): lambda / w^(r+1) is a square in GF(r)
+    w := PrimitiveRoot( K );
+    y := WALL_Sqrt( lambda / w^( r + 1 ), K );
+    return rec( mu := w * Minimum( y, -y ), twisted := false );
   fi;
   if IsBound( f.char2 ) then return rec( mu := lambda^( f.q / 2 ), twisted := false ); fi;
-  k := LogFFE( lambda, w );
-  if IsEvenInt( k ) then return rec( mu := w^( k / 2 ), twisted := false ); fi;
+  y := WALL_Sqrt( lambda, K );
+  if y <> fail then return rec( mu := Minimum( y, -y ), twisted := false ); fi;
   if IsOddInt( f.n ) then Error( "odd dimension: multipliers are squares" ); fi;
-  return rec( mu := w^( ( k - 1 ) / 2 ), twisted := true );
+  # nu = PrimitiveRoot( K ) is the multiplier of the twisted form
+  y := WALL_Sqrt( lambda / PrimitiveRoot( K ), K );
+  return rec( mu := Minimum( y, -y ), twisted := true );
 end );
 
 ##
@@ -3773,6 +4297,7 @@ end );
 ##
 BindGlobal( "WallConformalMultiplier", function( f, x )
   local lambda;
+  if f.type = "L" then Error( "conformal groups are not defined for GL" ); fi;
   lambda := WallMultiplier( f, x );
   if x * f.gram * WALL_Star( f, x ) <> lambda * f.gram then
     Error( "x is not a similitude" );
@@ -3825,6 +4350,7 @@ end );
 ##
 BindGlobal( "WallConformalInvariant", function( f, x )
   local lambda, sp, g, inv;
+  if f.type = "L" then Error( "conformal groups are not defined for GL" ); fi;
   lambda := WallConformalMultiplier( f, x );
   sp := WALL3_ScalarPart( f, lambda );
   g := sp.mu^-1 * x;
@@ -3855,6 +4381,7 @@ end );
 ##
 BindGlobal( "WallConformalClassInvariants", function( f )
   local res, w, lambdas, lambda, sp, ginvs, tinvs, inv;
+  if f.type = "L" then Error( "conformal groups are not defined for GL" ); fi;
   res := [];
   w := WALL3_MultGen( f );
   lambdas := List( [ 0 .. Order( w ) - 1 ], k -> w^k );
@@ -3880,13 +4407,50 @@ end );
 ##  <Func Name="WallConformalNrClasses" Arg="f"/>
 ##  <Returns>a positive integer</Returns>
 ##  <Description>
-##  returns the number of conjugacy classes of <M>CG(F)</M>.
+##  returns the number of conjugacy classes of <M>CG(F)</M>, computed from
+##  generating functions without enumerating the classes:
+##  <M>|\lambda(CG)| \cdot k(G)</M> if <M>CG = GZ</M>, and
+##  <M>(q-1)(k(G)+3b)/4</M> otherwise (<M>q</M> odd, Sp and
+##  <M>GO^{\pm}</M> in even dimension), where <M>b</M> is the number of
+##  classes of <M>G</M> that are stable under a similitude <M>\delta</M>
+##  with non-square multiplier.
 ##  </Description>
 ##  </ManSection>
 ##  <#/GAPDoc>
 ##
+# number of delta-stable G-classes (q odd, Sp or GO^+-(2nu,q), even dimension):
+#   Sp:  sum b_nu t^(2nu) = prod (1+t^(4i))^2 / (1-q t^(2i))
+#   GO:  f^+ + f^- = coeff. of prod (1+t^(4i-2))^2 / (1-q t^(2i)),
+#        f^+ - f^- = k(GO^+) - k(GO^-) = coeff. of prod (1-t^(4i-2)) / (1-q t^(4i))
+BindGlobal( "WALL3_DeltaStableNrClasses", function( f )
+  local N, q, S, D, l, i;
+  N := f.n; q := f.q;
+  S := ListWithIdenticalEntries( N + 1, 0 ); S[ 1 ] := 1;
+  for l in [ 1 .. N ] do
+    for i in [ 1 .. 2 ] do
+      if f.type = "Sp" then
+        S := WALL_SeriesMul( S, WALL_SeriesBinom( 1, 4 * l, N ), N );
+      else
+        S := WALL_SeriesMul( S, WALL_SeriesBinom( 1, 4 * l - 2, N ), N );
+      fi;
+    od;
+    S := WALL_SeriesMul( S, WALL_SeriesGeom( q, 2 * l, N ), N );
+  od;
+  if f.type = "Sp" then return S[ N + 1 ]; fi;
+  D := ListWithIdenticalEntries( N + 1, 0 ); D[ 1 ] := 1;
+  for l in [ 1 .. N ] do
+    D := WALL_SeriesMul( D, WALL_SeriesBinom( -1, 4 * l - 2, N ), N );
+    D := WALL_SeriesMul( D, WALL_SeriesGeom( q, 4 * l, N ), N );
+  od;
+  return ( S[ N + 1 ] + f.sign * D[ N + 1 ] ) / 2;
+end );
+
 BindGlobal( "WallConformalNrClasses", function( f )
-  return Length( WallConformalClassInvariants( f ) );
+  if f.type = "L" then Error( "conformal groups are not defined for GL" ); fi;
+  if WALL3_ConfKind( f ) = "scalar" then
+    return WALL3_ScalarFactor( f ) * WallNrClasses( f );
+  fi;
+  return ( f.q - 1 ) * ( WallNrClasses( f ) + 3 * WALL3_DeltaStableNrClasses( f ) ) / 4;
 end );
 
 ##
@@ -3904,6 +4468,7 @@ end );
 ##
 BindGlobal( "WallConformalCentralizerOrder", function( f, ci )
   local c;
+  if f.type = "L" then Error( "conformal groups are not defined for GL" ); fi;
   if ci.twisted then
     return ( f.q - 1 ) * WALL3_CentralizerOrder( WALL3_TwistedForm( f ), ci.inv );
   fi;
@@ -3931,6 +4496,7 @@ end );
 ##
 BindGlobal( "WallConformalRepresentative", function( f, ci )
   local sp;
+  if f.type = "L" then Error( "conformal groups are not defined for GL" ); fi;
   sp := WALL3_ScalarPart( f, ci.mult );
   if ci.twisted then return sp.mu * WALL3_Representative( WALL3_TwistedForm( f ), ci.inv ); fi;
   return sp.mu * WallRepresentative( f, ci.inv );
@@ -3951,6 +4517,7 @@ end );
 ##
 BindGlobal( "WallConformalConjugatingElement", function( f, x )
   local ci, sp, g, a, inv, d, y;
+  if f.type = "L" then Error( "conformal groups are not defined for GL" ); fi;
   ci := WallConformalInvariant( f, x );
   sp := WALL3_ScalarPart( f, ci.mult );
   g := sp.mu^-1 * x;
@@ -3984,6 +4551,7 @@ end );
 ##
 BindGlobal( "WallConformalRepresentativeWithCentralizer", function( f, ci )
   local sp, r, gens, d, g0, a, w;
+  if f.type = "L" then Error( "conformal groups are not defined for GL" ); fi;
   sp := WALL3_ScalarPart( f, ci.mult );
   w := PrimitiveRoot( f.field ) * IdentityMat( f.n, f.field );
   if ci.twisted then
@@ -4015,6 +4583,7 @@ end );
 ##
 BindGlobal( "WallConformalCentralizer", function( f, x )
   local a, r, yi;
+  if f.type = "L" then Error( "conformal groups are not defined for GL" ); fi;
   a := WallConformalConjugatingElement( f, x );
   r := WallConformalRepresentativeWithCentralizer( f, a.invariant );
   yi := a.conjugator^-1;
@@ -4052,6 +4621,7 @@ end );
 ##
 BindGlobal( "WallGroup", function( f )
   local G0, F0, Q0, S, nu;
+  if f.type = "L" then return WALLL_Group( f ); fi;
   if IsBound( f.oddChar2 ) then return WALL2_OddGroup( f ); fi;
   if IsBound( f.group ) then return f.group; fi;
   if IsBound( f.char2 ) then return WALL2_Group( f ); fi;
@@ -4080,7 +4650,7 @@ end );
 ##  <Returns>a matrix group</Returns>
 ##  <Description>
 ##  returns the conformal group <M>CG(F)</M> of all similitudes
-##  <M>x F \bar{x}^{tr} = \lambda F</M> (for even <M>q</M> and orthogonal
+##  <M>x F (x^\sigma)^{tr} = \lambda F</M> (for even <M>q</M> and orthogonal
 ##  forms: <M>Q(vx) = \lambda Q(v)</M>) as a &GAP; matrix group, with its size
 ##  stored.
 ##  </Description>
@@ -4089,6 +4659,7 @@ end );
 ##
 BindGlobal( "WallConformalGroup", function( f )
   local gens, CG;
+  if f.type = "L" then Error( "conformal groups are not defined for GL" ); fi;
   gens := ShallowCopy( GeneratorsOfGroup( WallGroup( f ) ) );
   Add( gens, PrimitiveRoot( f.field ) * IdentityMat( f.n, f.field ) );
   if WALL3_ConfKind( f ) = "fusion" then Add( gens, WALL3_Delta( f ) ); fi;
@@ -4397,4 +4968,525 @@ BindGlobal( "WALL2_OddRepresentativeWithCentralizer", function( f, inv )
   return rec( representative := WALL2_OddPreImage( f, r.representative ),
               generators := List( r.generators, s -> WALL2_OddPreImage( f, s ) ),
               centralizerOrder := r.centralizerOrder );
+end );
+
+#############################################################################
+##  Spin groups (q odd): the spin module
+#############################################################################
+##
+##  The Clifford algebra C(V) (with v^2 = B(v,v)) is realized on the spin
+##  module S = Lambda(E) (x) S0, E = span(e_1..e_h) for a Witt basis
+##  e_1,f_1,...,e_h,f_h of a hyperbolic part H, and S0 of dimension 1 or 2
+##  for the anisotropic part W0 (see the background notes, section "Spin groups"):
+##    gamma(e_i) = (e_i wedge) (x) 1,  gamma(f_i) = (2 contraction with f_i) (x) 1,
+##    gamma(w)   = Pi (x) D(w),  Pi the parity operator on Lambda(E),
+##  where D realizes C(W0) (a quaternion algebra, split over F_q).  Then
+##  gamma(u) gamma(v) + gamma(v) gamma(u) = 2 B(u,v), and C^0(V) acts
+##  faithfully on S, of dimension 2^QuoInt(m,2).  Conventions: matrices act
+##  from the right, and rho(X) is defined by X^-1 gamma(v) X = gamma(v rho(X)),
+##  a homomorphism Spin -> Omega.
+##
+
+# gamma(e_1), gamma(f_1), ..., gamma(e_h), gamma(f_h) and Pi on Lambda(E), dim E = h
+BindGlobal( "WALL_SpinGammaH", function( h, K )
+  local N, one, zero, ops, i, M, I, pos, sgn, Pi;
+  N := 2^h; one := One( K ); zero := Zero( K );
+  ops := [];
+  for i in [ 1 .. h ] do
+    # e_i wedge
+    M := NullMat( N, N, K );
+    for I in [ 0 .. N - 1 ] do
+      if QuoInt( I, 2^( i - 1 ) ) mod 2 = 0 then
+        sgn := (-1)^Number( [ 1 .. i - 1 ], j -> QuoInt( I, 2^( j - 1 ) ) mod 2 = 1 );
+        M[ I + 1 ][ I + 2^( i - 1 ) + 1 ] := sgn * one;
+      fi;
+    od;
+    Add( ops, M );
+    # 2 * contraction with f_i
+    M := NullMat( N, N, K );
+    for I in [ 0 .. N - 1 ] do
+      if QuoInt( I, 2^( i - 1 ) ) mod 2 = 1 then
+        sgn := (-1)^Number( [ 1 .. i - 1 ], j -> QuoInt( I, 2^( j - 1 ) ) mod 2 = 1 );
+        M[ I + 1 ][ I - 2^( i - 1 ) + 1 ] := 2 * sgn * one;
+      fi;
+    od;
+    Add( ops, M );
+  od;
+  Pi := DiagonalMat( List( [ 0 .. N - 1 ], I -> (-1)^Number( [ 1 .. h ], j -> QuoInt( I, 2^( j - 1 ) ) mod 2 = 1 ) * one ) );
+  if h = 0 then Pi := [ [ one ] ]; fi;
+  return rec( ops := List( ops, M -> ImmutableMatrix( K, M ) ), Pi := ImmutableMatrix( K, Pi ) );
+end );
+
+# the spin data for type sign (+1, -1, or 0 for odd m), dimension m, field GF(q),
+# covering the group Om = Omega(F) (F = InvariantBilinearForm( Om ).matrix)
+BindGlobal( "WALL_SpinData", function( sign, m, q, Om )
+  local K, one, zero, h, aniso, D, nu, x, y, z, GH, gam, s0, FW, n, i, j, ortho,
+        FG, lam, fr, T, v;
+  K := GF( q ); one := One( K ); zero := Zero( K );
+  nu := PrimitiveRoot( K );
+  if IsOddInt( m ) then
+    h := ( m - 1 ) / 2; aniso := [ one ]; D := [ [ [ one ] ] ];
+  elif sign = 1 then
+    h := m / 2; aniso := []; D := [];
+  else
+    h := m / 2 - 1; aniso := [ one, -nu ];
+    # C(W0) for diag(1,-nu): D1 = [[0,1],[1,0]], D2 = [[x,y],[-y,-x]], x^2 - y^2 = -nu
+    y := First( AsList( K ), y -> WALL_Leg( -nu + y^2, q ) = 1 or IsZero( -nu + y^2 ) );
+    x := WALL_Sqrt( -nu + y^2, K );
+    D := [ [ [ zero, one ], [ one, zero ] ], [ [ x, y ], [ -y, -x ] ] ];
+  fi;
+  GH := WALL_SpinGammaH( h, K );
+  if D = [] then s0 := 1; else s0 := Length( D[ 1 ] ); fi;
+  gam := List( GH.ops, M -> KroneckerProduct( M, IdentityMat( s0, K ) ) );
+  Append( gam, List( D, Dw -> KroneckerProduct( GH.Pi, Dw ) ) );
+  gam := List( gam, M -> ImmutableMatrix( K, M ) );
+  # Gram matrix of the basis e_1,f_1,...,e_h,f_h, w_1, (w_2)
+  n := 2 * h + Length( aniso );
+  FW := NullMat( n, n, K );
+  for i in [ 1 .. h ] do FW[ 2 * i - 1 ][ 2 * i ] := one; FW[ 2 * i ][ 2 * i - 1 ] := one; od;
+  for j in [ 1 .. Length( aniso ) ] do FW[ 2 * h + j ][ 2 * h + j ] := aniso[ j ]; od;
+  # orthogonal basis of anisotropic vectors (W-coordinates)
+  ortho := [];
+  for i in [ 1 .. h ] do
+    v := ListWithIdenticalEntries( n, zero ); v[ 2 * i - 1 ] := one; v[ 2 * i ] := one; Add( ortho, v );
+    v := ListWithIdenticalEntries( n, zero ); v[ 2 * i - 1 ] := one; v[ 2 * i ] := -one; Add( ortho, v );
+  od;
+  for j in [ 1 .. Length( aniso ) ] do
+    v := ListWithIdenticalEntries( n, zero ); v[ 2 * h + j ] := one; Add( ortho, v );
+  od;
+  # the change of basis T (rows: our basis in the coordinates of F)
+  FG := InvariantBilinearForm( Om ).matrix;
+  lam := one;
+  if IsOddInt( m ) then lam := DeterminantMat( FW ) / DeterminantMat( FG ); fi;
+  fr := WallClassicalForm( "O", lam * FG, K );
+  T := WallFormIsometry( fr, lam * FG, FW );        # T (lam FG) T^tr = FW
+  return rec( field := K, sign := sign, m := m, q := q, dim := 2^QuoInt( m, 2 ),
+              gamma := gam, gammaT := List( gam, TransposedMat ),
+              FW := ImmutableMatrix( K, FW ), FWinv := ImmutableMatrix( K, FW^-1 ),
+              ortho := ortho, T := ImmutableMatrix( K, T ), Tinv := ImmutableMatrix( K, T^-1 ),
+              omega := Om );
+end );
+
+# gamma(u) for u in W-coordinates
+BindGlobal( "WALL_SpinGammaVec", function( d, u )
+  local M, i;
+  M := ZeroMutable( d.gamma[ 1 ] );
+  for i in [ 1 .. Length( u ) ] do
+    if not IsZero( u[ i ] ) then M := M + u[ i ] * d.gamma[ i ]; fi;
+  od;
+  return M;
+end );
+
+# a preimage in Spin of g in Omega (GAP's form); fail if g is not in Omega
+BindGlobal( "WALL_SpinLiftOrFail", function( d, g )
+  local K, F, gW, n, us, b, y, w, B, refl, X, nrm, c, u;
+  K := d.field; F := d.FW;
+  B := function( u, v ) return u * F * v; end;
+  refl := u -> IdentityMat( Length( u ), K ) - ( 2 / B( u, u ) ) * TransposedMat( [ F * u ] ) * [ u ];
+  gW := d.T * g * d.Tinv;
+  us := [];
+  for b in d.ortho do
+    y := b * gW;
+    if y <> b then
+      w := b - y;
+      if not IsZero( B( w, w ) ) then
+        gW := gW * refl( w ); Add( us, w );
+      else
+        w := b + y;
+        if IsZero( B( w, w ) ) then return fail; fi;                     # g not in GO
+        gW := gW * refl( w ) * refl( b ); Add( us, w ); Add( us, b );
+      fi;
+    fi;
+  od;
+  if IsOddInt( Length( us ) ) then return fail; fi;                    # det -1
+  nrm := Product( us, u -> B( u, u ), One( K ) );
+  if WALL_Leg( nrm, d.q ) <> 1 then return fail; fi;                     # spinor norm
+  if not IsOne( gW ) then return fail; fi;                               # g not in GO
+  c := WALL_Sqrt( nrm, K );
+  X := IdentityMat( d.dim, K );
+  for u in Reversed( us ) do X := X * WALL_SpinGammaVec( d, u ); od;   # gamma(u_s) ... gamma(u_1)
+  return ImmutableMatrix( K, c^-1 * X );
+end );
+
+BindGlobal( "WALL_SpinLift", function( d, g )
+  local X;
+  X := WALL_SpinLiftOrFail( d, g );
+  if X = fail then Error( "the element is not in Omega" ); fi;
+  return X;
+end );
+
+# the image in Omega (GAP's form) of X in Spin; with check = true, fail is
+# returned if X does not normalize gamma(V)
+BindGlobal( "WALL_SpinImageCheck", function( d, X, check )
+  local K, Xi, n, gW, i, A, t, c, l, r;
+  K := d.field; n := Length( d.gamma );
+  if check and ( not IsMatrix( X ) or Length( X ) <> d.dim or RankMat( X ) <> d.dim ) then return fail; fi;
+  Xi := X^-1;
+  gW := [];
+  for i in [ 1 .. n ] do
+    A := Xi * d.gamma[ i ] * X;
+    t := List( [ 1 .. n ], l -> Sum( [ 1 .. d.dim ], r -> A[ r ] * d.gammaT[ l ][ r ] ) );
+    c := t * d.FWinv / ( d.dim * One( K ) );
+    if check and A <> WALL_SpinGammaVec( d, c ) then return fail; fi;
+    Add( gW, c );
+  od;
+  return ImmutableMatrix( K, d.Tinv * gW * d.T );
+end );
+
+BindGlobal( "WALL_SpinImage", function( d, X ) return WALL_SpinImageCheck( d, X, false ); end );
+
+# membership: X normalizes gamma(V), rho(X) in Omega, and X = +-lift(rho(X))
+BindGlobal( "WALL_SpinIsElement", function( d, X )
+  local g, L;
+  if not ( IsMatrix( X ) and ForAll( X, r -> ForAll( r, z -> z in d.field ) ) ) then return false; fi;
+  g := WALL_SpinImageCheck( d, X, true );
+  if g = fail then return false; fi;
+  L := WALL_SpinLiftOrFail( d, g );
+  if L = fail then return false; fi;
+  return X = L or X = -L;
+end );
+
+##
+##  <#GAPDoc Label="WallSpinGroup">
+##  <ManSection>
+##  <Func Name="WallSpinGroup" Arg="[e, ]m, q" Label="for type, dimension, q"/>
+##  <Func Name="WallSpinGroup" Arg="f" Label="for an orthogonal form"/>
+##  <Func Name="Spin" Arg="[e, ]m, q"/>
+##  <Returns>a matrix group</Returns>
+##  <Description>
+##  returns the spin group <M>\mathrm{Spin}^{e}(m,q)</M>, <M>q</M> odd,
+##  <M>m \geq 3</M> (<A>e</A> <M>= \pm 1</M> for even <A>m</A>, omitted or <M>0</M>
+##  for odd <A>m</A>), as a group of <M>2^{\lfloor m/2\rfloor} \times
+##  2^{\lfloor m/2\rfloor}</M> matrices over <M>GF(q)</M>, realized on the
+##  spin module (the even Clifford algebra acting on an exterior algebra). It
+##  is the double cover of <C>Omega(</C><A>e</A><C>,</C><A>m</A><C>,</C><A>q</A><C>)</C> with GAP's
+##  invariant form; the covering map is stored as
+##  <Ref Attr="HomomorphismToOmega"/>. In the second form, <A>f</A> is an
+##  orthogonal form record with <M>q</M> odd and dimension <M>m \geq 3</M> (see
+##  <Ref Func="WallClassicalForm"/>), or an orthogonal group (see
+##  <Ref Func="WallFormOfGroup"/>), and the range of the covering map is
+##  <M>\Omega(F)</M> for the Gram matrix <M>F</M> of <A>f</A>; the class
+##  functions then use the invariants with respect to <A>f</A>.
+##  The size is stored, and membership is
+##  tested directly (without a nice monomorphism). <C>Spin</C> is a synonym
+##  for <C>WallSpinGroup</C>.
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
+##
+BindGlobal( "WallSpinGroup", function( arg )
+  local sign, m, q, f, Om, G0, F0, T, d, gens, S, hom, name;
+  f := fail;
+  if Length( arg ) = 1 then
+    f := arg[ 1 ];
+    if IsGroup( f ) then f := WallFormOfGroup( f ); fi;
+    if not IsRecord( f ) or not IsBound( f.type ) or f.type <> "O" or IsBound( f.char2 ) then
+      Error( "WallSpinGroup: the argument must be an orthogonal form record (or group) with q odd" );
+    fi;
+    sign := f.sign; m := f.n; q := f.q;
+  elif Length( arg ) = 2 then sign := 0; m := arg[ 1 ]; q := arg[ 2 ];
+  elif Length( arg ) = 3 then sign := arg[ 1 ]; m := arg[ 2 ]; q := arg[ 3 ];
+  else Error( "usage: WallSpinGroup( [e, ]m, q ) or WallSpinGroup( f )" ); fi;
+  if not ( IsPrimePowerInt( q ) and IsOddInt( q ) ) then Error( "WallSpinGroup: q must be an odd prime power" ); fi;
+  if not ( IsInt( m ) and m >= 3 ) then Error( "WallSpinGroup: m must be an integer >= 3" ); fi;
+  if IsOddInt( m ) and sign <> 0 then Error( "WallSpinGroup: for odd m the sign must be 0 or omitted" ); fi;
+  if IsEvenInt( m ) and not sign in [ 1, -1 ] then Error( "WallSpinGroup: for even m the sign must be 1 or -1" ); fi;
+  if IsOddInt( m ) then G0 := Omega( m, q ); else G0 := Omega( sign, m, q ); fi;
+  if f = fail then
+    Om := G0;
+  else
+    # Omega(F): conjugate GAP's Omega (as in WallGroup)
+    F0 := InvariantBilinearForm( G0 ).matrix;
+    if IsOddInt( m ) and WALL_Leg( DeterminantMat( F0 ), q ) <> f.det then
+      F0 := PrimitiveRoot( f.field ) * F0;
+    fi;
+    T := WallFormIsometry( f, F0, f.gram );
+    Om := GroupWithGenerators( List( GeneratorsOfGroup( G0 ), g -> T * g * T^-1 ) );
+    SetSize( Om, Size( G0 ) );
+    SetInvariantBilinearForm( Om, rec( matrix := f.gram ) );
+  fi;
+  d := WALL_SpinData( sign, m, q, Om );
+  gens := List( GeneratorsOfGroup( d.omega ), g -> WALL_SpinLift( d, g ) );
+  Add( gens, ImmutableMatrix( d.field, -IdentityMat( d.dim, d.field ) ) );
+  S := GroupWithGenerators( gens );
+  SetSize( S, 2 * Size( d.omega ) );
+  if IsOddInt( m ) then name := Concatenation( "Spin(", String( m ), ",", String( q ), ")" );
+  else name := Concatenation( "Spin(", String( sign ), ",", String( m ), ",", String( q ), ")" ); fi;
+  if f <> fail then name := Concatenation( name, " for a given form" ); fi;
+  SetName( S, name );
+  if f = fail then
+    d.fOmega := WallClassicalForm( "O", InvariantBilinearForm( d.omega ).matrix, d.field );
+  else
+    d.fOmega := f;
+  fi;
+  d.classKeys := [ ]; d.classVals := [ ];
+  SetWallSpinData( S, d );
+  hom := GroupHomomorphismByFunction( S, d.omega, x -> WALL_SpinImage( d, x ), false,
+                                      g -> WALL_SpinLift( d, g ) );
+  SetIsSurjective( hom, true );
+  SetKernelOfMultiplicativeGeneralMapping( hom, SubgroupNC( S, [ gens[ Length( gens ) ] ] ) );
+  SetHomomorphismToOmega( S, hom );
+  return S;
+end );
+
+BindGlobal( "Spin", function( arg ) return CallFuncList( WallSpinGroup, arg ); end );
+
+InstallMethod( \in, "for a matrix and a spin group", IsElmsColls,
+  [ IsMatrix, IsGroup and HasWallSpinData ], SUM_FLAGS,
+  function( X, S ) return WALL_SpinIsElement( WallSpinData( S ), X ); end );
+
+##
+##  <#GAPDoc Label="HomomorphismToOmega">
+##  <ManSection>
+##  <Attr Name="HomomorphismToOmega" Arg="S"/>
+##  <Returns>a group homomorphism</Returns>
+##  <Description>
+##  for a group <A>S</A> returned by <Ref Func="Spin"/>, the covering
+##  homomorphism <M>S \to \Omega</M> onto GAP's
+##  <C>Omega(</C><A>e</A><C>,</C><A>m</A><C>,</C><A>q</A><C>)</C>, with kernel
+##  <M>\{\pm 1\}</M>. <C>Image</C> is computed from the conjugation action on
+##  the image of <M>V</M> in the Clifford algebra, and
+##  <C>PreImagesRepresentative</C> from a decomposition into reflections (at most
+##  <M>2m</M> products of <M>2^{\lfloor m/2\rfloor}</M>-dimensional matrices); no
+##  group-theoretic algorithms are used.
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
+##
+
+#############################################################################
+##  Spin groups: classes, representatives, centralizers
+##
+##  A class of Spin lies over a class of Omega (with Omega-invariant sinv as
+##  in WallSubgroupInvariant( f, "Omega", . )).  Fix the Omega-representative
+##  x0 and its lift L0 = WALL_SpinLift( d, x0 ).  By the background notes,
+##  Theorem spinsplit, either L0 and -L0 are conjugate in Spin ("fused",
+##  one class, invariant rec( omega := sinv, sign := 0 )), or not (two
+##  classes, signs +1 and -1, representatives L0 and -L0).  For h in
+##  C_SO(x0), the commutator of the lifts of h and x0 is det( h | V_-1 )
+##  (Theorem spincomm), V_-1 the generalized (-1)-eigenspace of x0.
+#############################################################################
+
+# fused? read off from the GO-invariant (Proposition pihat)
+BindGlobal( "WALL_SpinFused", function( f, inv )
+  local gens, l2, p, c, d, dual, mm, s, a, slot, v;
+  gens := []; l2 := WALL_Leg( 2 * f.one, f.q );
+  for p in inv.polys do
+    c := p[ 1 ]; d := Length( c ) - 1; dual := WALL_DualCoeffs( f, c );
+    if d = 1 and dual = c then
+      a := -c[ 1 ]; if a = f.one then slot := 1; else slot := 2; fi;
+      for mm in WALL_Mults( p[ 2 ] ) do
+        if IsOddInt( mm[ 1 ] ) then
+          v := [ 1, 1 ]; v[ slot ] := -1;
+          if mm[ 2 ] >= 2 then
+            Append( gens, [ Concatenation( v, [ 1 ] ), Concatenation( v, [ -1 ] ) ] );
+          else
+            s := First( inv.signs, x -> x[ 1 ] = a and x[ 2 ] = mm[ 1 ] )[ 3 ];
+            Add( gens, Concatenation( v, [ l2 * s ] ) );
+          fi;
+        fi;
+      od;
+    elif ForAny( p[ 2 ], IsOddInt ) then
+      Add( gens, [ 1, 1, -1 ] );
+    fi;
+  od;
+  return [ -1, -1, 1 ] in WALL_PiClosure( gens, 3 );
+end );
+
+# epsilon( h ) = det( h | V_-1(x0) ) for h in C(x0)
+BindGlobal( "WALL_SpinEpsilon", function( Vm, h )
+  if Length( Vm ) = 0 then return 1; fi;
+  if IsOne( DeterminantMat( List( Vm, v -> SolutionMat( Vm, v * h ) ) ) ) then return 1; fi;
+  return -1;
+end );
+
+# cached data for the Omega-class sinv: Omega-representative, its lift, fused,
+# generators of the centralizer in Spin, an element t with epsilon(t) = -1
+BindGlobal( "WALL_SpinClassData", function( S, sinv )
+  local d, f, pos, r, x0, L0, fused, Vm, eps, t, kg, h, ti, res;
+  d := WallSpinData( S ); f := d.fOmega;
+  pos := Position( d.classKeys, sinv );
+  if pos <> fail then return d.classVals[ pos ]; fi;
+  r := WallSubgroupRepresentativeWithCentralizer( f, "Omega", sinv );
+  x0 := r.representative;
+  L0 := WALL_SpinLift( d, x0 );
+  fused := WALL_SpinFused( f, sinv.inv );
+  t := fail;
+  if fused then
+    Vm := NullspaceMat( ( x0 + One( x0 ) )^Length( x0 ) );
+    eps := List( r.generators, h -> WALL_SpinEpsilon( Vm, h ) );
+    t := r.generators[ Position( eps, -1 ) ];
+    ti := t^-1;
+    # Schreier generators of the kernel of epsilon (transversal 1, t)
+    kg := [ t^2 ];
+    for h in [ 1 .. Length( r.generators ) ] do
+      if eps[ h ] = 1 then Append( kg, [ r.generators[ h ], t * r.generators[ h ] * ti ] );
+      else Append( kg, [ r.generators[ h ] * ti, t * r.generators[ h ] ] ); fi;
+    od;
+  else
+    kg := r.generators;
+  fi;
+  kg := List( kg, h -> WALL_SpinLift( d, h ) );
+  Add( kg, ImmutableMatrix( d.field, -IdentityMat( d.dim, d.field ) ) );
+  res := rec( x0 := x0, L0 := L0, fused := fused, generators := kg,
+              centralizerOrder := WallSubgroupCentralizerOrder( f, "Omega", sinv ) * ( 2 - Number( [ fused ], b -> b ) ) );
+  if t <> fail then res.t := WALL_SpinLift( d, t ); fi;
+  Add( d.classKeys, sinv ); Add( d.classVals, res );
+  return res;
+end );
+
+##
+##  <#GAPDoc Label="WallSpinClassInvariants">
+##  <ManSection>
+##  <Func Name="WallSpinClassInvariants" Arg="S"/>
+##  <Func Name="WallSpinNrClasses" Arg="S"/>
+##  <Returns>a list, resp. a positive integer</Returns>
+##  <Description>
+##  For a spin group <A>S</A> from <Ref Func="WallSpinGroup" Label="for type, dimension, q"/>, the first
+##  function returns the list of invariants of the conjugacy classes of
+##  <A>S</A>. An invariant is a record <C>rec( omega, sign )</C>, where
+##  <C>omega</C> is the invariant of the image class in <M>\Omega</M> (see
+##  <Ref Func="WallSubgroupInvariant"/>), and <C>sign</C> is <M>0</M> if the
+##  two preimages <M>\pm \tilde{x}</M> are conjugate, and <M>\pm 1</M> otherwise
+##  (relative to a fixed lift of the <M>\Omega</M>-representative). The second
+##  function returns the number of classes, computed from a generating
+##  function without enumerating them.
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
+##
+BindGlobal( "WallSpinClassInvariants", function( S )
+  local d, res, sinv;
+  d := WallSpinData( S ); res := [];
+  for sinv in WallSubgroupClassInvariants( d.fOmega, "Omega" ) do
+    if WALL_SpinFused( d.fOmega, sinv.inv ) then Add( res, rec( omega := sinv, sign := 0 ) );
+    else Append( res, [ rec( omega := sinv, sign := 1 ), rec( omega := sinv, sign := -1 ) ] ); fi;
+  od;
+  return res;
+end );
+
+# Phi(n) = number of fused Omega-classes (Theorem gfspin)
+BindGlobal( "WALL_SpinPhi", function( q, n )
+  local odd, B, U, Um, one, a, b;
+  odd := [ 1, 3 .. n - 1 + n mod 2 ];
+  B := WALL_SeriesProduct( Concatenation( List( [ 1 .. QuoInt( n, 2 ) ], i -> [ 1, 2 * i, -2 ] ),
+                                          List( [ 1 .. QuoInt( n, 2 ) ], i -> [ -q, 2 * i, -1 ] ) ), n );
+  U := WALL_SeriesProduct( Concatenation( List( odd, m -> [ 1, m, 1 ] ), List( odd, m -> [ -1, m, -1 ] ) ), n );
+  Um := WALL_SeriesProduct( Concatenation( List( odd, m -> [ -1, m, 1 ] ), List( odd, m -> [ 1, m, -1 ] ) ), n );
+  one := ListWithIdenticalEntries( n + 1, 0 ); one[ 1 ] := 1;
+  a := U - one; b := U + Um - 2 * one;
+  return WALL_SeriesMul( B, WALL_SeriesMul( a, b, n ), n )[ n + 1 ] / 8;
+end );
+
+BindGlobal( "WallSpinNrClasses", function( S )
+  local d;
+  d := WallSpinData( S );
+  return 2 * WallSubgroupNrClasses( d.fOmega, "Omega" ) - WALL_SpinPhi( d.q, d.m );
+end );
+
+##
+##  <#GAPDoc Label="WallSpinRepresentative">
+##  <ManSection>
+##  <Func Name="WallSpinRepresentative" Arg="S, inv"/>
+##  <Func Name="WallSpinRepresentativeWithCentralizer" Arg="S, inv"/>
+##  <Func Name="WallSpinCentralizerOrder" Arg="S, inv"/>
+##  <Func Name="WallSpinClassSize" Arg="S, inv"/>
+##  <Returns>a matrix, a record, resp. a positive integer</Returns>
+##  <Description>
+##  For a spin group <A>S</A> and a class invariant <A>inv</A> (see
+##  <Ref Func="WallSpinClassInvariants"/>), these functions return the class
+##  representative, a record with components <C>representative</C>,
+##  <C>generators</C> (of its centralizer in <A>S</A>) and
+##  <C>centralizerOrder</C>, the centralizer order, and the class size. The
+##  centralizer generators are the lifts of generators of the centralizer in
+##  <M>\Omega</M> (of the kernel of <M>h \mapsto \det(h|_{V_{-1}})</M> if the
+##  class is fused) together with <M>-1</M>.
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
+##
+BindGlobal( "WallSpinRepresentative", function( S, inv )
+  local c;
+  c := WALL_SpinClassData( S, inv.omega );
+  if inv.sign = -1 then return -c.L0; fi;
+  return c.L0;
+end );
+
+BindGlobal( "WallSpinRepresentativeWithCentralizer", function( S, inv )
+  local c;
+  c := WALL_SpinClassData( S, inv.omega );
+  return rec( representative := WallSpinRepresentative( S, inv ),
+              generators := c.generators, centralizerOrder := c.centralizerOrder );
+end );
+
+BindGlobal( "WallSpinCentralizerOrder", function( S, inv )
+  local d, co;
+  d := WallSpinData( S );
+  co := WallSubgroupCentralizerOrder( d.fOmega, "Omega", inv.omega );
+  if inv.sign = 0 then return co; fi;
+  return 2 * co;
+end );
+
+BindGlobal( "WallSpinClassSize", function( S, inv )
+  return Size( S ) / WallSpinCentralizerOrder( S, inv );
+end );
+
+##
+##  <#GAPDoc Label="WallSpinConjugatingElement">
+##  <ManSection>
+##  <Func Name="WallSpinConjugatingElement" Arg="S, x"/>
+##  <Func Name="WallSpinInvariant" Arg="S, x"/>
+##  <Func Name="WallSpinIsConjugate" Arg="S, x, z"/>
+##  <Func Name="WallSpinCentralizer" Arg="S, x"/>
+##  <Description>
+##  For <A>x</A> in the spin group <A>S</A>, <C>WallSpinConjugatingElement</C>
+##  returns a record with components <C>invariant</C>,
+##  <C>representative</C> <M>r</M> and <C>conjugator</C> <M>y \in S</M> with
+##  <M>y x y^{-1} = r</M>; <C>WallSpinInvariant</C> returns the class invariant;
+##  <C>WallSpinIsConjugate</C> compares invariants; and
+##  <C>WallSpinCentralizer</C> returns the centralizer of <A>x</A> in
+##  <A>S</A> as a subgroup with known size. The Omega-conjugating
+##  element of the image is lifted; for fused classes a sign is
+##  corrected by a centralizer element <M>t</M> with
+##  <M>\det(t|_{V_{-1}}) = -1</M>.
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
+##
+BindGlobal( "WallSpinConjugatingElement", function( S, X )
+  local d, g, a, y, Z, c, sgn;
+  d := WallSpinData( S );
+  g := WALL_SpinImage( d, X );
+  a := WallSubgroupConjugatingElement( d.fOmega, "Omega", g );      # y g y^-1 = x0
+  c := WALL_SpinClassData( S, a.invariant );
+  y := WALL_SpinLift( d, a.conjugator );
+  Z := y * X * y^-1;
+  if Z = c.L0 then sgn := 1;
+  elif Z = -c.L0 then sgn := -1;
+  else Error( "WallSpinConjugatingElement: lift mismatch" ); fi;
+  if c.fused then
+    if sgn = -1 then y := c.t * y; fi;
+    return rec( invariant := rec( omega := a.invariant, sign := 0 ),
+                representative := c.L0, conjugator := y );
+  fi;
+  return rec( invariant := rec( omega := a.invariant, sign := sgn ),
+              representative := sgn * c.L0, conjugator := y );
+end );
+
+BindGlobal( "WallSpinInvariant", function( S, X )
+  return WallSpinConjugatingElement( S, X ).invariant;
+end );
+
+BindGlobal( "WallSpinIsConjugate", function( S, X, Z )
+  return WallSpinInvariant( S, X ) = WallSpinInvariant( S, Z );
+end );
+
+BindGlobal( "WallSpinCentralizer", function( S, X )
+  local a, r, y, yi, C;
+  a := WallSpinConjugatingElement( S, X );
+  r := WallSpinRepresentativeWithCentralizer( S, a.invariant );
+  y := a.conjugator; yi := y^-1;
+  C := SubgroupNC( S, List( r.generators, h -> yi * h * y ) );
+  SetSize( C, r.centralizerOrder );
+  return C;
 end );

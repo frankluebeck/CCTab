@@ -19,7 +19,7 @@ gap> save:= SizeScreen();;
 gap> SizeScreen( [ 72 ] );;
 gap> START_TEST( "Input file: manual.tst" );
 
-##  doc/../lib/PositionConjugacyClass.gi (310-314)
+##  doc/../lib/PositionConjugacyClass.gi (311-315)
 gap> G := AlternatingGroup(5);;
 gap> creps := List(ConjugacyClasses(G), Representative);;
 gap> List(creps, x-> PositionConjugacyClass(G, x^Random(G)));
@@ -123,22 +123,23 @@ Group([ (4,5), (), () ])
 gap> ActionAutomorphismsOnRationalClasses(G, A);
 Group(())
 
-##  doc/../lib/Elementary.gi (34-37)
+##  doc/../lib/Elementary.gi (37-41)
 gap> G := SL(4,2);;
-gap> MaximalNonCyclicElementarySubgroups(G);
-[ [ 1, 3 ], [ 1, 2 ], [ 6, 2 ] ]
+gap> mnc := MaximalNonCyclicElementarySubgroups(G);;
+gap> List(mnc, a-> [Order(Representative(ConjugacyClasses(G)[a[1]])), a[2]]);
+[ [ 1, 3 ], [ 1, 2 ], [ 3, 2 ] ]
 
-##  doc/../lib/Elementary.gi (136-139)
+##  doc/../lib/Elementary.gi (140-143)
 gap> G := AlternatingGroup(5);;
 gap> InducedFromElementary(G, 1, 2);
 [ [ 15, -1, 0, 0, 0 ], [ 15, 3, 0, 0, 0 ] ]
 
-##  doc/../lib/Elementary.gi (263-266)
+##  doc/../lib/Elementary.gi (265-268)
 gap> G := AlternatingGroup(5);;
 gap> FusionElementaryCCTable(CCTable(G), 1,2);
 [ [ [ 1, [ 0, 1 ] ], [ 2, [ 0, 2, 3, 4 ] ] ], [ 1, 2, 3, 4 ] ]
 
-##  doc/../lib/Elementary.gi (439-453)
+##  doc/../lib/Elementary.gi (441-455)
 gap> G := SymmetricGroup(5);;
 gap> ind := InductionDataFromElementaryCCTable(CCTable(G),1,2);;
 gap> ind.next();
@@ -154,30 +155,57 @@ gap> ind.next();
 gap> ind.next();
 fail
 
-##  doc/../lib/LLL.gi (78-80)
+##  doc/../lib/LLL.gi (70-72)
 gap> HermiteIntMat(RandomUnimodularMat(4));
 [ [ 1, 0, 0, 0 ], [ 0, 1, 0, 0 ], [ 0, 0, 1, 0 ], [ 0, 0, 0, 1 ] ]
 
-##  doc/../lib/LLL.gi (239-244)
+##  doc/../lib/LLL.gi (231-236)
 gap> A := [ [ 9, -3, 1, -2 ], [ -3, 3, 1, 1 ], [ 1, 1, 13, -2 ],
 >   [ -2, 1, -2, 5 ] ];;
 gap> PermutedFractionFreeIntegerGaussPositiveDefinite(A);
 [ [ [ 3, 1, -3, 1 ], [ 0, 14, -3, -7 ], [ 0, 0, 81, 21 ], 
       [ 0, 0, 0, 900 ] ], (1,3,4,2) ]
 
-##  doc/../lib/LLL.gi (319-323)
+##  doc/../lib/LLL.gi (326-330)
 gap> A := RandomUnimodularMat(5);;
 gap> A * InverseUnimodularMat(A);
 [ [ 1, 0, 0, 0, 0 ], [ 0, 1, 0, 0, 0 ], [ 0, 0, 1, 0, 0 ], 
   [ 0, 0, 0, 1, 0 ], [ 0, 0, 0, 0, 1 ] ]
 
-##  doc/../lib/LLL.gi (567-573)
+##  doc/../lib/LLL.gi (582-588)
 gap> A := RandomUnimodularMat(5);;
 gap> gr := A * TransposedMat(A);;
 gap> h := LLLTransformUnimodularGram(gr);;
 gap> h * gr * TransposedMat(h);
 [ [ 1, 0, 0, 0, 0 ], [ 0, 1, 0, 0, 0 ], [ 0, 0, 1, 0, 0 ], 
   [ 0, 0, 0, 1, 0 ], [ 0, 0, 0, 0, 1 ] ]
+
+##  doc/../Classical/ClUtils.gi (49-56)
+gap> c := CoefficientsOfUnivariatePolynomial(ConwayPolynomial(3,2));
+[ Z(3), Z(3), Z(3)^0 ]
+gap> l := MonicIrreduciblesFromPrimitivePolynomial(GF(3), c);;
+gap> List(l, a -> UnivariatePolynomial(GF(3), a, 1));
+[ x_1^2-x_1-Z(3)^0, x_1^2+Z(3)^0, x_1^2+x_1-Z(3)^0 ]
+gap> Length(MonicIrreduciblesFromPrimitivePolynomial(GF(5), 6));
+2580
+
+##  doc/../Classical/ClUtils.gi (539-555)
+gap> c := CoefficientsOfUnivariatePolynomial(ConwayPolynomial(3,2));;
+gap> List(SelfDualMonicIrreducibles(GF(3), c), 
+>         a -> UnivariatePolynomial(GF(3), a, 1));
+[ x_1^2+Z(3)^0 ]
+gap> List(NonSelfDualMonicIrreducibleRepresentatives(GF(3), c), 
+>         a -> UnivariatePolynomial(GF(3), a, 1));
+[ x_1^2-x_1-Z(3)^0 ]
+gap> Length(SelfDualMonicIrreducibles(GF(3), 4));
+2
+gap> NonSelfDualMonicIrreducibleRepresentatives(GF(5), [-Z(5), Z(5)^0]);
+[ [ Z(5)^3, Z(5)^0 ] ]
+gap> Set(SelfDualMonicIrreducibles(GF(4), 3, 2), List);
+[ [ Z(2^2), 0*Z(2), 0*Z(2), Z(2)^0 ], 
+  [ Z(2^2)^2, 0*Z(2), 0*Z(2), Z(2)^0 ] ]
+gap> Length(NonSelfDualMonicIrreducibleRepresentatives(GF(9), 2, 3));
+18
 
 ##  doc/../lib/CCTable.gi (82-95)
 gap> G := AlternatingGroup(5);;
@@ -274,16 +302,17 @@ gap> List(irr, c-> List(irr, d-> ScalarProduct(CCT, c, d)));
 [ [ 1, 0, 0, 0, 0 ], [ 0, 1, 0, 0, 0 ], [ 0, 0, 1, 0, 0 ], 
   [ 0, 0, 0, 1, 0 ], [ 0, 0, 0, 0, 1 ] ]
 
-##  doc/../lib/SplitByCentre.gi (44-51)
+##  doc/../lib/SplitByCentre.gi (44-52)
 gap> G := SL(4,5);;
 gap> CCT := CCTable(G);;
 gap> SplitByCentre(CCT);
 gap> HasSplittingCentre(CCT);
 true
-gap> SplittingCentre(CCT);
-[ 1, 10, 19, 28 ]
+gap> Set(SplittingCentre(CCT), i-> 
+>         Representative(ConjugacyClasses(G)[i])[1][1]);
+[ Z(5)^0, Z(5), Z(5)^2, Z(5)^3 ]
 
-##  doc/../lib/SplitByCentre.gi (172-186)
+##  doc/../lib/SplitByCentre.gi (179-193)
 gap> G := SmallGroup(96, 14);;
 gap> CCT := CCTable(G);;
 gap> SplitByCentre(CCT);
@@ -316,6 +345,30 @@ gap> NaturalCharacters(SL(3,5));
 gap> NaturalCharacters(SmallGroup(24,4));
 [ Character( CharacterTable( <pc group of size 24 with 
     4 generators> ), [ 24, 0, 0, 0, 0, 0, 0, 0, 0 ] ) ]
+
+##  doc/main.xml (308-330)
+gap> G := Sp(4,3);;  f := WallFormOfGroup(G);;
+gap> WallNrClasses(f);
+34
+gap> invs := WallClassInvariants(f);;  Length(invs);
+34
+gap> inv := invs[20];;  WallDisplayInvariant(f, inv);
+  x_1+Z(3)^0 : [ 2 ]  [2:-1]
+  x_1-Z(3)^0 : [ 1, 1 ]
+gap> x := WallRepresentative(f, inv);;
+gap> x in G;  WallInvariant(f, x) = inv;
+true
+true
+gap> WallCentralizerOrder(f, inv);  WallClassSize(f, inv);
+144
+360
+gap> y := x^PseudoRandom(G);;  r := WallConjugatingElement(f, y);;
+gap> r.conjugator * y * r.conjugator^-1 = x;
+true
+gap> WallNrClasses(WallFormOfGroup(GO(-1,20,101)));
+59198211542997083292
+gap> NrConjugacyClasses(SO(5,3));
+25
 
 ##
 gap> STOP_TEST( "manual.tst", 10000000 );

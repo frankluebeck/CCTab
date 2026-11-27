@@ -31,9 +31,13 @@
 ##  <A>G</A>, that is the maximal cyclic subgroups (see <Ref
 ##  Attr="MaximalCyclics"/>) and the subgroups described by this function. See
 ##  <Cite Key="Isaacs" Where="Chapter 8"/> for more details.
+##  The class numbers depend on the ordering of the conjugacy classes, in the
+##  following example we show the element orders of the class
+##  representatives instead.
 ##  <Example>gap> G := SL(4,2);;
-##  gap> MaximalNonCyclicElementarySubgroups(G);
-##  [ [ 1, 3 ], [ 1, 2 ], [ 6, 2 ] ]
+##  gap> mnc := MaximalNonCyclicElementarySubgroups(G);;
+##  gap> List(mnc, a-> [Order(Representative(ConjugacyClasses(G)[a[1]])), a[2]]);
+##  [ [ 1, 3 ], [ 1, 2 ], [ 3, 2 ] ]
 ##  </Example>
 ##  </Description>
 ##  </ManSection>

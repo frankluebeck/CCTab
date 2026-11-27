@@ -116,7 +116,8 @@ This package implements various utility functions which may also be of
 independent interest. For example, there are functions for identifying
 the conjugacy class of a given element, or for computing all power maps
 of a finite group, or for computing information about rational conjugacy 
-classes. Furthermore there are utilities for certain integer matrices.
+classes. Furthermore there are utilities for certain integer matrices
+and for enumerating irreducible polynomials over finite fields.
 
 
 <Section Label="Sect-FindClass">
@@ -212,6 +213,26 @@ it, depending on the number of cores of your machine).
 
 </Section>
 
+<!-- ############################################################ -->
+<Section Label="Sect-IrredPols">
+<Heading>Irreducible polynomials over finite fields</Heading>
+
+The conjugacy classes of finite classical groups are parameterized by
+data involving the monic irreducible polynomials over the field of
+definition, grouped with respect to a duality (see <Ref
+Func="SelfDualMonicIrreducibles"/>). The following functions enumerate
+these polynomials efficiently for given degree <M>d</M>, also when the
+field with <M>q^d</M> elements is too large to be handled in &GAP; (or
+when no Conway polynomial for it is available). They only need a
+primitive polynomial of degree <M>d</M> and use computations with linear
+recurrence sequences and the Berlekamp-Massey algorithm.
+<P/>
+
+<#Include Label="MonicIrreduciblesFromPrimitivePolynomial">
+<#Include Label="SelfDualMonicIrreducibles">
+
+</Section>
+
 </Chapter>
 
 <!-- ############################################################ -->
@@ -271,3 +292,176 @@ to the lattice spanned by its rows.
 
 </Chapter>
 
+
+<!-- ############################################################ -->
+<Chapter Label="Chap-Classical">
+<Heading>Conjugacy Classes in Classical Groups</Heading>
+
+<Section Label="Sect-WallIntro">
+<Heading>Introduction</Heading>
+
+<#Include Label="WallIntro">
+<P/>
+
+Here is a small example.
+
+<Example>gap> G := Sp(4,3);;  f := WallFormOfGroup(G);;
+gap> WallNrClasses(f);
+34
+gap> invs := WallClassInvariants(f);;  Length(invs);
+34
+gap> inv := invs[20];;  WallDisplayInvariant(f, inv);
+  x_1+Z(3)^0 : [ 2 ]  [2:-1]
+  x_1-Z(3)^0 : [ 1, 1 ]
+gap> x := WallRepresentative(f, inv);;
+gap> x in G;  WallInvariant(f, x) = inv;
+true
+true
+gap> WallCentralizerOrder(f, inv);  WallClassSize(f, inv);
+144
+360
+gap> y := x^PseudoRandom(G);;  r := WallConjugatingElement(f, y);;
+gap> r.conjugator * y * r.conjugator^-1 = x;
+true
+gap> WallNrClasses(WallFormOfGroup(GO(-1,20,101)));
+59198211542997083292
+gap> NrConjugacyClasses(SO(5,3));
+25
+</Example>
+
+</Section>
+
+<!-- ############################################################ -->
+<Section Label="Sect-WallForms">
+<Heading>Forms and groups</Heading>
+
+<#Include Label="WallClassicalForm">
+<#Include Label="WallFormOfGroup">
+<#Include Label="WallGroup">
+<#Include Label="WallConformalGroup">
+<#Include Label="WallIsInGroup">
+<#Include Label="WallGroupOrder">
+<#Include Label="WallFormIsometry">
+<#Include Label="IsomorphismSymplecticGroup">
+
+</Section>
+
+<!-- ############################################################ -->
+<Section Label="Sect-WallClasses">
+<Heading>Conjugacy classes of the isometry group</Heading>
+
+<#Include Label="WallClassInvariants">
+<#Include Label="WallNrClasses">
+<#Include Label="WallInvariant">
+<#Include Label="WallDisplayInvariant">
+<#Include Label="WallCentralizerOrder">
+<#Include Label="WallRepresentative">
+<#Include Label="WallRepresentativeWithCentralizer">
+<#Include Label="WallCentralizerGenerators">
+<#Include Label="WallModel">
+<#Include Label="WallConjugatingElement">
+<#Include Label="WallIsConjugate">
+<#Include Label="WallCentralizer">
+<#Include Label="WallCertifyChar2">
+
+</Section>
+
+<!-- ############################################################ -->
+<Section Label="Sect-WallSubgroups">
+<Heading>The subgroups <M>SO</M>, <M>\Omega</M>, <M>SU</M> and <M>SL</M></Heading>
+
+<#Include Label="WallSpinorNorm">
+<#Include Label="WallSpinorNormOfInvariant">
+<#Include Label="WallDeterminantOfInvariant">
+<#Include Label="WallDicksonInvariant">
+<#Include Label="WallDicksonInvariantOfInvariant">
+<#Include Label="WallPiImageOfCentralizer">
+<#Include Label="WallIsInSubgroup">
+<#Include Label="WallSubgroupOrder">
+<#Include Label="WallSubgroupClassInvariants">
+<#Include Label="WallSubgroupNrClasses">
+<#Include Label="WallSubgroupInvariant">
+<#Include Label="WallSubgroupRepresentative">
+<#Include Label="WallSubgroupRepresentativeWithCentralizer">
+<#Include Label="WallSubgroupConjugatingElement">
+<#Include Label="WallSubgroupCentralizerOrder">
+
+</Section>
+
+<!-- ############################################################ -->
+<Section Label="Sect-WallConformal">
+<Heading>Conformal groups</Heading>
+
+<#Include Label="WallMultiplier">
+<#Include Label="WallConformalMultiplier">
+<#Include Label="WallConformalGroupOrder">
+<#Include Label="WallConformalClassInvariants">
+<#Include Label="WallConformalNrClasses">
+<#Include Label="WallConformalInvariant">
+<#Include Label="WallConformalRepresentative">
+<#Include Label="WallConformalRepresentativeWithCentralizer">
+<#Include Label="WallConformalConjugatingElement">
+<#Include Label="WallConformalCentralizer">
+<#Include Label="WallConformalCentralizerOrder">
+
+</Section>
+
+<!-- ############################################################ -->
+<Section Label="Sect-WallSpin">
+<Heading>Spin groups</Heading>
+
+For odd <M>q</M> the spin groups, the double covers of the groups
+<M>\Omega</M>, can be constructed as matrix groups on the spin module.
+Their conjugacy classes are described via the classes of <M>\Omega</M>.
+
+<#Include Label="WallSpinGroup">
+<#Include Label="HomomorphismToOmega">
+<#Include Label="WallSpinClassInvariants">
+<#Include Label="WallSpinRepresentative">
+<#Include Label="WallSpinConjugatingElement">
+
+</Section>
+
+<!-- ############################################################ -->
+<Section Label="Sect-WallMethods">
+<Heading>Methods for &GAP;'s classical groups</Heading>
+
+The package installs methods which use the functions of this chapter for
+matrix groups which are recognized as classical groups by the filters of
+the &GAP; library: 
+<C>IsFullSubgroupGLorSLRespectingBilinearForm</C> (for <M>Sp</M>,
+<M>GO</M>, <M>SO</M>, <M>q</M> odd),
+<C>IsFullSubgroupGLorSLRespectingQuadraticForm</C> (for <M>GO</M>,
+<M>SO</M>),
+<C>IsFullSubgroupGLRespectingBilinearFormUpToScalars</C> (for conformal
+symplectic groups),
+<C>IsFullSubgroupGLorSLRespectingSesquilinearForm</C> (for <M>GU</M>,
+<M>SU</M>), where <C>IsSubgroupSL</C> distinguishes <M>SO</M> from
+<M>GO</M> and <M>SU</M> from <M>GU</M>, and <C>IsNaturalGL</C>,
+<C>IsNaturalSL</C> (for <M>GL</M>, <M>SL</M>). This includes the groups
+returned by <Ref Func="GL" BookName="ref"/>, <Ref Func="SL"
+BookName="ref"/>, <Ref Func="Sp" BookName="ref"/>, <Ref Func="GO"
+BookName="ref"/>, <Ref Func="SO" BookName="ref"/>, <Ref Func="GU"
+BookName="ref"/>, <Ref Func="SU" BookName="ref"/>, and by <Ref
+Func="WallGroup"/>. Furthermore the spin groups returned by <Ref
+Func="WallSpinGroup" Label="for type, dimension, q"/> are handled.
+<P/>
+
+There are methods for <Ref Attr="NrConjugacyClasses" BookName="ref"/>
+(not for <M>GU</M>, <M>SU</M>, <M>GL</M>, <M>SL</M>, for which &GAP;'s
+own methods are fast; for spin groups via the generating function),
+<Ref Attr="ConjugacyClasses" BookName="ref"/>,
+<Ref Func="Centralizer" BookName="ref"/>,
+<Ref Oper="IsConjugate" BookName="ref"/> and
+<Ref Func="RepresentativeAction" BookName="ref"/> (for the action by
+conjugation). For elements which do not lie in the group the next method
+is used. The conjugacy classes store their invariant in the attribute
+<Ref Attr="WallClassInvariant"/>; if it is known then membership of a
+matrix in the class is decided by comparing invariants.
+
+<#Include Label="WallClassicalGroupData">
+<#Include Label="WallClassInvariant">
+
+</Section>
+
+</Chapter>

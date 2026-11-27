@@ -18,7 +18,9 @@ docdir := "doc";
 mainfiles :=  ["../lib/PowerMaps.gi", "../lib/Elementary.gi",
     "../lib/PositionConjugacyClass.gi", "../lib/ScalarProducts.gi",
     "../lib/SomeCharacters.gi", "../lib/SplitByCentre.gi",
-    "../lib/CCTable.gi", "../lib/LLL.gi"];
+    "../lib/CCTable.gi", "../lib/LLL.gi",
+    "../Classical/ClUtils.gi",
+    "../Classical/Wall.gi", "../Classical/WallMethods.gi"];
 
 ExampleFileHeader:= function( filename, pkgname, authors, copyrightyear,
                               text, linelen )

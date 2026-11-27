@@ -1,10 +1,10 @@
 #############################################################################
+##  WallMethods.gi
 ##
-##  wallmethods.gi    methods for GAP's classical groups, based on the
-##                    functions in wall.gd / wall.gi
+##  (C) 2026 Frank Lübeck, Lehrstuhl für Algebra und Zahlentheorie, RWTH Aachen
 ##
-##  Read after wall.gd and wall.gi:
-##     Read("wall.gd"); Read("wall.gi"); Read("wallmethods.gi");
+##  Methods for GAP's classical groups, based on the functions in
+##  Wall.gd / Wall.gi.
 ##
 ##  The type of a group is recognized by the filters of the GAP library:
 ##    IsFullSubgroupGLorSLRespectingBilinearForm       Sp, GO, SO (q odd)
@@ -13,8 +13,12 @@
 ##    IsFullSubgroupGLorSLRespectingSesquilinearForm   GU, SU
 ##    IsSubgroupSL                                     distinguishes SO from GO
 ##                                                     and SU from GU
-##  Methods: NrConjugacyClasses (not for GU, SU: GAP's own fast methods
-##  are used), ConjugacyClasses, Centralizer (via CentralizerOp),
+##    IsNaturalGL, IsNaturalSL                         GL, SL (no form)
+##    HasWallSpinData                                  spin groups from
+##                                                     WallSpinGroup / Spin
+##  Methods: NrConjugacyClasses (not for GU, SU, GL, SL: GAP's own fast
+##  methods are used; for spin groups via the generating function),
+##  ConjugacyClasses, Centralizer (via CentralizerOp),
 ##  IsConjugate, RepresentativeAction (via RepresentativeActionOp, for
 ##  OnPoints = conjugation).  For elements not in G the next method is used.
 ##  Membership in conjugacy classes: classes store their invariant in the
@@ -34,6 +38,11 @@ end );
 BindGlobal( "WALL_FormOfClassicalGroup", function( G )
   local frm, F, K, conformal, quad;
   conformal := false;
+  # only matrices over finite fields (e.g. not SL(2, Integers mod 4))
+  if not IsFFECollColl( G ) then return fail; fi;
+  if WALL_KnownTrue( IsNaturalGL, G ) or WALL_KnownTrue( IsNaturalSL, G ) then
+    return WallClassicalForm( "L", DimensionOfMatrixGroup( G ), DefaultFieldOfMatrixGroup( G ) );
+  fi;
   if WALL_KnownTrue( IsFullSubgroupGLorSLRespectingSesquilinearForm, G ) then
     frm := InvariantSesquilinearForm( G );
     if IsBound( frm.baseDomain ) then K := frm.baseDomain;
@@ -189,6 +198,31 @@ InstallMethod( ConjugacyClasses,
              inv -> WallRepresentative( f, inv ), inv -> WallClassSize( f, inv ) );
   end );
 
+# GL, SL
+BindGlobal( "WALL_ConjugacyClassesGLSL", function( G )
+  local d, f;
+  d := WALL_ClassicalGroupData( G );
+  if d = fail then TryNextMethod(); fi;
+  f := d.f;
+  if d.kind = "SL" then
+    return WALL_ClassesFromInvariants( G, f.field, WallSubgroupClassInvariants( f, "SL" ),
+             inv -> WallSubgroupRepresentative( f, "SL", inv ),
+             inv -> WallSubgroupClassSize( f, "SL", inv ) );
+  fi;
+  return WALL_ClassesFromInvariants( G, f.field, WallClassInvariants( f ),
+           inv -> WallRepresentative( f, inv ), inv -> WallClassSize( f, inv ) );
+end );
+
+InstallMethod( ConjugacyClasses, "for GL via Wall's classification",
+  [ IsMatrixGroup and IsFinite and IsNaturalGL ],
+  RankFilter( IsHandledByNiceMonomorphism ),
+  WALL_ConjugacyClassesGLSL );
+
+InstallMethod( ConjugacyClasses, "for SL via Wall's classification",
+  [ IsMatrixGroup and IsFinite and IsNaturalSL ],
+  RankFilter( IsHandledByNiceMonomorphism ),
+  WALL_ConjugacyClassesGLSL );
+
 #############################################################################
 ##  Centralizer( G, x )   (via CentralizerOp)
 #############################################################################
@@ -208,16 +242,20 @@ end );
 ##  <Attr Name="WallClassicalGroupData" Arg="G"/>
 ##  <Returns>a record or <K>fail</K></Returns>
 ##  <Description>
-##  (needs <F>wallmethods.gi</F>) For a matrix group <A>G</A> recognized as a
+##  For a matrix group <A>G</A> recognized as a
 ##  classical group by the filters of the &GAP; library (for example
 ##  <C>IsFullSubgroupGLorSLRespectingBilinearForm</C>), returns
 ##  <C>rec( f, kind )</C> with the form record <C>f</C> and <C>kind</C> one of
-##  <C>"G"</C> (isometry group), <C>"SO"</C>, <C>"SU"</C> or
-##  <C>"conformal"</C>; otherwise <K>fail</K>. The value is mutable, since the
+##  <C>"G"</C> (isometry group, or <M>GL</M>), <C>"SO"</C>, <C>"SU"</C>,
+##  <C>"SL"</C> or <C>"conformal"</C>; otherwise <K>fail</K>. For a spin group
+##  from <Ref Func="WallSpinGroup" Label="for type, dimension, q"/> it is <C>rec( f, kind := "spin", group )</C>
+##  with the form record <C>f</C> of the image <M>\Omega</M>. The groups
+##  <C>GL(n,q)</C> and <C>SL(n,q)</C> are recognized by the properties
+##  <C>IsNaturalGL</C> and <C>IsNaturalSL</C>. The value is mutable, since the
 ##  form record caches further data. The methods for <C>ConjugacyClasses</C>,
 ##  <C>NrConjugacyClasses</C>, <C>Centralizer</C>, <C>IsConjugate</C>,
-##  <C>RepresentativeAction</C> and <C>\in</C> installed in
-##  <F>wallmethods.gi</F> use it.
+##  <C>RepresentativeAction</C> and <C>\in</C> described in
+##  Section&nbsp;<Ref Sect="Sect-WallMethods"/> use it.
 ##  </Description>
 ##  </ManSection>
 ##  <#/GAPDoc>
@@ -228,7 +266,9 @@ function( G )
   f := WALL_FormOfClassicalGroup( G );
   if f = fail then return fail; fi;
   kind := "G";
-  if WALL_KnownTrue( IsFullSubgroupGLRespectingBilinearFormUpToScalars, G ) then
+  if f.type = "L" then
+    if not WALL_KnownTrue( IsNaturalGL, G ) then kind := "SL"; fi;
+  elif WALL_KnownTrue( IsFullSubgroupGLRespectingBilinearFormUpToScalars, G ) then
     kind := "conformal";
   elif IsSubgroupSL( G ) and not IsBound( f.char2 ) and not IsBound( f.oddChar2 ) then
     if f.type = "U" then kind := "SU"; elif f.type = "O" then kind := "SO"; fi;
@@ -236,9 +276,14 @@ function( G )
   return rec( f := f, kind := kind );
 end );
 
+# spin groups (WallSpinGroup): kind "spin", f = the form of Omega
+InstallMethod( WallClassicalGroupData, "for a spin group", [ IsMatrixGroup and HasWallSpinData ],
+  S -> rec( f := WallSpinData( S ).fOmega, kind := "spin", group := S ) );
+
 # is the matrix x in the group described by d?
 BindGlobal( "WALL_IsInClassicalGroup", function( d, x )
   local f;
+  if d.kind = "spin" then return x in d.group; fi;
   f := d.f;
   if not IsMatrix( x ) or Length( x ) <> f.n or IsZero( DeterminantMat( x ) ) then
     return false;
@@ -254,18 +299,21 @@ end );
 # rec( invariant, conjugator ) with conjugator * x * conjugator^-1 the
 # class representative
 BindGlobal( "WALL_ConjugatingData", function( d, x )
+  if d.kind = "spin" then return WallSpinConjugatingElement( d.group, x ); fi;
   if d.kind = "conformal" then return WallConformalConjugatingElement( d.f, x );
   elif d.kind = "G" then return WallConjugatingElement( d.f, x ); fi;
   return WallSubgroupConjugatingElement( d.f, d.kind, x );
 end );
 
 BindGlobal( "WALL_ClassInvariant", function( d, x )
+  if d.kind = "spin" then return WallSpinInvariant( d.group, x ); fi;
   if d.kind = "conformal" then return WallConformalInvariant( d.f, x );
   elif d.kind = "G" then return WallInvariant( d.f, x ); fi;
   return WallSubgroupInvariant( d.f, d.kind, x );
 end );
 
 BindGlobal( "WALL_RepWithCentralizer", function( d, inv )
+  if d.kind = "spin" then return WallSpinRepresentativeWithCentralizer( d.group, inv ); fi;
   if d.kind = "conformal" then return WallConformalRepresentativeWithCentralizer( d.f, inv );
   elif d.kind = "G" then return WallRepresentativeWithCentralizer( d.f, inv ); fi;
   return WallSubgroupRepresentativeWithCentralizer( d.f, d.kind, inv );
@@ -314,6 +362,18 @@ InstallMethod( CentralizerOp,
 InstallMethod( CentralizerOp,
   "for CSp and an element, via Wall's classification", IsCollsElms,
   [ IsMatrixGroup and IsFinite and IsFullSubgroupGLRespectingBilinearFormUpToScalars, IsMatrix ],
+  RankFilter( IsHandledByNiceMonomorphism ),
+  WALL_CentralizerOpMethod );
+
+InstallMethod( CentralizerOp,
+  "for GL and an element, via Wall's classification", IsCollsElms,
+  [ IsMatrixGroup and IsFinite and IsNaturalGL, IsMatrix ],
+  RankFilter( IsHandledByNiceMonomorphism ),
+  WALL_CentralizerOpMethod );
+
+InstallMethod( CentralizerOp,
+  "for SL and an element, via Wall's classification", IsCollsElms,
+  [ IsMatrixGroup and IsFinite and IsNaturalSL, IsMatrix ],
   RankFilter( IsHandledByNiceMonomorphism ),
   WALL_CentralizerOpMethod );
 
@@ -392,6 +452,30 @@ InstallOtherMethod( RepresentativeActionOp,
   RankFilter( IsHandledByNiceMonomorphism ),
   WALL_RepresentativeActionMethod );
 
+InstallMethod( IsConjugate,
+  "for GL and two elements, via Wall's classification", IsCollsElmsElms,
+  [ IsMatrixGroup and IsFinite and IsNaturalGL, IsMatrix, IsMatrix ],
+  RankFilter( IsHandledByNiceMonomorphism ),
+  WALL_IsConjugateMethod );
+
+InstallOtherMethod( RepresentativeActionOp,
+  "for GL and two elements, via Wall's classification", IsCollsElmsElmsX,
+  [ IsMatrixGroup and IsFinite and IsNaturalGL, IsMatrix, IsMatrix, IsFunction ],
+  RankFilter( IsHandledByNiceMonomorphism ),
+  WALL_RepresentativeActionMethod );
+
+InstallMethod( IsConjugate,
+  "for SL and two elements, via Wall's classification", IsCollsElmsElms,
+  [ IsMatrixGroup and IsFinite and IsNaturalSL, IsMatrix, IsMatrix ],
+  RankFilter( IsHandledByNiceMonomorphism ),
+  WALL_IsConjugateMethod );
+
+InstallOtherMethod( RepresentativeActionOp,
+  "for SL and two elements, via Wall's classification", IsCollsElmsElmsX,
+  [ IsMatrixGroup and IsFinite and IsNaturalSL, IsMatrix, IsMatrix, IsFunction ],
+  RankFilter( IsHandledByNiceMonomorphism ),
+  WALL_RepresentativeActionMethod );
+
 #############################################################################
 ##  membership in conjugacy classes
 #############################################################################
@@ -402,7 +486,7 @@ InstallOtherMethod( RepresentativeActionOp,
 ##  <Attr Name="WallClassInvariant" Arg="cl"/>
 ##  <Returns>a record</Returns>
 ##  <Description>
-##  (needs <F>wallmethods.gi</F>) For a conjugacy class <A>cl</A> of a group
+##  For a conjugacy class <A>cl</A> of a group
 ##  recognized by <Ref Attr="WallClassicalGroupData"/>, returns its invariant
 ##  (as in <Ref Func="WallClassInvariants"/>,
 ##  <Ref Func="WallSubgroupClassInvariants"/> or
@@ -431,3 +515,36 @@ function( x, cl )
   if not WALL_IsInClassicalGroup( d, x ) then return false; fi;
   return WALL_ClassInvariant( d, x ) = WallClassInvariant( cl );
 end );
+
+#############################################################################
+##  spin groups (WallSpinGroup / Spin)
+#############################################################################
+
+InstallMethod( NrConjugacyClasses, "for a spin group via Wall's classification",
+  [ IsMatrixGroup and IsFinite and HasWallSpinData ],
+  RankFilter( IsHandledByNiceMonomorphism ),
+  WallSpinNrClasses );
+
+InstallMethod( ConjugacyClasses, "for a spin group via Wall's classification",
+  [ IsMatrixGroup and IsFinite and HasWallSpinData ],
+  RankFilter( IsHandledByNiceMonomorphism ),
+  S -> WALL_ClassesFromInvariants( S, WallSpinData( S ).field, WallSpinClassInvariants( S ),
+         inv -> WallSpinRepresentative( S, inv ), inv -> WallSpinClassSize( S, inv ) ) );
+
+InstallMethod( CentralizerOp,
+  "for a spin group and an element, via Wall's classification", IsCollsElms,
+  [ IsMatrixGroup and IsFinite and HasWallSpinData, IsMatrix ],
+  RankFilter( IsHandledByNiceMonomorphism ),
+  WALL_CentralizerOpMethod );
+
+InstallMethod( IsConjugate,
+  "for a spin group and two elements, via Wall's classification", IsCollsElmsElms,
+  [ IsMatrixGroup and IsFinite and HasWallSpinData, IsMatrix, IsMatrix ],
+  RankFilter( IsHandledByNiceMonomorphism ),
+  WALL_IsConjugateMethod );
+
+InstallOtherMethod( RepresentativeActionOp,
+  "for a spin group and two elements, via Wall's classification", IsCollsElmsElmsX,
+  [ IsMatrixGroup and IsFinite and HasWallSpinData, IsMatrix, IsMatrix, IsFunction ],
+  RankFilter( IsHandledByNiceMonomorphism ),
+  WALL_RepresentativeActionMethod );
